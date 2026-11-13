@@ -1,0 +1,28 @@
+{
+ "theme": "bldg_lod3_textured",
+ "tileCount": 52,
+ "failed": [],
+ "rawB3dmBytes": 13401912,
+ "triangles": 68172,
+ "vertices": 204516,
+ "primitives": 101,
+ "images": 49,
+ "imageFormats": {
+  "image/webp": 49
+ },
+ "textures": 49,
+ "materials": 50,
+ "geometryBytes": 7482048,
+ "textureBytes": 5661548,
+ "glbBytes": 13240976,
+ "min": [
+  -442.74810791015625,
+  40.73764419555664,
+  -604.7374877929688
+ ],
+ "max": [
+  448.33404541015625,
+  70.33150482177734,
+  286.20550537109375
+ ]
+}

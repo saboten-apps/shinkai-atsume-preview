@@ -1,0 +1,51 @@
+{
+ "theme": "luse_water_mvt",
+ "waterClassCode": "204",
+ "waterClass": "水面（河川水面、湖沼、ため池、用水路、濠、運河水面）",
+ "tiles": [
+  {
+   "name": "luse/15/29022/12969.mvt",
+   "waterFeatures": 7
+  },
+  {
+   "name": "luse/15/29022/12970.mvt",
+   "waterFeatures": 8
+  },
+  {
+   "name": "luse/15/29023/12969.mvt",
+   "waterFeatures": 39
+  },
+  {
+   "name": "luse/15/29023/12970.mvt",
+   "waterFeatures": 34
+  }
+ ],
+ "waterFeatures": 88,
+ "waterPolygons": 90,
+ "waterRings": 90,
+ "skippedDegenerate": 0,
+ "tileCoordRange": {
+  "min": [
+   -2560,
+   -2560
+  ],
+  "max": [
+   133632,
+   133632
+  ]
+ },
+ "vertices": 2362,
+ "triangles": 2182,
+ "glbBytes": 84288,
+ "enuRange": {
+  "x": [
+   -479.73922167457016,
+   893.9856750182553
+  ],
+  "z": [
+   -1289.277888319806,
+   744.4695652205111
+  ],
+  "y": 0
+ }
+}

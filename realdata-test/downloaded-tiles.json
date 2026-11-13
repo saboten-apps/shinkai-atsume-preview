@@ -1,0 +1,386 @@
+{
+ "lod1": {
+  "count": 19,
+  "totalBytes": 4551060,
+  "files": [
+   {
+    "file": "data1651.b3dm",
+    "bytes": 130780,
+    "zipEntry": "bldg_lod1/data/data1651.b3dm",
+    "compSize": 18980
+   },
+   {
+    "file": "data1760.b3dm",
+    "bytes": 398852,
+    "zipEntry": "bldg_lod1/data/data1760.b3dm",
+    "compSize": 49941
+   },
+   {
+    "file": "data1761.b3dm",
+    "bytes": 404632,
+    "zipEntry": "bldg_lod1/data/data1761.b3dm",
+    "compSize": 50467
+   },
+   {
+    "file": "data1762.b3dm",
+    "bytes": 277120,
+    "zipEntry": "bldg_lod1/data/data1762.b3dm",
+    "compSize": 36029
+   },
+   {
+    "file": "data1763.b3dm",
+    "bytes": 236076,
+    "zipEntry": "bldg_lod1/data/data1763.b3dm",
+    "compSize": 29164
+   },
+   {
+    "file": "data1766.b3dm",
+    "bytes": 351056,
+    "zipEntry": "bldg_lod1/data/data1766.b3dm",
+    "compSize": 42097
+   },
+   {
+    "file": "data1770.b3dm",
+    "bytes": 108688,
+    "zipEntry": "bldg_lod1/data/data1770.b3dm",
+    "compSize": 13698
+   },
+   {
+    "file": "data1771.b3dm",
+    "bytes": 6804,
+    "zipEntry": "bldg_lod1/data/data1771.b3dm",
+    "compSize": 2055
+   },
+   {
+    "file": "data1854.b3dm",
+    "bytes": 437436,
+    "zipEntry": "bldg_lod1/data/data1854.b3dm",
+    "compSize": 54811
+   },
+   {
+    "file": "data1855.b3dm",
+    "bytes": 473792,
+    "zipEntry": "bldg_lod1/data/data1855.b3dm",
+    "compSize": 59973
+   },
+   {
+    "file": "data1859.b3dm",
+    "bytes": 460384,
+    "zipEntry": "bldg_lod1/data/data1859.b3dm",
+    "compSize": 57370
+   },
+   {
+    "file": "data1904.b3dm",
+    "bytes": 304568,
+    "zipEntry": "bldg_lod1/data/data1904.b3dm",
+    "compSize": 38775
+   },
+   {
+    "file": "data1905.b3dm",
+    "bytes": 242212,
+    "zipEntry": "bldg_lod1/data/data1905.b3dm",
+    "compSize": 31569
+   },
+   {
+    "file": "data1906.b3dm",
+    "bytes": 296584,
+    "zipEntry": "bldg_lod1/data/data1906.b3dm",
+    "compSize": 39055
+   },
+   {
+    "file": "data1907.b3dm",
+    "bytes": 29776,
+    "zipEntry": "bldg_lod1/data/data1907.b3dm",
+    "compSize": 5503
+   },
+   {
+    "file": "data1909.b3dm",
+    "bytes": 234004,
+    "zipEntry": "bldg_lod1/data/data1909.b3dm",
+    "compSize": 31259
+   },
+   {
+    "file": "data1911.b3dm",
+    "bytes": 87432,
+    "zipEntry": "bldg_lod1/data/data1911.b3dm",
+    "compSize": 13432
+   },
+   {
+    "file": "data1914.b3dm",
+    "bytes": 17012,
+    "zipEntry": "bldg_lod1/data/data1914.b3dm",
+    "compSize": 3609
+   },
+   {
+    "file": "data1917.b3dm",
+    "bytes": 53852,
+    "zipEntry": "bldg_lod1/data/data1917.b3dm",
+    "compSize": 8678
+   }
+  ]
+ },
+ "lod2": {
+  "count": 43,
+  "totalBytes": 9868112,
+  "files": [
+   {
+    "file": "data4643.b3dm",
+    "bytes": 367984,
+    "zipEntry": "bldg_lod2/data/data4643.b3dm",
+    "compSize": 155602
+   },
+   {
+    "file": "data5047.b3dm",
+    "bytes": 178252,
+    "zipEntry": "bldg_lod2/data/data5047.b3dm",
+    "compSize": 90194
+   },
+   {
+    "file": "data5048.b3dm",
+    "bytes": 257012,
+    "zipEntry": "bldg_lod2/data/data5048.b3dm",
+    "compSize": 120644
+   },
+   {
+    "file": "data5049.b3dm",
+    "bytes": 260188,
+    "zipEntry": "bldg_lod2/data/data5049.b3dm",
+    "compSize": 125304
+   },
+   {
+    "file": "data5050.b3dm",
+    "bytes": 343932,
+    "zipEntry": "bldg_lod2/data/data5050.b3dm",
+    "compSize": 152309
+   },
+   {
+    "file": "data5052.b3dm",
+    "bytes": 305100,
+    "zipEntry": "bldg_lod2/data/data5052.b3dm",
+    "compSize": 146016
+   },
+   {
+    "file": "data5053.b3dm",
+    "bytes": 169232,
+    "zipEntry": "bldg_lod2/data/data5053.b3dm",
+    "compSize": 77141
+   },
+   {
+    "file": "data5054.b3dm",
+    "bytes": 334480,
+    "zipEntry": "bldg_lod2/data/data5054.b3dm",
+    "compSize": 164721
+   },
+   {
+    "file": "data5055.b3dm",
+    "bytes": 344272,
+    "zipEntry": "bldg_lod2/data/data5055.b3dm",
+    "compSize": 157828
+   },
+   {
+    "file": "data5057.b3dm",
+    "bytes": 70724,
+    "zipEntry": "bldg_lod2/data/data5057.b3dm",
+    "compSize": 34399
+   },
+   {
+    "file": "data5058.b3dm",
+    "bytes": 490276,
+    "zipEntry": "bldg_lod2/data/data5058.b3dm",
+    "compSize": 212851
+   },
+   {
+    "file": "data5059.b3dm",
+    "bytes": 252036,
+    "zipEntry": "bldg_lod2/data/data5059.b3dm",
+    "compSize": 117344
+   },
+   {
+    "file": "data5061.b3dm",
+    "bytes": 235680,
+    "zipEntry": "bldg_lod2/data/data5061.b3dm",
+    "compSize": 111255
+   },
+   {
+    "file": "data5062.b3dm",
+    "bytes": 318504,
+    "zipEntry": "bldg_lod2/data/data5062.b3dm",
+    "compSize": 132232
+   },
+   {
+    "file": "data5063.b3dm",
+    "bytes": 118636,
+    "zipEntry": "bldg_lod2/data/data5063.b3dm",
+    "compSize": 48567
+   },
+   {
+    "file": "data5064.b3dm",
+    "bytes": 132256,
+    "zipEntry": "bldg_lod2/data/data5064.b3dm",
+    "compSize": 75537
+   },
+   {
+    "file": "data5072.b3dm",
+    "bytes": 95076,
+    "zipEntry": "bldg_lod2/data/data5072.b3dm",
+    "compSize": 12683
+   },
+   {
+    "file": "data5073.b3dm",
+    "bytes": 16352,
+    "zipEntry": "bldg_lod2/data/data5073.b3dm",
+    "compSize": 3308
+   },
+   {
+    "file": "data5074.b3dm",
+    "bytes": 124168,
+    "zipEntry": "bldg_lod2/data/data5074.b3dm",
+    "compSize": 15778
+   },
+   {
+    "file": "data5075.b3dm",
+    "bytes": 121652,
+    "zipEntry": "bldg_lod2/data/data5075.b3dm",
+    "compSize": 16191
+   },
+   {
+    "file": "data5091.b3dm",
+    "bytes": 6804,
+    "zipEntry": "bldg_lod2/data/data5091.b3dm",
+    "compSize": 2055
+   },
+   {
+    "file": "data5374.b3dm",
+    "bytes": 312476,
+    "zipEntry": "bldg_lod2/data/data5374.b3dm",
+    "compSize": 153083
+   },
+   {
+    "file": "data5380.b3dm",
+    "bytes": 273756,
+    "zipEntry": "bldg_lod2/data/data5380.b3dm",
+    "compSize": 114558
+   },
+   {
+    "file": "data5395.b3dm",
+    "bytes": 289240,
+    "zipEntry": "bldg_lod2/data/data5395.b3dm",
+    "compSize": 134448
+   },
+   {
+    "file": "data5513.b3dm",
+    "bytes": 399396,
+    "zipEntry": "bldg_lod2/data/data5513.b3dm",
+    "compSize": 220705
+   },
+   {
+    "file": "data5514.b3dm",
+    "bytes": 177160,
+    "zipEntry": "bldg_lod2/data/data5514.b3dm",
+    "compSize": 85243
+   },
+   {
+    "file": "data5515.b3dm",
+    "bytes": 386300,
+    "zipEntry": "bldg_lod2/data/data5515.b3dm",
+    "compSize": 163225
+   },
+   {
+    "file": "data5516.b3dm",
+    "bytes": 198944,
+    "zipEntry": "bldg_lod2/data/data5516.b3dm",
+    "compSize": 100666
+   },
+   {
+    "file": "data5518.b3dm",
+    "bytes": 245804,
+    "zipEntry": "bldg_lod2/data/data5518.b3dm",
+    "compSize": 120520
+   },
+   {
+    "file": "data5519.b3dm",
+    "bytes": 406944,
+    "zipEntry": "bldg_lod2/data/data5519.b3dm",
+    "compSize": 177233
+   },
+   {
+    "file": "data5520.b3dm",
+    "bytes": 12648,
+    "zipEntry": "bldg_lod2/data/data5520.b3dm",
+    "compSize": 4797
+   },
+   {
+    "file": "data5522.b3dm",
+    "bytes": 566792,
+    "zipEntry": "bldg_lod2/data/data5522.b3dm",
+    "compSize": 223187
+   },
+   {
+    "file": "data5523.b3dm",
+    "bytes": 123428,
+    "zipEntry": "bldg_lod2/data/data5523.b3dm",
+    "compSize": 63280
+   },
+   {
+    "file": "data5524.b3dm",
+    "bytes": 173072,
+    "zipEntry": "bldg_lod2/data/data5524.b3dm",
+    "compSize": 91575
+   },
+   {
+    "file": "data5525.b3dm",
+    "bytes": 226004,
+    "zipEntry": "bldg_lod2/data/data5525.b3dm",
+    "compSize": 125168
+   },
+   {
+    "file": "data5527.b3dm",
+    "bytes": 343352,
+    "zipEntry": "bldg_lod2/data/data5527.b3dm",
+    "compSize": 229827
+   },
+   {
+    "file": "data5529.b3dm",
+    "bytes": 209256,
+    "zipEntry": "bldg_lod2/data/data5529.b3dm",
+    "compSize": 92231
+   },
+   {
+    "file": "data5530.b3dm",
+    "bytes": 230124,
+    "zipEntry": "bldg_lod2/data/data5530.b3dm",
+    "compSize": 100356
+   },
+   {
+    "file": "data5531.b3dm",
+    "bytes": 142972,
+    "zipEntry": "bldg_lod2/data/data5531.b3dm",
+    "compSize": 60532
+   },
+   {
+    "file": "data5532.b3dm",
+    "bytes": 61172,
+    "zipEntry": "bldg_lod2/data/data5532.b3dm",
+    "compSize": 26209
+   },
+   {
+    "file": "data5535.b3dm",
+    "bytes": 312832,
+    "zipEntry": "bldg_lod2/data/data5535.b3dm",
+    "compSize": 159879
+   },
+   {
+    "file": "data5538.b3dm",
+    "bytes": 17012,
+    "zipEntry": "bldg_lod2/data/data5538.b3dm",
+    "compSize": 3609
+   },
+   {
+    "file": "data5544.b3dm",
+    "bytes": 216812,
+    "zipEntry": "bldg_lod2/data/data5544.b3dm",
+    "compSize": 95895
+   }
+  ]
+ }
+}

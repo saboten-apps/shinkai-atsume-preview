@@ -1,0 +1,58 @@
+{
+ "theme": "bldg_lod2_color",
+ "tileCount": 43,
+ "failed": [],
+ "rawB3dmBytes": 9868112,
+ "usageJoin": {
+  "keySource": "b3dm batch table gml_id -> CityGML bldg gml:id",
+  "idMatch": "525/525 buildings matched",
+  "usageAttributePresent": false,
+  "usageFinding": "Numazu 2021 CityGML bldg records carry no usage attribute (tag census of meshes 52384698 + 52385608; BuildingDetailAttribute contains only surveyYear). Classification impossible -> all buildings colored as unknown class.",
+  "classCounts": {
+   "commercial": 0,
+   "residential": 0,
+   "warehouse": 0,
+   "public": 0,
+   "unknown": 525
+  }
+ },
+ "paletteUsed": {
+  "unknown": {
+   "wall": "#CFCEC8",
+   "roof": "#777C7C"
+  }
+ },
+ "roofTriangles": 17969,
+ "wallTriangles": 41143,
+ "frame": "corrected: glTF Y-up up-axis conversion (lx,-lz,ly) applied before ECEF->ENU",
+ "groundLevelAssumed": 41.7,
+ "ceilingApplied": 101.7,
+ "floorApplied": 39.7,
+ "trianglesBefore": 59112,
+ "trianglesRemovedByCeilingFilter": 0,
+ "trianglesAfter": 59112,
+ "verticesBefore": 177336,
+ "verticesAfter": 177336,
+ "pointsClampedToFloor": 0,
+ "literalThresholdImpact": {
+  "trianglesWithAnyVertexAboveAbsolute60m": 1165,
+  "pointsBelowAbsoluteMinus2m": 0
+ },
+ "distinctBuildings": 525,
+ "buildingBaseY": {
+  "min": 40.73764419555664,
+  "median": 41.75202941894531,
+  "max": 54.13728332519531
+ },
+ "glbBytes": 7095652,
+ "min": [
+  -442.74810791015625,
+  40.73764419555664,
+  -604.7374877929688
+ ],
+ "max": [
+  450.6726379394531,
+  70.33150482177734,
+  288.19659423828125
+ ]
+}

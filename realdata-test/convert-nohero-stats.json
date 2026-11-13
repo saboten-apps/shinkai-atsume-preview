@@ -1,0 +1,79 @@
+{
+ "theme": "bldg_lod2_color_nohero",
+ "tileCount": 43,
+ "failed": [],
+ "rawB3dmBytes": 9868112,
+ "round4": {
+  "excludedHeroBuildings": 49,
+  "excludedHeroTriangles": 8874,
+  "overrideApplied": [],
+  "overrideDefined": {
+   "びゅうお": {
+    "wall": "#EDEBE4",
+    "roof": "#5B7186"
+   },
+   "深海水族館": {
+    "wall": "#D8D5CC",
+    "roof": "#2E4A5A"
+   },
+   "魚市場": {
+    "wall": "#D5D9DB",
+    "roof": "#6E7F8A"
+   }
+  }
+ },
+ "distinctBuildings": 476,
+ "distinctBuildingsInSource": 525,
+ "usageJoin": {
+  "keySource": "b3dm batch table gml_id -> CityGML bldg gml:id",
+  "idMatch": "525/525 buildings matched",
+  "usageAttributePresent": false,
+  "usageFinding": "Numazu 2021 CityGML bldg records carry no usage attribute (tag census of meshes 52384698 + 52385608; BuildingDetailAttribute contains only surveyYear). Classification impossible -> all buildings colored as unknown class.",
+  "classCounts": {
+   "commercial": 0,
+   "residential": 0,
+   "warehouse": 0,
+   "public": 0,
+   "unknown": 525
+  }
+ },
+ "paletteUsed": {
+  "unknown": {
+   "wall": "#CFCEC8",
+   "roof": "#777C7C"
+  }
+ },
+ "roofTriangles": 15096,
+ "wallTriangles": 35142,
+ "frame": "corrected: glTF Y-up up-axis conversion (lx,-lz,ly) applied before ECEF->ENU",
+ "groundLevelAssumed": 41.7,
+ "ceilingApplied": 101.7,
+ "floorApplied": 39.7,
+ "trianglesBefore": 59112,
+ "trianglesRemovedByCeilingFilter": 0,
+ "trianglesAfter": 50238,
+ "verticesBefore": 177336,
+ "verticesAfter": 150714,
+ "pointsClampedToFloor": 0,
+ "literalThresholdImpact": {
+  "trianglesWithAnyVertexAboveAbsolute60m": 1165,
+  "pointsBelowAbsoluteMinus2m": 0
+ },
+ "buildingBaseY": {
+  "min": 40.73764419555664,
+  "median": 41.75202941894531,
+  "max": 54.13728332519531
+ },
+ "glbBytes": 6031308,
+ "packedGlbBytes": 370228,
+ "min": [
+  -310.6470642089844,
+  40.73764419555664,
+  -604.7374877929688
+ ],
+ "max": [
+  450.6726379394531,
+  68.55243682861328,
+  288.19659423828125
+ ]
+}

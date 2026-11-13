@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+*.log
+.DS_Store
+
+# 実データの生成物（スクリプト＋RESULT.mdの手順で再生成可能）
+realdata-test/*.glb
+realdata-test/zip-index.json

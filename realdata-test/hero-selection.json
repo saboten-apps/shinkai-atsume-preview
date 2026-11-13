@@ -1,0 +1,1155 @@
+{
+ "round": 4,
+ "landmarks": [
+  {
+   "name": "びゅうお",
+   "x": -210,
+   "z": -366
+  },
+  {
+   "name": "深海水族館",
+   "x": -73,
+   "z": -300
+  },
+  {
+   "name": "魚市場",
+   "x": -36,
+   "z": -233
+  }
+ ],
+ "radiusM": 60,
+ "budgetBytes": 2200000,
+ "heroTexKeptKeys": [
+  "data5395.b3dm:13",
+  "data5395.b3dm:3",
+  "data5395.b3dm:2",
+  "data5514.b3dm:8",
+  "data5514.b3dm:3",
+  "data5514.b3dm:1",
+  "data5516.b3dm:3",
+  "data5516.b3dm:1",
+  "data5518.b3dm:11",
+  "data5518.b3dm:8",
+  "data5518.b3dm:7",
+  "data5518.b3dm:5",
+  "data5518.b3dm:4",
+  "data5518.b3dm:3",
+  "data5518.b3dm:0",
+  "data5519.b3dm:20",
+  "data5519.b3dm:19",
+  "data5519.b3dm:17",
+  "data5519.b3dm:12",
+  "data5519.b3dm:10",
+  "data5519.b3dm:6",
+  "data5519.b3dm:4",
+  "data5519.b3dm:1",
+  "data5520.b3dm:0",
+  "data5529.b3dm:14",
+  "data5529.b3dm:13",
+  "data5529.b3dm:10",
+  "data5529.b3dm:9",
+  "data5529.b3dm:8",
+  "data5529.b3dm:7",
+  "data5529.b3dm:6",
+  "data5529.b3dm:4",
+  "data5529.b3dm:3",
+  "data5529.b3dm:2",
+  "data5529.b3dm:1",
+  "data5529.b3dm:0",
+  "data5530.b3dm:4",
+  "data5530.b3dm:3",
+  "data5530.b3dm:1",
+  "data5530.b3dm:0",
+  "data5527.b3dm:0",
+  "data5544.b3dm:6",
+  "data5523.b3dm:1",
+  "data5530.b3dm:2",
+  "data5064.b3dm:1",
+  "data5524.b3dm:1",
+  "data5544.b3dm:4",
+  "data5525.b3dm:1",
+  "data4643.b3dm:5"
+ ],
+ "droppedForBudget": [],
+ "heroes": [
+  {
+   "key": "data5529.b3dm:4",
+   "tile": "data5529.b3dm",
+   "batchId": 4,
+   "centroid": [
+    -207.4,
+    -365.6
+   ],
+   "footprintM2": 155.6,
+   "footprintRank": 178,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 2.6,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 458,
+   "plainTris": 12,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5518.b3dm:11",
+   "tile": "data5518.b3dm",
+   "batchId": 11,
+   "centroid": [
+    -77.2,
+    -312
+   ],
+   "footprintM2": 102.9,
+   "footprintRank": 271,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 12.7,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 100,
+   "plainTris": 12,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5530.b3dm:1",
+   "tile": "data5530.b3dm",
+   "batchId": 1,
+   "centroid": [
+    -219.2,
+    -353.6
+   ],
+   "footprintM2": 748.6,
+   "footprintRank": 26,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 15.4,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 130,
+   "plainTris": 20,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:8",
+   "tile": "data5529.b3dm",
+   "batchId": 8,
+   "centroid": [
+    -192.2,
+    -368.9
+   ],
+   "footprintM2": 38.7,
+   "footprintRank": 438,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 18.1,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 10,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5518.b3dm:3",
+   "tile": "data5518.b3dm",
+   "batchId": 3,
+   "centroid": [
+    -72.4,
+    -278.1
+   ],
+   "footprintM2": 211.7,
+   "footprintRank": 118,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 21.9,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 227,
+   "plainTris": 19,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:14",
+   "tile": "data5529.b3dm",
+   "batchId": 14,
+   "centroid": [
+    -186.8,
+    -375.9
+   ],
+   "footprintM2": 157.3,
+   "footprintRank": 174,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 25.3,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 170,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:0",
+   "tile": "data5529.b3dm",
+   "batchId": 0,
+   "centroid": [
+    -186.6,
+    -356.3
+   ],
+   "footprintM2": 535,
+   "footprintRank": 36,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 25.3,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 118,
+   "plainTris": 10,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5520.b3dm:0",
+   "tile": "data5520.b3dm",
+   "batchId": 0,
+   "centroid": [
+    -60.5,
+    -276.6
+   ],
+   "footprintM2": 84.7,
+   "footprintRank": 319,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 26.6,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 60,
+   "plainTris": 4,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5516.b3dm:1",
+   "tile": "data5516.b3dm",
+   "batchId": 1,
+   "centroid": [
+    -16.6,
+    -214
+   ],
+   "footprintM2": 2818.4,
+   "footprintRank": 3,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "魚市場",
+   "landmarkDistM": 27.1,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:魚市場",
+    "largest-footprint#3"
+   ],
+   "textured": true,
+   "texTris": 469,
+   "plainTris": 27,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5518.b3dm:5",
+   "tile": "data5518.b3dm",
+   "batchId": 5,
+   "centroid": [
+    -59.3,
+    -324.2
+   ],
+   "footprintM2": 273.9,
+   "footprintRank": 86,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 27.8,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 36,
+   "plainTris": 8,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5519.b3dm:10",
+   "tile": "data5519.b3dm",
+   "batchId": 10,
+   "centroid": [
+    -100.5,
+    -304.3
+   ],
+   "footprintM2": 123.9,
+   "footprintRank": 215,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 27.8,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 217,
+   "plainTris": 19,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:13",
+   "tile": "data5529.b3dm",
+   "batchId": 13,
+   "centroid": [
+    -192.8,
+    -339.8
+   ],
+   "footprintM2": 80.7,
+   "footprintRank": 325,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 31.3,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 14,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5530.b3dm:3",
+   "tile": "data5530.b3dm",
+   "batchId": 3,
+   "centroid": [
+    -223.3,
+    -394.4
+   ],
+   "footprintM2": 1387.4,
+   "footprintRank": 13,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 31.3,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 300,
+   "plainTris": 12,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5518.b3dm:8",
+   "tile": "data5518.b3dm",
+   "batchId": 8,
+   "centroid": [
+    -44.8,
+    -285.8
+   ],
+   "footprintM2": 176.7,
+   "footprintRank": 153,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 31.6,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 176,
+   "plainTris": 12,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:10",
+   "tile": "data5529.b3dm",
+   "batchId": 10,
+   "centroid": [
+    -205.3,
+    -332.3
+   ],
+   "footprintM2": 70.5,
+   "footprintRank": 352,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 34,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 38,
+   "plainTris": 6,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5518.b3dm:4",
+   "tile": "data5518.b3dm",
+   "batchId": 4,
+   "centroid": [
+    -48,
+    -325.8
+   ],
+   "footprintM2": 176.7,
+   "footprintRank": 154,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 35.9,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 184,
+   "plainTris": 12,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5518.b3dm:7",
+   "tile": "data5518.b3dm",
+   "batchId": 7,
+   "centroid": [
+    -67.4,
+    -336.4
+   ],
+   "footprintM2": 29.3,
+   "footprintRank": 460,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 36.8,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 14,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5519.b3dm:1",
+   "tile": "data5519.b3dm",
+   "batchId": 1,
+   "centroid": [
+    -109.5,
+    -304.7
+   ],
+   "footprintM2": 109.3,
+   "footprintRank": 248,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 36.8,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 27,
+   "plainTris": 7,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:6",
+   "tile": "data5529.b3dm",
+   "batchId": 6,
+   "centroid": [
+    -179.3,
+    -342.5
+   ],
+   "footprintM2": 141.6,
+   "footprintRank": 195,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 38.7,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 116,
+   "plainTris": 20,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:9",
+   "tile": "data5529.b3dm",
+   "batchId": 9,
+   "centroid": [
+    -200.4,
+    -327.7
+   ],
+   "footprintM2": 14.1,
+   "footprintRank": 498,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 39.5,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 10,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5518.b3dm:0",
+   "tile": "data5518.b3dm",
+   "batchId": 0,
+   "centroid": [
+    -60.7,
+    -338.3
+   ],
+   "footprintM2": 28,
+   "footprintRank": 462,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 40.3,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 10,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:3",
+   "tile": "data5529.b3dm",
+   "batchId": 3,
+   "centroid": [
+    -201.4,
+    -325.3
+   ],
+   "footprintM2": 1.5,
+   "footprintRank": 522,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 41.6,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 10,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5519.b3dm:17",
+   "tile": "data5519.b3dm",
+   "batchId": 17,
+   "centroid": [
+    -114.7,
+    -296.4
+   ],
+   "footprintM2": 66.4,
+   "footprintRank": 363,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 41.8,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 78,
+   "plainTris": 6,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5519.b3dm:4",
+   "tile": "data5519.b3dm",
+   "batchId": 4,
+   "centroid": [
+    -116.4,
+    -303.2
+   ],
+   "footprintM2": 43.4,
+   "footprintRank": 429,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 43.5,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 30,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5519.b3dm:19",
+   "tile": "data5519.b3dm",
+   "batchId": 19,
+   "centroid": [
+    -111.8,
+    -320.9
+   ],
+   "footprintM2": 195.1,
+   "footprintRank": 131,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 44,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 298,
+   "plainTris": 8,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:1",
+   "tile": "data5529.b3dm",
+   "batchId": 1,
+   "centroid": [
+    -165.6,
+    -366.6
+   ],
+   "footprintM2": 29.4,
+   "footprintRank": 459,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 44.4,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 10,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5530.b3dm:4",
+   "tile": "data5530.b3dm",
+   "batchId": 4,
+   "centroid": [
+    -254.9,
+    -371.6
+   ],
+   "footprintM2": 148.1,
+   "footprintRank": 185,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 45.2,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 75,
+   "plainTris": 17,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:7",
+   "tile": "data5529.b3dm",
+   "batchId": 7,
+   "centroid": [
+    -191.1,
+    -324
+   ],
+   "footprintM2": 60.1,
+   "footprintRank": 386,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 46,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 10,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5519.b3dm:20",
+   "tile": "data5519.b3dm",
+   "batchId": 20,
+   "centroid": [
+    -122.4,
+    -298.5
+   ],
+   "footprintM2": 74.5,
+   "footprintRank": 339,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 49.4,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 208,
+   "plainTris": 16,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5529.b3dm:2",
+   "tile": "data5529.b3dm",
+   "batchId": 2,
+   "centroid": [
+    -189.4,
+    -319.3
+   ],
+   "footprintM2": 85.3,
+   "footprintRank": 318,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 51,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 10,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5516.b3dm:3",
+   "tile": "data5516.b3dm",
+   "batchId": 3,
+   "centroid": [
+    14.5,
+    -222
+   ],
+   "footprintM2": 185.8,
+   "footprintRank": 139,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "魚市場",
+   "landmarkDistM": 51.6,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:魚市場"
+   ],
+   "textured": true,
+   "texTris": 101,
+   "plainTris": 7,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5395.b3dm:3",
+   "tile": "data5395.b3dm",
+   "batchId": 3,
+   "centroid": [
+    -164.4,
+    -393
+   ],
+   "footprintM2": 97.8,
+   "footprintRank": 284,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 53,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 16,
+   "plainTris": 4,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5514.b3dm:8",
+   "tile": "data5514.b3dm",
+   "batchId": 8,
+   "centroid": [
+    -19.4,
+    -298.4
+   ],
+   "footprintM2": 31.5,
+   "footprintRank": 452,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 53.6,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 66,
+   "plainTris": 10,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5519.b3dm:6",
+   "tile": "data5519.b3dm",
+   "batchId": 6,
+   "centroid": [
+    -156.9,
+    -378.3
+   ],
+   "footprintM2": 240.6,
+   "footprintRank": 103,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 54.5,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 46,
+   "plainTris": 6,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5395.b3dm:13",
+   "tile": "data5395.b3dm",
+   "batchId": 13,
+   "centroid": [
+    -169.3,
+    -403.8
+   ],
+   "footprintM2": 54.6,
+   "footprintRank": 400,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 55.6,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 64,
+   "plainTris": 6,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5514.b3dm:3",
+   "tile": "data5514.b3dm",
+   "batchId": 3,
+   "centroid": [
+    -24.1,
+    -327.6
+   ],
+   "footprintM2": 91.3,
+   "footprintRank": 307,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 56.2,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 78,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5519.b3dm:12",
+   "tile": "data5519.b3dm",
+   "batchId": 12,
+   "centroid": [
+    -119.8,
+    -331.7
+   ],
+   "footprintM2": 172.3,
+   "footprintRank": 157,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 56.5,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 182,
+   "plainTris": 10,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5395.b3dm:2",
+   "tile": "data5395.b3dm",
+   "batchId": 2,
+   "centroid": [
+    -157.6,
+    -393.8
+   ],
+   "footprintM2": 126.7,
+   "footprintRank": 211,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 59.3,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 134,
+   "plainTris": 10,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5530.b3dm:0",
+   "tile": "data5530.b3dm",
+   "batchId": 0,
+   "centroid": [
+    -260.2,
+    -334.1
+   ],
+   "footprintM2": 193.8,
+   "footprintRank": 133,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 59.5,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:びゅうお"
+   ],
+   "textured": true,
+   "texTris": 153,
+   "plainTris": 13,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5514.b3dm:1",
+   "tile": "data5514.b3dm",
+   "batchId": 1,
+   "centroid": [
+    -28.7,
+    -340
+   ],
+   "footprintM2": 92.2,
+   "footprintRank": 305,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 59.7,
+   "withinLandmarkArea": true,
+   "selectionReasons": [
+    "landmark:深海水族館"
+   ],
+   "textured": true,
+   "texTris": 14,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5530.b3dm:2",
+   "tile": "data5530.b3dm",
+   "batchId": 2,
+   "centroid": [
+    -234.2,
+    -278.1
+   ],
+   "footprintM2": 2222.2,
+   "footprintRank": 5,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "びゅうお",
+   "landmarkDistM": 91.2,
+   "withinLandmarkArea": false,
+   "selectionReasons": [
+    "largest-footprint#5"
+   ],
+   "textured": true,
+   "texTris": 803,
+   "plainTris": 51,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5523.b3dm:1",
+   "tile": "data5523.b3dm",
+   "batchId": 1,
+   "centroid": [
+    -29.2,
+    -98.5
+   ],
+   "footprintM2": 2601.5,
+   "footprintRank": 4,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "魚市場",
+   "landmarkDistM": 134.7,
+   "withinLandmarkArea": false,
+   "selectionReasons": [
+    "largest-footprint#4"
+   ],
+   "textured": true,
+   "texTris": 26,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5525.b3dm:1",
+   "tile": "data5525.b3dm",
+   "batchId": 1,
+   "centroid": [
+    22.7,
+    6.6
+   ],
+   "footprintM2": 1580,
+   "footprintRank": 9,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "魚市場",
+   "landmarkDistM": 246.7,
+   "withinLandmarkArea": false,
+   "selectionReasons": [
+    "largest-footprint#9"
+   ],
+   "textured": true,
+   "texTris": 664,
+   "plainTris": 48,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5524.b3dm:1",
+   "tile": "data5524.b3dm",
+   "batchId": 1,
+   "centroid": [
+    72.7,
+    -5.9
+   ],
+   "footprintM2": 2074.9,
+   "footprintRank": 7,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "魚市場",
+   "landmarkDistM": 251.7,
+   "withinLandmarkArea": false,
+   "selectionReasons": [
+    "largest-footprint#7"
+   ],
+   "textured": true,
+   "texTris": 721,
+   "plainTris": 37,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5064.b3dm:1",
+   "tile": "data5064.b3dm",
+   "batchId": 1,
+   "centroid": [
+    133,
+    -15
+   ],
+   "footprintM2": 2122,
+   "footprintRank": 6,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "魚市場",
+   "landmarkDistM": 275.8,
+   "withinLandmarkArea": false,
+   "selectionReasons": [
+    "largest-footprint#6"
+   ],
+   "textured": true,
+   "texTris": 368,
+   "plainTris": 32,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5527.b3dm:0",
+   "tile": "data5527.b3dm",
+   "batchId": 0,
+   "centroid": [
+    -124.7,
+    38
+   ],
+   "footprintM2": 5471.3,
+   "footprintRank": 1,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "魚市場",
+   "landmarkDistM": 285.2,
+   "withinLandmarkArea": false,
+   "selectionReasons": [
+    "largest-footprint#1"
+   ],
+   "textured": true,
+   "texTris": 506,
+   "plainTris": 14,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data4643.b3dm:5",
+   "tile": "data4643.b3dm",
+   "batchId": 5,
+   "centroid": [
+    228.7,
+    -516.4
+   ],
+   "footprintM2": 1538.5,
+   "footprintRank": 10,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "深海水族館",
+   "landmarkDistM": 371.3,
+   "withinLandmarkArea": false,
+   "selectionReasons": [
+    "largest-footprint#10"
+   ],
+   "textured": true,
+   "texTris": 426,
+   "plainTris": 18,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5544.b3dm:4",
+   "tile": "data5544.b3dm",
+   "batchId": 4,
+   "centroid": [
+    -306,
+    81.8
+   ],
+   "footprintM2": 1602.7,
+   "footprintRank": 8,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "魚市場",
+   "landmarkDistM": 414.7,
+   "withinLandmarkArea": false,
+   "selectionReasons": [
+    "largest-footprint#8"
+   ],
+   "textured": true,
+   "texTris": 238,
+   "plainTris": 2,
+   "status": "hero-tex"
+  },
+  {
+   "key": "data5544.b3dm:6",
+   "tile": "data5544.b3dm",
+   "batchId": 6,
+   "centroid": [
+    -355.4,
+    95.4
+   ],
+   "footprintM2": 4506.6,
+   "footprintRank": 2,
+   "footprintSource": "bottom-faces",
+   "nearestLandmark": "魚市場",
+   "landmarkDistM": 458.1,
+   "withinLandmarkArea": false,
+   "selectionReasons": [
+    "largest-footprint#2"
+   ],
+   "textured": true,
+   "texTris": 106,
+   "plainTris": 6,
+   "status": "hero-tex"
+  }
+ ]
+}

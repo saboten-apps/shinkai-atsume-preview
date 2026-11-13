@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>実データ重さテスト | 深海あつめ</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #07131e; overflow: hidden; }
+  #hud {
+    position: fixed; top: 10px; left: 10px; z-index: 10;
+    background: rgba(7,19,30,.88); color: #f5f0e6; border: 1px solid rgba(245,240,230,.35);
+    font: 13px/1.7 monospace; padding: 8px 12px; border-radius: 6px; white-space: pre;
+  }
+  canvas { display: block; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./node_modules/three/build/three.module.js",
+  "three/addons/": "./node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="hud">loading…</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+
+const hud = document.getElementById('hud');
+const file = new URLSearchParams(location.search).get('f') || 'port-bldg-lod1.glb';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1c2c);
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.5, 5000);
+const controls = new OrbitControls(camera, renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0xf5f0e6, 0.9));
+const sun = new THREE.DirectionalLight(0xfff7ed, 1.6);
+sun.position.set(200, 300, 150);
+scene.add(sun);
+const sea = new THREE.Mesh(
+  new THREE.PlaneGeometry(3000, 3000),
+  new THREE.MeshStandardMaterial({ color: 0x0d2f4d, roughness: 0.4 })
+);
+sea.rotation.x = -Math.PI / 2; sea.position.y = -0.5;
+scene.add(sea);
+
+const t0 = performance.now();
+const loader = new GLTFLoader();
+loader.setMeshoptDecoder(MeshoptDecoder);
+loader.load(file, (gltf) => {
+  const loadMs = Math.round(performance.now() - t0);
+  scene.add(gltf.scene);
+  const box = new THREE.Box3().setFromObject(gltf.scene);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const radius = Math.max(size.x, size.z) * 0.9 + 30;
+  camera.position.set(center.x + radius * 0.8, radius * 0.85, center.z + radius * 0.8);
+  controls.target.copy(center);
+  controls.update();
+  let frames = 0; const f0 = performance.now();
+  renderer.setAnimationLoop(() => {
+    controls.update();
+    renderer.render(scene, camera);
+    frames++;
+    if (frames === 90) {
+      const fps = Math.round(frames * 1000 / (performance.now() - f0));
+      const info = renderer.info.render;
+      hud.textContent =
+        `file: ${file}\nload: ${loadMs} ms\nfps(90f): ${fps}\ncalls: ${info.calls}\ntris: ${(info.triangles / 1000).toFixed(1)}k\n` +
+        `bbox: ${size.x.toFixed(0)} x ${size.z.toFixed(0)} m, h ${size.y.toFixed(1)} m`;
+      window.__stats = { loadMs, fps, calls: info.calls, tris: info.triangles, size: [size.x, size.y, size.z] };
+    }
+  });
+}, undefined, (err) => { hud.textContent = 'LOAD ERROR: ' + err.message; window.__stats = { error: String(err) }; });
+</script>
+</body>
+</html>

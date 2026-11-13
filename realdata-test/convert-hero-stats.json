@@ -1,0 +1,23 @@
+{
+ "theme": "bldg_lod2_hero_tex",
+ "buildingsTotal": 525,
+ "heroesTotal": 49,
+ "heroesTextured": 49,
+ "heroesTextureless": 0,
+ "heroesKeptInTexGlb": 49,
+ "droppedForBudget": [],
+ "heroTexGlb": {
+  "bytes": 2151008,
+  "tris": 8874,
+  "verts": 26622,
+  "images": 15,
+  "textureBytes": 1156656,
+  "geometryBytes": 964980
+ },
+ "heroTexPackedGlb": {
+  "bytes": 1266852
+ },
+ "budgetBytes": 2200000,
+ "withinBudget": true,
+ "mixedKeyTriangles": 0
+}

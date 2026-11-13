@@ -1,0 +1,32 @@
+{
+ "theme": "dem (CityGML TIN)",
+ "files": [
+  "523846_dem_6697_op.gml",
+  "523856_dem_6697_05_op.gml"
+ ],
+ "posListsScanned": 3317256,
+ "anomalies": 0,
+ "keptTriangles": 52986,
+ "vertices": 158958,
+ "referencePatch": {
+  "n": 1518,
+  "medianOrthoH": 1.4625
+ },
+ "buildingCluster": {
+  "n": 9666,
+  "medianOrthoH": 2.0935,
+  "geoidN": 39.7065,
+  "groundTarget": 41.8
+ },
+ "min": [
+  -693.1607666015625,
+  38.941707611083984,
+  -599.4204711914062
+ ],
+ "max": [
+  588.6731567382812,
+  55.58256149291992,
+  721.1011352539062
+ ],
+ "glbBytes": 4452332
+}

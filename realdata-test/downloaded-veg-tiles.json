@@ -1,0 +1,38 @@
+{
+ "veg": {
+  "count": 5,
+  "totalBytes": 898928,
+  "files": [
+   {
+    "file": "data50.b3dm",
+    "bytes": 176456,
+    "zipEntry": "veg/data/data50.b3dm",
+    "compSize": 27044
+   },
+   {
+    "file": "data53.b3dm",
+    "bytes": 142708,
+    "zipEntry": "veg/data/data53.b3dm",
+    "compSize": 22306
+   },
+   {
+    "file": "data54.b3dm",
+    "bytes": 182320,
+    "zipEntry": "veg/data/data54.b3dm",
+    "compSize": 28718
+   },
+   {
+    "file": "data63.b3dm",
+    "bytes": 294048,
+    "zipEntry": "veg/data/data63.b3dm",
+    "compSize": 44065
+   },
+   {
+    "file": "data83.b3dm",
+    "bytes": 103396,
+    "zipEntry": "veg/data/data83.b3dm",
+    "compSize": 16714
+   }
+  ]
+ }
+}

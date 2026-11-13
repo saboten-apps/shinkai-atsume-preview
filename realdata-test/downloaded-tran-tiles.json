@@ -1,0 +1,86 @@
+{
+ "tran_lod3": {
+  "count": 13,
+  "totalBytes": 505736,
+  "files": [
+   {
+    "file": "data163.b3dm",
+    "bytes": 31704,
+    "zipEntry": "tran_lod3/data/data163.b3dm",
+    "compSize": 6200
+   },
+   {
+    "file": "data164.b3dm",
+    "bytes": 9320,
+    "zipEntry": "tran_lod3/data/data164.b3dm",
+    "compSize": 2205
+   },
+   {
+    "file": "data165.b3dm",
+    "bytes": 96588,
+    "zipEntry": "tran_lod3/data/data165.b3dm",
+    "compSize": 16250
+   },
+   {
+    "file": "data166.b3dm",
+    "bytes": 23396,
+    "zipEntry": "tran_lod3/data/data166.b3dm",
+    "compSize": 4889
+   },
+   {
+    "file": "data167.b3dm",
+    "bytes": 36772,
+    "zipEntry": "tran_lod3/data/data167.b3dm",
+    "compSize": 6611
+   },
+   {
+    "file": "data176.b3dm",
+    "bytes": 79060,
+    "zipEntry": "tran_lod3/data/data176.b3dm",
+    "compSize": 13309
+   },
+   {
+    "file": "data177.b3dm",
+    "bytes": 9648,
+    "zipEntry": "tran_lod3/data/data177.b3dm",
+    "compSize": 2283
+   },
+   {
+    "file": "data178.b3dm",
+    "bytes": 17844,
+    "zipEntry": "tran_lod3/data/data178.b3dm",
+    "compSize": 4066
+   },
+   {
+    "file": "data179.b3dm",
+    "bytes": 7588,
+    "zipEntry": "tran_lod3/data/data179.b3dm",
+    "compSize": 2163
+   },
+   {
+    "file": "data182.b3dm",
+    "bytes": 103620,
+    "zipEntry": "tran_lod3/data/data182.b3dm",
+    "compSize": 17405
+   },
+   {
+    "file": "data183.b3dm",
+    "bytes": 31808,
+    "zipEntry": "tran_lod3/data/data183.b3dm",
+    "compSize": 6269
+   },
+   {
+    "file": "data185.b3dm",
+    "bytes": 13936,
+    "zipEntry": "tran_lod3/data/data185.b3dm",
+    "compSize": 3859
+   },
+   {
+    "file": "data187.b3dm",
+    "bytes": 44452,
+    "zipEntry": "tran_lod3/data/data187.b3dm",
+    "compSize": 8977
+   }
+  ]
+ }
+}

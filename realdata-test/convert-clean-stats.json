@@ -1,0 +1,37 @@
+{
+ "theme": "bldg_lod2_clean",
+ "tileCount": 43,
+ "failed": [],
+ "rawB3dmBytes": 9868112,
+ "frame": "corrected: glTF Y-up up-axis conversion (lx,-lz,ly) applied before ECEF->ENU",
+ "groundLevelAssumed": 41.7,
+ "ceilingApplied": 101.7,
+ "floorApplied": 39.7,
+ "trianglesBefore": 59112,
+ "trianglesRemovedByCeilingFilter": 0,
+ "trianglesAfter": 59112,
+ "verticesBefore": 177336,
+ "verticesAfter": 177336,
+ "pointsClampedToFloor": 0,
+ "literalThresholdImpact": {
+  "trianglesWithAnyVertexAboveAbsolute60m": 1165,
+  "pointsBelowAbsoluteMinus2m": 0
+ },
+ "distinctBuildings": 525,
+ "buildingBaseY": {
+  "min": 40.73764419555664,
+  "median": 41.75202941894531,
+  "max": 54.13728332519531
+ },
+ "glbBytes": 7095264,
+ "min": [
+  -442.74810791015625,
+  40.73764419555664,
+  -604.7374877929688
+ ],
+ "max": [
+  450.6726379394531,
+  70.33150482177734,
+  288.19659423828125
+ ]
+}
