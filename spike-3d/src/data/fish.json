@@ -1,0 +1,437 @@
+{
+  "version": "0.1",
+  "note": "裏取り済みスターター (fish-research.md から生成)。rarityは暫定配分。name_enは裏取り後に投入。needs_check=true の項目は公開前に再確認必須。 / 2026-11-09 英語名裏取り (fish-names-en.md) を反映: 学名未確定8種を同定 (f14は2026-11-09にWoRMSで最終確認済み・needs_check解除), 英語名22種を投入 (f14/f16は定訳なしのため null=学名フォールバック)。",
+  "fish": [
+    {
+      "id": "f01",
+      "name_ja": "タカアシガニ",
+      "name_alias": null,
+      "scientific_name": "Macrocheira kaempferi",
+      "scientific_name_note": null,
+      "name_en": "Japanese spider crab",
+      "depth_text": "200–800",
+      "fact": "脚を広げると3m超、世界最大の甲殻類。静岡県沿岸の重要水産資源",
+      "eat_or_display_note": "食用あり（沼津で「高足ガニ天丼」等）／展示あり（沼津港深海水族館の常設種として紹介例あり）",
+      "rarity": 5,
+      "illustration": "assets/fish/f01.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/",
+        "https://fish-exp.pref.shizuoka.jp/03research/bull_pdf/59/02_okamoto_etal.pdf",
+        "https://www.city.numazu.shizuoka.jp/shisei//pr/kohonumazu/1699/page20.pdf"
+      ],
+      "needs_check": false
+    },
+    {
+      "id": "f02",
+      "name_ja": "メンダコ",
+      "name_alias": null,
+      "scientific_name": "Opisthoteuthis depressa",
+      "scientific_name_note": null,
+      "name_en": "Japanese pancake devilfish",
+      "depth_text": "200–1,000",
+      "fact": "耳のようなヒレをパタパタさせて泳ぐ「深海のアイドル」。墨を持たない",
+      "eat_or_display_note": "食用 不明／展示あり（沼津港深海水族館：底曳網漁期10–5月頃、捕獲時に展示）",
+      "rarity": 5,
+      "illustration": "assets/fish/f02.webp",
+      "sources": [
+        "https://www.numazu-deepsea.com/exhibition/",
+        "https://www.pref.shizuoka.jp/machizukuri/kowan/1040846/1025740.html"
+      ],
+      "needs_check": false
+    },
+    {
+      "id": "f03",
+      "name_ja": "サクラエビ",
+      "name_alias": null,
+      "scientific_name": "Lucensosergia lucens（旧名 Sergia lucens）",
+      "scientific_name_note": null,
+      "name_en": "Sakura shrimp",
+      "depth_text": "昼間 200–350（夜間は20–60まで浮上）",
+      "fact": "日本で漁業が行われているのは駿河湾のみ。発光器を多数持ち「海の宝石」と呼ばれる",
+      "eat_or_display_note": "食用あり（駿河湾の名産）／展示 要確認",
+      "rarity": 4,
+      "illustration": "assets/fish/f03.webp",
+      "sources": [
+        "https://fish-exp.pref.shizuoka.jp/02fishery/2-5/12_sakuraebi.pdf",
+        "https://www.caa.go.jp/policies/policy/food_labeling/food_labeling_act/assets/food_labeling_cms201_261001_16.pdf"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f04",
+      "name_ja": "キンメダイ",
+      "name_alias": null,
+      "scientific_name": "Beryx splendens",
+      "scientific_name_note": null,
+      "name_en": "Splendid alfonsino",
+      "depth_text": "100–800",
+      "fact": "静岡県では漁業者による自主的な資源管理（浅場・夜間操業の自粛等）が行われている",
+      "eat_or_display_note": "食用あり（煮付け・刺身等）／展示 要確認",
+      "rarity": 2,
+      "illustration": "assets/fish/f04.webp",
+      "sources": [
+        "https://fish-exp.pref.shizuoka.jp/04library/news/20080909.html"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f05",
+      "name_ja": "アカムツ",
+      "name_alias": "ノドグロ",
+      "scientific_name": "Doederleinia berycoides",
+      "scientific_name_note": null,
+      "name_en": "Blackthroat seaperch",
+      "depth_text": "100–200（出典により600までとするものもあり・要確認）",
+      "fact": "口の中が黒いのが「ノドグロ」の由来。駿河湾の食用深海生物の一つとして紹介される",
+      "eat_or_display_note": "食用あり／展示 不明",
+      "rarity": 3,
+      "illustration": "assets/fish/f05.webp",
+      "sources": [
+        "https://www.fra.go.jp/jamarc/archive/jyoho/hakusei/akamutsu/akamutsu.htm",
+        "https://www.surugabank.co.jp/d-bank/special/sp539/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f06",
+      "name_ja": "アカザエビ",
+      "name_alias": null,
+      "scientific_name": "Metanephrops japonicus",
+      "scientific_name_note": null,
+      "name_en": "Japanese lobster",
+      "depth_text": "200–400",
+      "fact": "戸田では「手長エビ」とも呼ばれる日本近海の深海性エビ。駿河湾の重要水産資源",
+      "eat_or_display_note": "食用あり（和食・フレンチ等で重用）／展示あり（他館展示実績リストに記載・最新状況は要確認）",
+      "rarity": 3,
+      "illustration": "assets/fish/f06.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/",
+        "https://fish-exp.pref.shizuoka.jp/03research/bull_pdf/46/bull46_105-108.pdf"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f07",
+      "name_ja": "ラブカ",
+      "name_alias": null,
+      "scientific_name": "Chlamydoselachus anguineus",
+      "scientific_name_note": null,
+      "name_en": "Frilled shark",
+      "depth_text": "120–1,280（主には500–1,000以深。駿河湾ではサクラエビ漁で水深80mで混獲例）",
+      "fact": "原始的なサメの特徴を残す「生きている化石」。駿河湾でもめったに捕獲されない",
+      "eat_or_display_note": "食用 不明／展示あり（沼津港深海水族館に剥製展示エリア）",
+      "rarity": 5,
+      "illustration": "assets/fish/f07.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/",
+        "https://www.aquamarine.or.jp/new-animals/frilled_shark180427/",
+        "https://www.numazu-deepsea.com/exhibition/"
+      ],
+      "needs_check": false
+    },
+    {
+      "id": "f08",
+      "name_ja": "ヌタウナギ",
+      "name_alias": null,
+      "scientific_name": "Eptatretus burgeri",
+      "scientific_name_note": null,
+      "name_en": "Inshore hagfish",
+      "depth_text": "10–270（ヌタウナギ類では例外的に浅い）",
+      "fact": "顎のない円口類で「生きている化石」。体表のヌメヌメが特徴。JAMSTECの駿河湾観察でも確認",
+      "eat_or_display_note": "食用 要確認（蒲焼き等の食用利用の一般記載はあるが沼津港周辺での提供は未確認）／展示あり（沼津港深海水族館の生体リストに記載・2017年時点）",
+      "rarity": 2,
+      "illustration": "assets/fish/f08.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/",
+        "https://www.godac.jamstec.go.jp/doc_catalog/external/metadata/shinkai04_13/file/shinkai04_13.pdf",
+        "https://www.kochi-u.ac.jp/w3museum/Fish_Labo/TopPageFishes/TopPageFishes.html/201111Cover.html"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f09",
+      "name_ja": "オオグソクムシ",
+      "name_alias": null,
+      "scientific_name": "Bathynomus doederleini",
+      "scientific_name_note": null,
+      "name_en": "Giant isopod",
+      "depth_text": "200–650（駿河湾以南）",
+      "fact": "ダンゴムシの仲間で「深海底の掃除屋」。鎧のような姿が名前の由来",
+      "eat_or_display_note": "食用 不明／展示 要確認（※沼津港深海水族館で紹介されるのはメキシコ湾産の**ダイオウグソクムシ**で別種。本種の同館展示は未確認）",
+      "rarity": 3,
+      "illustration": "assets/fish/f09.webp",
+      "sources": [
+        "https://www.aquamarine.or.jp/animals/oogusokumushi/",
+        "https://www.deep-heda.com/fish/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f10",
+      "name_ja": "アオメエソ",
+      "name_alias": "メヒカリ／トロボッチ",
+      "scientific_name": "Chlorophthalmus albatrossis",
+      "scientific_name_note": null,
+      "name_en": "Albatross greeneye",
+      "depth_text": "200–600",
+      "fact": "目が青緑に光るのが「メヒカリ」の由来。沼津では「トロボッチ」と呼ばれる",
+      "eat_or_display_note": "食用あり（沼津で唐揚げ・塩焼き等）／展示 要確認（飼育が難しい旨の他館記載あり）",
+      "rarity": 1,
+      "illustration": "assets/fish/f10.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/",
+        "https://www.city.numazu.shizuoka.jp/shisei//pr/kohonumazu/1699/page20.pdf",
+        "https://www.aquamarine.or.jp/animals/greeneyes/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f11",
+      "name_ja": "ニギス",
+      "name_alias": "メギス",
+      "scientific_name": "Glossanodon semifasciatus",
+      "scientific_name_note": null,
+      "name_en": "Deep-sea smelt",
+      "depth_text": "100–400（分布域に駿河湾を明記）",
+      "fact": "姿がキスに似る。戸田では「メギス」と呼ばれ、とろはんぺんの主原料",
+      "eat_or_display_note": "食用あり（戸田の日常食・加工品）／展示 不明",
+      "rarity": 1,
+      "illustration": "assets/fish/f11.webp",
+      "sources": [
+        "https://www.zukan-bouz.com/syu/%E3%83%8B%E3%82%AE%E3%82%B9",
+        "https://www.deep-heda.com/fish/",
+        "https://fujinokuni.shokunomiyako-shizuoka.pref.shizuoka.jp/culture/article/2741"
+      ],
+      "needs_check": false
+    },
+    {
+      "id": "f12",
+      "name_ja": "ユメカサゴ",
+      "name_alias": null,
+      "scientific_name": "Helicolenus hilgendorfii",
+      "scientific_name_note": null,
+      "name_en": "Hilgendorf's saucord",
+      "depth_text": "130–980（通常150–500）",
+      "fact": "赤い体色が特徴。目を開けたまま海底でじっとしている様子が和名の由来という説あり",
+      "eat_or_display_note": "食用あり（沼津の「深海丼」の構成魚の一つ。唐揚げ・刺身）／展示あり（他館展示実績あり）",
+      "rarity": 2,
+      "illustration": "assets/fish/f12.webp",
+      "sources": [
+        "https://churaumi.okinawa/sp/fishbook/00000589/",
+        "https://www.deep-heda.com/fish/",
+        "https://www.city.numazu.shizuoka.jp/shisei//pr/kohonumazu/1699/page20.pdf"
+      ],
+      "needs_check": false
+    },
+    {
+      "id": "f13",
+      "name_ja": "アブラボウズ",
+      "name_alias": null,
+      "scientific_name": "Erilepis zonifer",
+      "scientific_name_note": null,
+      "name_en": "Skilfish",
+      "depth_text": "約400前後（300–600とする水族館資料もあり）",
+      "fact": "全長2m近くになる大型深海魚。脂が非常に多く、食べ過ぎると腹を壊すことがあるので量に注意",
+      "eat_or_display_note": "食用あり（沼津の「深海丼」等。ただし多食注意）／展示 要確認",
+      "rarity": 3,
+      "illustration": "assets/fish/f13.webp",
+      "sources": [
+        "https://www.mhlw.go.jp/topics/syokuchu/poison/animal_08.html",
+        "https://www.city.numazu.shizuoka.jp/shisei//pr/kohonumazu/1699/page20.pdf"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f14",
+      "name_ja": "ミノエビ",
+      "name_alias": null,
+      "scientific_name": "Heterocarpus hayashii",
+      "scientific_name_note": "WoRMSで最終確認済み（2026-11-09）：Heterocarpus hayashii Crosnier, 1988 は accepted、AphiaID 515431。和名ミノエビがWoRMSの日本語通称として登録あり。H. sibogae は別種であり同義名ではない。BISMaLに同種の個別ページは検索で見つからず（BISMaL自体がWoRMSの分類体系にリンクしているためWoRMSで確認）。",
+      "name_en": null,
+      "depth_text": "300以深",
+      "fact": "深海性のエビで漁獲量が少なく市場に出回ることは少ない。甘味が強く刺身で食される",
+      "eat_or_display_note": "食用あり（戸田で水揚げ・刺身）／展示あり（名古屋港水族館が駿河湾採集個体を展示紹介）",
+      "rarity": 3,
+      "illustration": "assets/fish/f14.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/",
+        "https://nagoyaaqua.jp/study/column/29335/",
+        "https://www.marinespecies.org/aphia.php?p=taxdetails&id=515431"
+      ],
+      "needs_check": false
+    },
+    {
+      "id": "f15",
+      "name_ja": "ボタンエビ",
+      "name_alias": null,
+      "scientific_name": "Pandalus nipponensis",
+      "scientific_name_note": "アクアマリンふくしま・消費者庁名称ガイドラインで同定",
+      "name_en": "Botan shrimp",
+      "depth_text": "300以上",
+      "fact": "体長約20cm、ねっとりした強い甘味で「高級エビ」として知られる",
+      "eat_or_display_note": "食用あり／展示 不明",
+      "rarity": 3,
+      "illustration": "assets/fish/f15.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f16",
+      "name_ja": "オオコシオリエビ",
+      "name_alias": null,
+      "scientific_name": "Cervimunida princeps",
+      "scientific_name_note": "WoRMSでは Grimothea princeps に再分類",
+      "name_en": null,
+      "depth_text": "200以上",
+      "fact": "静岡では姿から「クモエビ」とも呼ばれる、大型で美味な貴重なエビ（分類上はヤドカリに近い）",
+      "eat_or_display_note": "食用あり／展示あり（他館展示実績リストに記載・最新状況は要確認）",
+      "rarity": 3,
+      "illustration": "assets/fish/f16.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f17",
+      "name_ja": "ミドリフサアンコウ",
+      "name_alias": null,
+      "scientific_name": "Chaunax abei",
+      "scientific_name_note": "鳥羽水族館・市場魚貝類図鑑で同定",
+      "name_en": "Sea toad",
+      "depth_text": "浅海–600近く",
+      "fact": "アカアンコウとも呼ばれる。揚げ物・煮物・汁物で食され、肝が特に美味とされる",
+      "eat_or_display_note": "食用あり／展示あり（沼津港深海水族館の生体リストに記載・2017年時点）",
+      "rarity": 3,
+      "illustration": "assets/fish/f17.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f18",
+      "name_ja": "アカグツ",
+      "name_alias": null,
+      "scientific_name": "Halieutaea stellata",
+      "scientific_name_note": "マリンピア日本海・アクアマリンふくしまで同定",
+      "name_en": "Starry handfish",
+      "depth_text": "要確認",
+      "fact": "カエルのように見えるアンコウの仲間。海底を好み、トロール漁で漁獲される",
+      "eat_or_display_note": "食用 不明／展示あり（沼津港深海水族館の生体リストに記載・2017年時点）",
+      "rarity": 4,
+      "illustration": "assets/fish/f18.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f19",
+      "name_ja": "トウジン",
+      "name_alias": "ゲホウ",
+      "scientific_name": "Caelorinchus japonicus",
+      "scientific_name_note": "FishBaseでは属名綴り Coelorinchus",
+      "name_en": "Japanese grenadier",
+      "depth_text": "要確認",
+      "fact": "戸田を代表する深海魚の一つ。ソコダラ科で、クチバシのように尖った口が個性的",
+      "eat_or_display_note": "食用あり（戸田で刺身・鮨ネタ）／展示 不明",
+      "rarity": 3,
+      "illustration": "assets/fish/f19.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f20",
+      "name_ja": "エゾイバラガニ",
+      "name_alias": null,
+      "scientific_name": "Paralomis multispina",
+      "scientific_name_note": "BISMaL経由のタラバガニ科一覧で同定",
+      "name_en": "Oregon hair crab",
+      "depth_text": "700–1,000以上",
+      "fact": "別名「ミルクガニ」。漁獲量も少ない貴重な海洋資産とされる",
+      "eat_or_display_note": "食用 要確認（「貴重な海洋資産」との記載のみ）／展示 不明",
+      "rarity": 4,
+      "illustration": "assets/fish/f20.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f21",
+      "name_ja": "ハダカイワシ",
+      "name_alias": null,
+      "scientific_name": "Diaphus watasei",
+      "scientific_name_note": null,
+      "name_en": "Watase's lanternfish",
+      "depth_text": "200–1,500",
+      "fact": "体表に発光器を持つ深海魚。戸田周辺では焼き魚や唐揚げで食べられる",
+      "eat_or_display_note": "食用あり（戸田周辺）／展示 不明",
+      "rarity": 2,
+      "illustration": "assets/fish/f21.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/",
+        "https://www.aomori-itc.or.jp/soshiki/suisan_sougou/useful/kaisangyorui/mokuroku.html"
+      ],
+      "needs_check": false
+    },
+    {
+      "id": "f22",
+      "name_ja": "ホウライエソ",
+      "name_alias": null,
+      "scientific_name": "Chauliodus sloani",
+      "scientific_name_note": null,
+      "name_en": "Sloane's viperfish",
+      "depth_text": "500–2,500",
+      "fact": "牙のある大きな口と発光器を持つ、深海魚のシンボル的な魚。長くのびた背びれで小魚をおびき寄せる",
+      "eat_or_display_note": "食用 不明／展示 不明",
+      "rarity": 4,
+      "illustration": "assets/fish/f22.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/",
+        "https://www.weblio.jp/content/%E3%83%9B%E3%82%A6%E3%83%A9%E3%82%A4%E3%82%A8%E3%82%BD"
+      ],
+      "needs_check": false
+    },
+    {
+      "id": "f23",
+      "name_ja": "アカギンザメ",
+      "name_alias": null,
+      "scientific_name": "Hydrolagus mitsukurii",
+      "scientific_name_note": "市場魚貝類図鑑・水産研究教育機構リストで同定",
+      "name_en": "Mitsukuri's chimaera",
+      "depth_text": "500以深",
+      "fact": "体長約50cmのギンザメの仲間。食用にされることはあまりない",
+      "eat_or_display_note": "食用 ほぼなし（出典明記）／展示 不明",
+      "rarity": 4,
+      "illustration": "assets/fish/f23.webp",
+      "sources": [
+        "https://www.deep-heda.com/fish/"
+      ],
+      "needs_check": true
+    },
+    {
+      "id": "f24",
+      "name_ja": "キアンコウ",
+      "name_alias": null,
+      "scientific_name": "Lophius litulon",
+      "scientific_name_note": null,
+      "name_en": "Yellow goosefish",
+      "depth_text": "約500まで（普段は200m付近）",
+      "fact": "静岡県の「駿河湾の深海に棲む生き物」として公式に紹介されるアンコウ。一般にアンコウ鍋で知られる",
+      "eat_or_display_note": "食用あり（アンコウ類は食用・鍋等）／展示 要確認",
+      "rarity": 4,
+      "illustration": "assets/fish/f24.webp",
+      "sources": [
+        "https://www.pref.shizuoka.jp/machizukuri/kowan/1040846/1025740.html",
+        "https://www.deep-heda.com/fish/"
+      ],
+      "needs_check": true
+    }
+  ]
+}
