@@ -20,15 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # spike-3d は ../../../app/data/fish.json を読むため、アプリ本体を app/ に配置する。
-      # shinkai-atsume が private の場合は、読み取り権限のあるトークンを
-      # リポジトリ secret APP_REPO_TOKEN に登録する。
-      - uses: actions/checkout@v4
-        with:
-          repository: saboten-apps/shinkai-atsume
-          path: app
-          token: ${{ secrets.APP_REPO_TOKEN || github.token }}
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20

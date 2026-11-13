@@ -1,5 +1,5 @@
 import { Fish } from '../types';
-import rawFishData from '../../../app/data/fish.json';
+import rawFishData from './fish.json';
 
 interface FishJsonStructure {
   fish: Fish[];
