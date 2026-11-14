@@ -86,7 +86,7 @@ function decodePrimitive(json, bin, prim) {
   const ext = prim.extensions?.KHR_draco_mesh_compression;
   if (!ext) {
     const res = {};
-    for (const name of ['POSITION', 'NORMAL', 'TEXCOORD_0', 'COLOR_0']) {
+    for (const name of ['POSITION', 'NORMAL', 'TEXCOORD_0', 'COLOR_0', '_BATCHID']) {
       if (prim.attributes[name] !== undefined) {
         const r = readAccessor(json, bin, prim.attributes[name]);
         res[name] = { values: Float32Array.from(r.data), ncomp: r.ncomp, count: r.count };
@@ -120,7 +120,7 @@ function decodePrimitive(json, bin, prim) {
     return { values: out, ncomp, count: mesh.num_points() };
   };
   const res = {};
-  for (const name of ['POSITION', 'NORMAL', 'TEXCOORD_0', 'COLOR_0']) {
+  for (const name of ['POSITION', 'NORMAL', 'TEXCOORD_0', 'COLOR_0', '_BATCHID']) {
     const a = getAttr(name);
     if (a) res[name] = a;
   }
@@ -180,6 +180,7 @@ let rawBytes = 0, totTris = 0, totVerts = 0, primsTotal = 0;
 const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
 const failed = [];
 const imageFormats = new Map();
+const buildingCoverage = new Map();
 
 for (const f of files) {
   const buf = readFileSync(`${dir}/${f}`);
@@ -236,6 +237,15 @@ for (const f of files) {
       for (const prim of mesh.primitives) {
         if ((prim.mode ?? 4) !== 4) continue;
         const dec = decodePrimitive(json, bin, prim);
+        const sourceMaterial = json.materials?.[prim.material];
+        const hasPhoto = !!sourceMaterial?.pbrMetallicRoughness?.baseColorTexture;
+        for (const index of dec.indices) {
+          const batchId = dec._BATCHID ? Math.round(dec._BATCHID.values[index]) : 0;
+          const key = `${f}:${batchId}`;
+          const record = buildingCoverage.get(key) ?? { key, hasPhoto: false };
+          record.hasPhoto ||= hasPhoto;
+          buildingCoverage.set(key, record);
+        }
         const n = dec.POSITION.count;
         const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3);
         const tmp = [0, 0, 0], tmp2 = [0, 0, 0];
@@ -310,6 +320,11 @@ const bh = Buffer.alloc(8); bh.writeUInt32LE(binBuf.length, 0); bh.write('BIN\0'
 const glb = Buffer.concat([head, jh, jsonBuf, Buffer.alloc(jsonPad, 0x20), bh, binBuf]);
 writeFileSync(new URL(`./${outFile}`, import.meta.url), glb);
 const stats = {
+  buildingCoverage: {
+    total: buildingCoverage.size,
+    withPhotos: [...buildingCoverage.values()].filter(b => b.hasPhoto).length,
+    withoutPhotos: [...buildingCoverage.values()].filter(b => !b.hasPhoto).map(b => b.key),
+  },
   theme: `bldg_${label}_textured`, tileCount: files.length, failed, rawB3dmBytes: rawBytes,
   triangles: totTris, vertices: totVerts, primitives: primsTotal,
   images: outImages.length, imageFormats: Object.fromEntries(imageFormats),

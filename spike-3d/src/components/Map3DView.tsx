@@ -119,7 +119,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     scene.add(fillLight);
 
     // --- 6. Build Port Geometry with PLATEAU Real Data ---
-    const { disposables, ready, updateWater, updateBuildings, dispose: disposeScene } = buildNumazuPortScene(scene, (loaded, total) => {
+    const { disposables, ready, updateWater, dispose: disposeScene } = buildNumazuPortScene(scene, (loaded, total) => {
       setLoadText(`PLATEAU実データを読み込み中 (${loaded}/${total})…`);
     }, (group) => flight.addGeometry(group));
 
@@ -262,7 +262,6 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
       if (flight.isActive()) flight.update(delta, currentTime * 0.001);
       else controls.update();
-      updateBuildings?.(camera.position);
       renderer.render(scene, camera);
     };
 

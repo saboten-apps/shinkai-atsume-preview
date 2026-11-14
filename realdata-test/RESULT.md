@@ -335,3 +335,33 @@ DESIGN-astra-round3.md の D3/T2（主要建物への限定的な実テクスチ
 - `inspect-tex-glb.mjs` — `port-bldg-tex.glb` のプリミティブ構成・COLOR_0 値分布の精査（黄ばみ検証）
 - `convert-bldg-hero.mjs` — ヒーロー選定＋テクスチャ抽出＋予算ループ（`hero-selection.json` / `convert-hero-stats.json`）
 - `convert-bldg-color-nohero.mjs` — 色版コンパニオン（ヒーロー除外＋個別指定上書き、`convert-nohero-stats.json`）
+
+
+## 13. 全域の実写テクスチャ保持表示（2026-11-14）
+
+49棟限定の表示を廃止し、§10.3のLOD2全域モデルをプレビューに投入。
+全43タイルの変換失敗は0件、525棟・59,112三角形を保持。
+37枚の元WebP（計3,010,002 B）を再圧縮せず保持し、packed GLBは3,669,944 B。
+独自配色と近距離・低高度でのみ実写を適用する処理を廃止した。
+
+### 実写化の残件
+
+`_BATCHID` と元マテリアルを照合した結果、434棟には写真面があるが、91棟にはない。
+一覧は `convert-tex-stats.json` の `buildingCoverage.withoutPhotos`。
+写真なし6タイルの90棟に加え、data5544内の1棟が該当する。
+写真あり建物の無撮影面（屋根等）も元マテリアルを維持する。
+全棟・全表面の実写統一には、これらの面に対応する追加写真とUV割当が必要。
+
+### 再生成
+
+```bash
+cd realdata-test
+npm ci
+node fetch-zip-index.mjs
+node fetch-lod2-tiles-r4.mjs
+node convert-bldg-tex.mjs lod2 port-bldg-tex.glb convert-tex-stats.json lod2
+npx gltfpack -i port-bldg-tex.glb -o ../spike-3d/public/data/port-bldg-tex-packed.glb -cc
+node validate-glb.mjs ../spike-3d/public/data/port-bldg-tex-packed.glb
+```
+
+HTTPプロキシを必要とするNode環境では取得コマンドに `NODE_USE_ENV_PROXY=1` を指定する。

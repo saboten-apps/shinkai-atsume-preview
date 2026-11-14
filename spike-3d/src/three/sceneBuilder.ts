@@ -1,4 +1,3 @@
-import { loadBuildingDetail } from './buildingDetail';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
@@ -10,56 +9,8 @@ export interface SceneBuildResult {
     texture?: THREE.Texture;
   }[];
   ready: Promise<void>;
-  updateBuildings?: (position: THREE.Vector3) => void;
   updateWater?: (delta: number) => void;
   dispose?: () => void;
-}
-
-function colorPortBuildings(geometry: THREE.BufferGeometry) {
-  const positions = geometry.getAttribute('position');
-  const original = geometry.getAttribute('color');
-  if (!positions || !original) return;
-
-  // Connect triangles across duplicated vertices at roof and wall seams.
-  const parents = Int32Array.from({ length: positions.count }, (_, i) => i);
-  function root(i: number): number {
-    while (i !== parents[i]) {
-      parents[i] = parents[parents[i]];
-      i = parents[i];
-    }
-    return i;
-  }
-  function join(a: number, b: number) {
-    parents[root(b)] = root(a);
-  }
-  const verticesByPosition = new Map<string, number>();
-  for (let i = 0; i < positions.count; i++) {
-    const key = [positions.getX(i), positions.getY(i), positions.getZ(i)].join(',');
-    const other = verticesByPosition.get(key);
-    if (other === undefined) verticesByPosition.set(key, i);
-    else join(i, other);
-  }
-  const index = geometry.index;
-  for (let i = 0; i + 2 < (index?.count ?? positions.count); i += 3) {
-    const a = index ? index.getX(i) : i;
-    join(a, index ? index.getX(i + 1) : i + 1);
-    join(a, index ? index.getX(i + 2) : i + 2);
-  }
-
-  // One coordinated wall/roof palette per connected building.
-  const palette = [
-    [0xe7c49a, 0x93634f], [0xccd9e3, 0x597895], [0xe4b6ac, 0x8c5f60],
-    [0xc8d6bd, 0x617e71], [0xe9daba, 0x8a765f], [0xd5c9df, 0x6f658c],
-  ].map(pair => pair.map(hex => new THREE.Color(hex)));
-  const colors = new Float32Array(positions.count * 3);
-  for (let i = 0; i < positions.count; i++) {
-    const building = root(i);
-    const hash = Math.imul(building + 1, 2654435761) >>> 0;
-    // The original GLB has dark gray roofs and light beige walls.
-    const roof = original.getX(i) < .45;
-    palette[hash % palette.length][roof ? 1 : 0].toArray(colors, i * 3);
-  }
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 }
 
 /**
@@ -140,27 +91,21 @@ function ensureWaterUVCoordinates(geometry: THREE.BufferGeometry, scale = 0.04) 
 }
 
 /**
- * PLATEAU実データ（沼津港周辺 建物頂点カラー・道路・DEM地形・VEG植生・海/川水面、および目印建物実テクスチャ版）と周囲環境を構築
- * - 第4弾統合:
- *   1. 建物初期表示: port-bldg-color-nohero-packed.glb（目印建物49棟を除いた476棟、370KB、屋根 #777C7C／外壁 #CFCEC8）
- *   2. 目印建物実テクスチャ: port-bldg-hero-tex-packed.glb（49棟）を形状と画像のバイト範囲に分けて取得
- *   3. 目印建物: 単色で表示し、近くの区画だけ写真を適用
- *   4. 水面・周囲環境: 第3弾仕様（海・川分離、自前ノイズ roughnessMap、UVスクロールアニメーション）を完全維持
+ * Load the complete port building model with original PLATEAU photo textures.
+ * All available photographs stay applied at every viewing distance/height.
+ * Surfaces without source photography retain their original neutral material.
  */
 export function buildNumazuPortScene(
   scene: THREE.Scene,
   onProgress?: (loaded: number, total: number) => void,
   onCollisionGeometry?: (group: THREE.Group) => void
 ): SceneBuildResult {
+  let isDisposed = false;
   const disposables: {
     geometry?: THREE.BufferGeometry;
     material?: THREE.Material;
     texture?: THREE.Texture;
   }[] = [];
-
-  let isDisposed = false;
-  const detailAbort = new AbortController();
-  let buildingDetail: Awaited<ReturnType<typeof loadBuildingDetail>> | undefined;
 
   function track<T extends THREE.Object3D>(obj: T): T {
     obj.traverse((child) => {
@@ -244,9 +189,8 @@ export function buildNumazuPortScene(
 
   // --- 3. PLATEAU実データ GLB の読み込み ---
   const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
-  // 第4弾: 建物カラー版は目印49棟を除いた476棟（nohero）を初期ロード
-  const bldgUrl = `${baseUrl}data/port-bldg-color-nohero-packed.glb`;
-  const heroBldgUrl = `${baseUrl}data/port-bldg-hero-tex-packed.glb`;
+  // Complete 525-building dataset; preserve source UVs, photographs and colors.
+  const bldgUrl = `${baseUrl}data/port-bldg-tex-packed.glb`;
   const roadUrl = `${baseUrl}data/port-road-packed.glb`;
   const terrainUrl = `${baseUrl}data/port-terrain-packed.glb`;
   const vegUrl = `${baseUrl}data/port-veg-packed.glb`;
@@ -264,6 +208,19 @@ export function buildNumazuPortScene(
       loader.load(
         url,
         (gltf) => {
+          if (isDisposed) {
+            gltf.scene.traverse(child => {
+              if (!(child instanceof THREE.Mesh)) return;
+              child.geometry.dispose();
+              const materials = Array.isArray(child.material) ? child.material : [child.material];
+              materials.forEach(material => {
+                if (material instanceof THREE.MeshStandardMaterial) material.map?.dispose();
+                material.dispose();
+              });
+            });
+            reject(new Error('Scene disposed during loading'));
+            return;
+          }
           loadedCount++;
           if (onProgress) onProgress(loadedCount, totalCount);
           resolve(gltf.scene);
@@ -286,15 +243,17 @@ export function buildNumazuPortScene(
     loadGLTF(waterRiverUrl),
   ])
     .then(([bldgScene, roadScene, terrainScene, vegScene, waterSeaScene, waterRiverScene]) => {
-      // 1) 写真のない建物は、外壁と屋根を建物ごとの配色にする。
+      // Preserve every source material and texture instead of repainting buildings.
       bldgScene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          colorPortBuildings(child.geometry);
-          child.material = new THREE.MeshStandardMaterial({
-            vertexColors: true,
-            roughness: 0.85,
-            metalness: 0.05,
-          });
+          const materials = Array.isArray(child.material) ? child.material : [child.material];
+          for (const material of materials) {
+            if (material instanceof THREE.MeshStandardMaterial) {
+              material.roughness = 0.85;
+              material.metalness = 0.05;
+              if (material.map) material.color.set(0xffffff);
+            }
+          }
           child.castShadow = false;
           child.receiveShadow = false;
         }
@@ -382,23 +341,6 @@ export function buildNumazuPortScene(
         }
       });
       scene.add(track(waterRiverScene));
-
-      void loadBuildingDetail(heroBldgUrl, loader, detailAbort.signal).then(detail => {
-        track(detail.group);
-        if (isDisposed) {
-          for (const item of disposables) {
-            item.geometry?.dispose();
-            item.material?.dispose();
-            item.texture?.dispose();
-          }
-          return;
-        }
-        buildingDetail = detail;
-        scene.add(detail.group);
-        onCollisionGeometry?.(detail.group);
-      }).catch(error => {
-        if (!detailAbort.signal.aborted) console.warn('Building detail could not be loaded:', error);
-      });
     })
     .catch((err) => {
       console.error('Error during PLATEAU real data integration:', err);
@@ -424,8 +366,6 @@ export function buildNumazuPortScene(
 
   const dispose = () => {
     isDisposed = true;
-    detailAbort.abort();
-    buildingDetail?.dispose();
     disposables.forEach((item) => {
       if (item.geometry) item.geometry.dispose();
       if (item.material) item.material.dispose();
@@ -433,5 +373,5 @@ export function buildNumazuPortScene(
     });
   };
 
-  return { disposables, ready, updateWater, updateBuildings: position => buildingDetail?.update(position), dispose };
+  return { disposables, ready, updateWater, dispose };
 }
