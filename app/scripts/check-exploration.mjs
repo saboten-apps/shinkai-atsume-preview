@@ -1,0 +1,36 @@
+import { createRequire } from 'node:module';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+const {chromium}=createRequire(import.meta.url)('playwright');
+const places=JSON.parse(await readFile(new URL('../src/features/exploration/hidingPlaces.v1.json',import.meta.url)));
+const {createHash}=await import('node:crypto');
+const date='2026-11-14';const index=createHash('sha256').update(`shinkai-exploration:hide-v1:${date}`).digest().readUInt32BE(0)%10;const place=places[index];
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+try{
+ const context=await browser.newContext({viewport:{width:412,height:915},reducedMotion:'reduce'});
+ const page=await context.newPage();const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
+ await page.clock.install({time:new Date('2026-11-14T03:00:00Z')});
+ await page.goto(process.env.APP_URL||'http://127.0.0.1:5180/');
+ await page.getByRole('button',{name:'本日の標本を引き上げる（1日1回）',exact:true}).click();
+ await page.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).waitFor();
+ assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest/.test(u)),'gacha loaded 3D');
+ const initial=await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1'));
+ await page.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).click();
+ await page.getByRole('button',{name:'軽い2D地図で探す',exact:true}).click();
+ assert(await page.getByRole('button',{name:'探知機を頼りに近づこう'}).isDisabled());
+ const svg=page.locator('.search-2d svg');await svg.scrollIntoViewIfNeeded();
+ const target=await svg.evaluate((el,p)=>{const m=el.getScreenCTM();const point=new DOMPoint(p.x,p.z).matrixTransform(m);return{x:point.x,y:point.y};},place);
+ await page.mouse.click(target.x,target.y);
+ await page.getByRole('button',{name:'魚を発見する！',exact:true}).click();
+ await page.getByRole('button',{name:'景色入りカードを作る',exact:true}).click();
+ await page.locator('.discovery-card-preview').waitFor({timeout:20000});
+ const image=await page.locator('.discovery-card-preview').evaluate(async el=>{await el.decode();return {w:el.naturalWidth,h:el.naturalHeight};});assert.deepEqual(image,{w:1200,h:630});
+ assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1')),initial,'discovery modified collection');
+ assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest/.test(u)),'2D loaded 3D');
+ await page.screenshot({path:'/tmp/shinkai-discovery-mobile.png',fullPage:true});
+ await page.reload();await page.getByRole('button',{name:'景色入りカードを作る',exact:true}).waitFor();
+ assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1')),initial);
+ assert.deepEqual(errors,[]);
+ console.log(JSON.stringify({result:'pass',date,place:place.id,png:image,errors,checks:['no 3D on gacha or 2D','draw→2D→discover→PNG','collection unchanged','discovery survives reload']},null,2));
+ await context.close();
+}finally{await browser.close();}

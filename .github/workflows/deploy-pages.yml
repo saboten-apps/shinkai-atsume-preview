@@ -1,4 +1,4 @@
-name: Deploy spike-3d to GitHub Pages
+name: Deploy integrated app to preview Pages
 
 on:
   push:
@@ -24,19 +24,21 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: spike-3d/package-lock.json
+          cache-dependency-path: app/package-lock.json
 
       - name: Build
-        working-directory: spike-3d
+        working-directory: app
         run: |
+          node ../scripts/prepare-app-map.mjs
           npm ci
+          npm test
           npm run build
           node ../realdata-test/validate-station-corridor.mjs
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: spike-3d/dist
+          path: app/dist
 
   deploy:
     needs: build

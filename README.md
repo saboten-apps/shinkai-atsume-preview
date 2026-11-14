@@ -13,3 +13,8 @@
 - 実データのGLB実物（realdata-test 配下）は容量と配布前提の都合で **git管理外**（.gitignore）。スクリプトと RESULT.md の手順で再生成できる。
 - 例外：`spike-3d/public/data/` の packed GLB（表示用・合計 約44MB、区画単位で読み込み）は、リポジトリ単体でプレビューを再現できるよう管理対象に含める。
 - 出典：国土交通省 PLATEAU ウェブサイト（3D都市モデル 沼津市 2021年度）の地理空間データをもとに独自にジオメトリ加工・モデル化。
+
+## ガチャと探索の統合版（2026-11-14）
+
+テスト公開のビルド対象は `app/` です。本体 `saboten-apps/shinkai-atsume` の指定コミットから同期しています。
+開発・公開・Pixel検証・引き継ぎは [HANDOFF-ANTIGRAVITY.md](HANDOFF-ANTIGRAVITY.md) を参照してください。

@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "today": "Daily Specimen",
+    "pokedex": "Catalog",
+    "about": "Notes & Policy",
+    "langSwitchLabel": "JA",
+    "langCurrent": "EN"
+  },
+  "common": {
+    "tentativeBadge": "",
+    "specimenNumberLabel": "Catalog No.",
+    "rarityLabel": "Rank",
+    "depthLabel": "Depth",
+    "depthUnitSuffix": "m",
+    "scientificNameLabel": "Scientific Name",
+    "scientificNamePending": "Pending verification",
+    "englishNameLabel": "Common Name (EN)",
+    "englishNamePending": "Pending verification (showing scientific / Japanese name)",
+    "japaneseNameLabel": "Japanese Name",
+    "aliasLabel": "Local / Alias Name",
+    "factLabel": "Specimen Note (JA)",
+    "eatOrDisplayLabel": "Dining / Exhibit Record (Verified Sources, JA)",
+    "sourcesLabel": "Verified Sources & References",
+    "needsCheckBadge": "Under Secondary Review (needs_check)",
+    "needsCheckNotice": "* Some details for this species (such as exact scientific taxonomy, depth range, or historical exhibit dates) are currently undergoing secondary verification. Displayed notes reflect cited source materials as-is.",
+    "backToPokedex": "Return to Catalog",
+    "backToToday": "Return to Daily Specimen",
+    "viewDetail": "View Specimen Details & Area Guide",
+    "storageWarning": "Unable to save catalog data on this device (private browsing or storage restriction). You can still view today's specimen and area guides."
+  },
+  "gacha": {
+    "todayDatePrefix": "Record Date (JST / Asia/Tokyo)",
+    "heroTitle": "Suruga Bay Deep-Sea Specimen Log",
+    "heroSubtitle": "Based on Japan Standard Time, one deep-sea species from Suruga Bay is selected and recorded each day (shared across all devices).",
+    "drawButton": "Haul Up Today's Specimen (1/day)",
+    "drawingStatus": "Hauling up from 1,000m deep...",
+    "drawnBadgeToday": "Today's Record (Shared Daily Selection)",
+    "newDiscoveryBadge": "Newly Recorded in Catalog",
+    "alreadyInPokedexBadge": "Recorded in Catalog",
+    "sameDayNotice": "Today's specimen has already been recorded. The next species is selected daily at 00:00 JST.",
+    "factLanguageNotice": "* To preserve verified factual accuracy without machine-translation distortion, biological notes are shown in their original verified Japanese text."
+  },
+  "pokedex": {
+    "title": "Suruga Bay Deep-Sea Catalog (Initial 24 Species)",
+    "completionLabel": "Recorded",
+    "speciesCountFormat": "{obtained} / {total} Species",
+    "completedBanner": "All 24 species have been recorded. Daily specimen logs and exhibit plate exports remain available.",
+    "unobtainedName": "???",
+    "unobtainedBadge": "Unrecorded",
+    "unobtainedHint": "Unrecorded specimen. Detailed records are unlocked upon daily selection.",
+    "obtainedDateLabel": "First Recorded",
+    "encounterCountLabel": "Times Recorded",
+    "backupSectionTitle": "Backup & Restore Catalog Data",
+    "backupDescription": "Your collection is stored locally in your browser (localStorage). You can export or restore your records in JSON format.",
+    "exportButton": "Display Backup JSON",
+    "downloadJsonButton": "Save JSON File",
+    "importButton": "Restore from Backup",
+    "importPlaceholder": "Paste your backup JSON here",
+    "importSuccess": "Catalog data restored (duplicate dates are not double-counted).",
+    "importError": "Invalid backup JSON format."
+  },
+  "detail": {
+    "pageTitle": "Specimen Details",
+    "unobtainedGuardTitle": "Unrecorded Deep-Sea Specimen",
+    "unobtainedGuardBody": "Detailed specimen records unlock once this species is selected in the daily draw.",
+    "notFoundTitle": "Specimen Record Not Found",
+    "obtainedStatusOwned": "Recorded in Catalog",
+    "obtainedStatusToday": "Selected Today",
+    "factUntranslatedNotice": "* Verified biological facts and source notes are displayed in Japanese to avoid unverified translation claims."
+  },
+  "reactions": {
+    "sectionTitle": "Visit & Interest Log",
+    "wantToGo": "Want to Go",
+    "visited": "Visited",
+    "activeState": "Logged",
+    "countPlaceholder": "(This device only)",
+    "selfReportNote": "* 'Visited' is a self-reported log. In Stage 0, your selection state is saved on this device only, and public tallying will begin after official launch."
+  },
+  "area": {
+    "sectionTitle": "Related Coastal Areas (Numazu Port / Heda)",
+    "sectionSubtitle": "Official tourism portals and map search links for coastal port areas along Suruga Bay.",
+    "noAssertionNotice": "* This guide introduces local port areas and does not guarantee that specific shops or facilities currently serve or exhibit this species. Availability depends on daily conditions.",
+    "officialLinkPrefix": "Official Guide: ",
+    "mapLinkPrefix": "Map Search: "
+  },
+  "card": {
+    "sectionTitle": "Export Exhibit Plate Image (PNG)",
+    "sectionDescription": "Generate and save a 1200×630 px museum plate image for archiving or sharing on social media.",
+    "downloadPngButton": "Download Plate PNG",
+    "regenerateButton": "Redraw Plate Image",
+    "copyDraftButton": "Copy Post Text Draft",
+    "copiedNotice": "Copied to clipboard",
+    "cardHeaderToday": "Daily Deep-Sea Specimen",
+    "cardHeaderArchive": "Deep-Sea Specimen Plate",
+    "cardAreaHintTitle": "Related Areas: Numazu Port Area / Heda Area",
+    "cardDisclaimer": "Enjoy collecting and exploring virtual Numazu."
+  },
+  "about": {
+    "title": "About This Application",
+    "conceptTitle": "Overview",
+    "conceptBody": "Collect a deep-sea creature each day, explore virtual Numazu, and share a postcard of your discovery.",
+    "operatorTitle": "Produced & Operated By",
+    "operatorName": "Umimachi Lab Numazu (うみまちラボ沼津)",
+    "operatorBody": "Umimachi Lab Numazu is a local project documenting and sharing the coastal lifestyle, marine culture, and regional character around Numazu and Suruga Bay.",
+    "disclaimerTitle": "Disclaimers & Usage Notes",
+    "disclaimerItem1": "Draws, collections and exploration are virtual experiences. Real-world visits are not recorded.",
+    "disclaimerItem2": "Interest, collection and discovery records stay on this device. There are no shared counts or rankings.",
+    "disclaimerItem3": "In-app Rank (★1–★5) represents draw probability weights only and does not indicate biological rarity or conservation status.",
+    "dataPolicyTitle": "Sources & Local Storage",
+    "dataPolicyBody": "Species information is compiled from verified public research institutes, aquariums, and tourism associations. Catalog progress and preferences are saved locally in your browser (localStorage) without sending personal data to external servers."
+  }
+}

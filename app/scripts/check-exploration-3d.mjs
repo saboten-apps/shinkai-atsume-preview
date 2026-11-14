@@ -1,0 +1,45 @@
+import {createRequire} from 'node:module';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+const {chromium}=createRequire(import.meta.url)('playwright');
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+try{
+ const page=await browser.newPage({viewport:{width:412,height:915},reducedMotion:'reduce'});
+ const errors=[],failed=[];page.on('pageerror',e=>{errors.push(e.message);console.error(e.stack);});page.on('response',r=>{if(r.status()>=400)failed.push([r.status(),r.url()]);});
+ await page.goto(process.env.APP_URL||'http://127.0.0.1:5180/');
+ await page.getByRole('button',{name:'本日の標本を引き上げる（1日1回）',exact:true}).click();
+ await page.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).click();
+ await page.getByRole('button',{name:'3Dの街で探す',exact:true}).click();
+ await page.locator('.search-map canvas').waitFor();
+ await page.waitForFunction(()=>Array.from(document.querySelectorAll('button')).some(b=>b.textContent==='飛んでみる'&&!b.disabled),{},{timeout:90000});
+ await page.locator('.search-map').scrollIntoViewIfNeeded();
+ await page.screenshot({path:'/tmp/shinkai-exploration-3d-mobile.png',fullPage:true});
+ await page.getByRole('button',{name:'飛んでみる',exact:true}).click();
+ await page.locator('.flight-pad:not([hidden])').waitFor();
+ await page.getByRole('button',{name:'マップに戻る',exact:true}).click();
+ await page.getByRole('button',{name:'2D',exact:true}).click();
+ await page.locator('.search-2d svg').waitFor();assert.equal(await page.locator('.search-map canvas').count(),0);
+ const date=await page.locator('.search-heading p').textContent();
+ const day=date.slice(0,10);
+ const places=JSON.parse(await readFile(new URL('../src/features/exploration/hidingPlaces.v1.json',import.meta.url)));
+ const target=places[createHash('sha256').update(`shinkai-exploration:hide-v1:${day}`).digest().readUInt32BE(0)%10];
+ const svg=page.locator('.search-2d svg');await svg.scrollIntoViewIfNeeded();
+ const point=await svg.evaluate((el,p)=>{const point=new DOMPoint(p.x,p.z).matrixTransform(el.getScreenCTM());return{x:point.x,y:point.y};},target);
+ await page.mouse.click(point.x,point.y);
+ await page.getByRole('button',{name:'3D',exact:true}).click();
+ await page.locator('.search-map canvas').waitFor();
+ await page.locator('.search-map canvas').evaluate(canvas=>{
+   const gl=canvas.getContext('webgl2')||canvas.getContext('webgl');gl.getExtension('WEBGL_lose_context').loseContext();
+ });
+ await page.locator('.search-2d svg').waitFor({timeout:15000});
+ assert.equal(await page.locator('.search-map canvas').count(),0);
+ await page.getByRole('button',{name:'3D',exact:true}).click();
+ await page.waitForFunction(()=>Array.from(document.querySelectorAll('button')).some(b=>b.textContent==='飛んでみる'&&!b.disabled),{},{timeout:90000});
+ await page.getByRole('button',{name:'魚を発見する！',exact:true}).click();
+ await page.getByRole('button',{name:'景色入りカードを作る',exact:true}).click();
+ await page.locator('.discovery-card-preview').waitFor({timeout:20000});
+ await page.screenshot({path:'/tmp/shinkai-discovery-3d-mobile.png',fullPage:true});
+ assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
+ console.log(JSON.stringify({result:'pass',errors,failed,checks:['3D mounts in StrictMode','port model and nearby chunks load','flight starts and stops','2D releases canvas','context loss falls back to 2D','position survives mode changes','3D discovery and live-scene PNG']},null,2));
+}finally{await browser.close();}

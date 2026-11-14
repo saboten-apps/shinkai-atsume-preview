@@ -1,0 +1,15 @@
+import {readFile,mkdir,copyFile,readdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+const app=new URL('../app/',import.meta.url);
+const upstream=JSON.parse(await readFile(new URL('UPSTREAM.json',app)));
+const fish=await readFile(new URL('data/fish.json',app));
+if(createHash('sha256').update(fish).digest('hex')!==upstream.fishSha256)throw new Error('Edit fish.json in canonical shinkai-atsume, then re-sync.');
+const source=new URL('../spike-3d/public/data/',import.meta.url);
+const dest=new URL('public/map/data/',app);await mkdir(dest,{recursive:true});
+const manifest=JSON.parse(await readFile(new URL('station-manifest.json',source)));
+const names=['station-manifest.json','corridor-road-packed.glb','corridor-terrain-packed.glb','corridor-veg-packed.glb','corridor-water-sea-packed.glb','corridor-water-river-packed.glb',...manifest.chunks.map(c=>c.url.split('/').at(-1))];
+for(const name of new Set(names))await copyFile(new URL(name,source),new URL(name,dest));
+const places=JSON.parse(await readFile(new URL('src/features/exploration/hidingPlaces.v1.json',app)));
+const cards=await readdir(new URL('public/map/cards/',app));
+for(const place of places)if(!cards.includes(`${place.id}.webp`))throw new Error(`Missing 2D discovery scene: ${place.id}`);
+console.log(`Prepared ${new Set(names).size} model assets and ${places.length} card scenes.`);

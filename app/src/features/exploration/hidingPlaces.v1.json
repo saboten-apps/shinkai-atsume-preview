@@ -1,0 +1,92 @@
+[
+  {
+    "id": "port-entrance",
+    "name": "港の入口",
+    "nameEn": "Harbor entrance",
+    "hint": "港の街並みと水辺が交わるあたり。",
+    "hintEn": "Where the harbor streets meet the water.",
+    "x": -10,
+    "z": -270
+  },
+  {
+    "id": "port-south",
+    "name": "港の南側",
+    "nameEn": "Southern harbor",
+    "hint": "港から南へ。海が広く見える方へ。",
+    "hintEn": "Head south toward the open water.",
+    "x": -180,
+    "z": 30
+  },
+  {
+    "id": "port-inner",
+    "name": "港の内側",
+    "nameEn": "Inner harbor",
+    "hint": "港の内側、水面のそばを探そう。",
+    "hintEn": "Search near the water inside the harbor.",
+    "x": -230,
+    "z": -170
+  },
+  {
+    "id": "port-east",
+    "name": "港の東側",
+    "nameEn": "Eastern harbor",
+    "hint": "港の街並みの東側を探そう。",
+    "hintEn": "Search east of the harbor streets.",
+    "x": 180,
+    "z": -180
+  },
+  {
+    "id": "port-north",
+    "name": "港の北側",
+    "nameEn": "Northern harbor",
+    "hint": "港から駅へ向かう、最初のあたり。",
+    "hintEn": "The first stretch north from the harbor.",
+    "x": 0,
+    "z": -450
+  },
+  {
+    "id": "river-south",
+    "name": "川沿い・南",
+    "nameEn": "Southern riverside",
+    "hint": "港の北東、川の流れを探そう。",
+    "hintEn": "Look for the river northeast of the harbor.",
+    "x": 400,
+    "z": -700
+  },
+  {
+    "id": "river-north",
+    "name": "川沿い・北",
+    "nameEn": "Northern riverside",
+    "hint": "川沿いを、駅に近い方へ。",
+    "hintEn": "Follow the riverside toward the station.",
+    "x": 470,
+    "z": -1300
+  },
+  {
+    "id": "city-middle",
+    "name": "港と駅のあいだ",
+    "nameEn": "Between harbor and station",
+    "hint": "港と駅の、ちょうど途中あたり。",
+    "hintEn": "Roughly halfway between harbor and station.",
+    "x": 100,
+    "z": -1150
+  },
+  {
+    "id": "station-approach",
+    "name": "駅へ続く街並み",
+    "nameEn": "Streets toward the station",
+    "hint": "北へ進んで、駅の少し手前へ。",
+    "hintEn": "Head north, just short of the station.",
+    "x": 180,
+    "z": -1985
+  },
+  {
+    "id": "station-south",
+    "name": "駅南側の広場周辺",
+    "nameEn": "Station south area",
+    "hint": "港から北へ。駅南側の開けた場所。",
+    "hintEn": "North from the harbor, near the open station south area.",
+    "x": 210,
+    "z": -2395
+  }
+]
