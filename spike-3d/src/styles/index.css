@@ -743,3 +743,12 @@ a {
 .flight-knob { width:40px; height:40px; border-radius:50%; background:#fff9; pointer-events:none; }
 .flight-vertical { position:absolute; bottom:30px; right:18px; display:flex; flex-direction:column; gap:12px; }
 .flight-vertical button { border:1px solid #fffd; border-radius:24px; background:#174461cc; color:white; padding:13px 17px; font-weight:bold; }
+
+@media (max-width: 600px) {
+  .app-header { padding: 0 12px; gap: 8px; }
+  .header-left { min-width: 0; }
+  .header-title { font-size: 14px; white-space: nowrap; }
+  .header-title-row .badge-spike { display: none; }
+  .header-sub { font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-right { flex-shrink: 0; }
+}
