@@ -12,3 +12,6 @@ realdata-test/zip-index.json
 realdata-test/station-*-stats.json
 realdata-test/corridor-road-stats.json
 realdata-test/corridor-veg-stats.json
+
+# App mirror reuses the canonical model assets above at build time.
+app/public/map/data/

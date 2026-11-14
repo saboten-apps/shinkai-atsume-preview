@@ -1,0 +1,1308 @@
+:root {
+  /* 基本パレット：深い紺・生成り・墨色 ＋ 唯一の差し色（魚の赤） */
+  --navy-deep: #0B1C2C;
+  --navy-abyss: #07131E;
+  --navy-panel: #102437;
+  --paper-bg: #F5F0E6;
+  --paper-sub: #ECE5D5;
+  --paper-muted: #E2D9C5;
+  --ink-main: #1C1B18;
+  --ink-muted: #524E46;
+  --ink-faint: #7A7468;
+  --rule-ink: #1C1B18;
+  --rule-subtle: #C4B9A5;
+  --rule-on-navy: rgba(245, 240, 230, 0.22);
+  --accent-red: #C73E2C;
+
+  /* 書体定義 */
+  --font-serif: "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif;
+  --font-sans: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Zen Kaku Gothic New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--navy-deep);
+  color: var(--paper-bg);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.7;
+  min-height: 100vh;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+a {
+  color: var(--ink-main);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  color: var(--accent-red);
+}
+
+.tabular-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.sci-latin,
+em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+.inline-ext-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 5px;
+  flex-shrink: 0;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   Header（深い紺の展示室ヘッダー ＋ 1px罫線）
+   ========================================================================== */
+.app-header {
+  background-color: var(--navy-deep);
+  border-bottom: 1px solid var(--rule-on-navy);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.header-inner {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.brand-group {
+  cursor: pointer;
+  border-left: 3px solid var(--accent-red);
+  padding-left: 12px;
+}
+
+.brand-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brand-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--paper-bg);
+}
+
+.tentative-badge {
+  font-size: 0.7rem;
+  color: var(--paper-bg);
+  border: 1px solid var(--rule-on-navy);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.brand-org {
+  margin: 2px 0 0;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  color: rgba(245, 240, 230, 0.72);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.main-nav {
+  display: flex;
+  gap: 6px;
+}
+
+.nav-tab {
+  background-color: transparent;
+  color: rgba(245, 240, 230, 0.82);
+  border: 1px solid var(--rule-on-navy);
+  padding: 7px 14px;
+  border-radius: 2px;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: border-color 0.12s, background-color 0.12s, color 0.12s;
+}
+
+.nav-tab:hover {
+  border-color: var(--paper-bg);
+  color: var(--paper-bg);
+}
+
+.nav-tab.is-active {
+  background-color: var(--paper-bg);
+  border-color: var(--paper-bg);
+  color: var(--ink-main);
+  font-weight: 700;
+  box-shadow: inset 0 -3px 0 var(--accent-red);
+}
+
+.lang-toggle-btn {
+  background-color: transparent;
+  color: var(--paper-bg);
+  border: 1px solid var(--rule-on-navy);
+  padding: 7px 12px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lang-toggle-btn:hover {
+  border-color: var(--paper-bg);
+}
+
+.lang-switch-sep {
+  opacity: 0.5;
+}
+
+.storage-warning-banner {
+  background-color: var(--paper-sub);
+  border-bottom: 1px solid var(--accent-red);
+  color: var(--ink-main);
+  padding: 10px 18px;
+  text-align: center;
+  font-size: 0.84rem;
+}
+
+/* ==========================================================================
+   Main Container
+   ========================================================================== */
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 28px 18px 56px;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ==========================================================================
+   Hero & Gacha（唯一、深海の闇としてごく控えめなグラデーションを許容する領域）
+   ========================================================================== */
+.gacha-hero-card {
+  position: relative;
+  background: linear-gradient(180deg, var(--navy-deep) 0%, var(--navy-abyss) 100%);
+  border: 1px solid rgba(245, 240, 230, 0.35);
+  border-radius: 2px;
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--paper-bg);
+}
+
+.gacha-hero-card::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(245, 240, 230, 0.16);
+  pointer-events: none;
+}
+
+.gacha-date-pill {
+  display: inline-block;
+  background-color: transparent;
+  border-top: 1px solid var(--rule-on-navy);
+  border-bottom: 1px solid var(--rule-on-navy);
+  padding: 4px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: rgba(245, 240, 230, 0.85);
+  margin-bottom: 14px;
+}
+
+.gacha-hero-title {
+  margin: 4px 0 10px;
+  font-family: var(--font-serif);
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--paper-bg);
+}
+
+.gacha-hero-subtitle {
+  margin: 0 auto 22px;
+  max-width: 620px;
+  color: rgba(245, 240, 230, 0.78);
+  font-size: 0.9rem;
+}
+
+.gacha-action-area {
+  margin-top: 6px;
+}
+
+.gacha-draw-btn {
+  background-color: var(--accent-red);
+  color: var(--paper-bg);
+  border: 1px solid var(--paper-bg);
+  border-radius: 2px;
+  padding: 12px 28px;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.gacha-draw-btn:hover:not(:disabled) {
+  background-color: var(--paper-bg);
+  color: var(--ink-main);
+  border-color: var(--accent-red);
+}
+
+.gacha-draw-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+/* ==========================================================================
+   額装された展示プレート（生成り背景・墨色文字・二重細枠線）
+   ========================================================================== */
+.fish-result-card,
+.fish-detail-card,
+.about-card,
+.pokedex-summary-card,
+.backup-section,
+.area-guide-section,
+.result-card-section,
+.guard-card {
+  position: relative;
+  background-color: var(--paper-bg);
+  color: var(--ink-main);
+  border: 1px solid var(--rule-ink);
+  border-radius: 2px;
+  padding: 26px 24px;
+}
+
+.fish-result-card::before,
+.fish-detail-card::before,
+.about-card::before,
+.pokedex-summary-card::before,
+.backup-section::before,
+.area-guide-section::before,
+.result-card-section::before,
+.guard-card::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--rule-subtle);
+  pointer-events: none;
+}
+
+/* プレート最上部の標本番号＋ステータスバー */
+.specimen-plate-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--rule-ink);
+}
+
+.specimen-plate-no {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  border-left: 3px solid var(--accent-red);
+  padding-left: 10px;
+}
+
+.specimen-no-caption {
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+
+.specimen-no-code {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink-main);
+}
+
+.fish-result-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge {
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 2px;
+  border: 1px solid var(--rule-ink);
+  background-color: var(--paper-sub);
+  color: var(--ink-main);
+}
+
+.badge-primary {
+  background-color: var(--navy-deep);
+  color: var(--paper-bg);
+  border-color: var(--navy-deep);
+}
+
+.badge-new {
+  background-color: transparent;
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+  font-weight: 700;
+}
+
+.badge-owned {
+  background-color: var(--paper-sub);
+  color: var(--ink-muted);
+  border-color: var(--rule-subtle);
+}
+
+.badge-warning {
+  background-color: var(--paper-sub);
+  color: var(--ink-main);
+  border-color: var(--ink-muted);
+}
+
+.fish-result-main-grid,
+.fish-detail-header {
+  display: grid;
+  grid-template-columns: minmax(250px, 340px) 1fr;
+  gap: 26px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .fish-result-main-grid,
+  .fish-detail-header {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Illustration & Specimen Window
+   ========================================================================== */
+.fish-illust-container {
+  position: relative;
+  width: 100%;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid var(--rule-ink);
+  background-color: var(--navy-deep);
+}
+
+.fish-illust-container::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(245, 240, 230, 0.22);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.fish-illust-sm {
+  aspect-ratio: 1 / 1;
+}
+
+.fish-illust-md {
+  max-width: 280px;
+  margin: 0 auto 16px;
+}
+
+.fish-illust-lg {
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.fish-illust-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  transition: filter 0.2s ease;
+}
+
+.fish-illust-container.is-silhouette .fish-illust-img {
+  filter: brightness(0.14) saturate(0) contrast(1.4);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.fish-illust-mystery-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(11, 28, 44, 0.55);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fish-illust-mystery-text {
+  font-family: var(--font-serif);
+  color: rgba(245, 240, 230, 0.65);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+}
+
+.fish-illust-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.fish-illust-id-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--ink-main);
+  background-color: var(--paper-bg);
+  border: 1px solid var(--rule-ink);
+  border-left: 3px solid var(--accent-red);
+  padding: 1px 7px;
+  border-radius: 0;
+}
+
+/* ==========================================================================
+   Specimen Labels & Typography
+   ========================================================================== */
+.fish-title-block {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule-subtle);
+}
+
+.specimen-rank-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.specimen-inline-no {
+  font-weight: 700;
+  color: var(--accent-red);
+  letter-spacing: 0.05em;
+}
+
+.specimen-rank-tag {
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.fish-main-name {
+  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink-main);
+}
+
+.fish-sub-name,
+.fish-alias-name,
+.fish-scientific-name {
+  margin: 3px 0;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+.sci-label {
+  font-style: normal;
+}
+
+/* ==========================================================================
+   Depth Scale Bar（水深目盛りバー 0m / 200m / 500m / 1000m / 2500m）
+   ========================================================================== */
+.specimen-depth-panel {
+  margin: 14px 0;
+  padding: 12px 14px;
+  background-color: var(--paper-sub);
+  border: 1px solid var(--rule-subtle);
+  border-radius: 2px;
+}
+
+.depth-scale-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.depth-scale-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.depth-scale-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+}
+
+.depth-scale-value {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink-main);
+}
+
+.depth-scale-track-wrap {
+  position: relative;
+  padding: 4px 2px 18px;
+}
+
+.depth-scale-track {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  background-color: var(--ink-main);
+}
+
+.depth-scale-tick {
+  position: absolute;
+  top: -4px;
+  width: 1px;
+  height: 9px;
+  background-color: var(--ink-main);
+  transform: translateX(-50%);
+}
+
+.depth-scale-bar-active {
+  position: absolute;
+  top: -2px;
+  height: 5px;
+  background-color: var(--accent-red);
+  min-width: 8px;
+}
+
+.depth-scale-labels {
+  position: relative;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.depth-scale-tick-label {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.depth-scale-tick-label:first-child {
+  transform: none;
+}
+
+.depth-scale-tick-label:last-child {
+  transform: translateX(-100%);
+}
+
+/* ==========================================================================
+   Fact Boxes & Sources
+   ========================================================================== */
+.fish-fact-box {
+  background-color: var(--paper-sub);
+  border: 1px solid var(--rule-subtle);
+  border-left: 3px solid var(--ink-main);
+  border-radius: 2px;
+  padding: 12px 16px;
+  margin: 14px 0;
+}
+
+.fact-heading {
+  margin: 0 0 6px;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+
+.fact-body {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink-main);
+}
+
+.fact-lang-note,
+.needs-check-notice {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  border-left: 2px solid var(--accent-red);
+  padding-left: 10px;
+  margin: 10px 0;
+}
+
+.fish-sources-inline,
+.fish-sources-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule-subtle);
+}
+
+.sources-inline-label,
+.section-title-sm {
+  margin: 0 0 6px;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+}
+
+.sources-inline-list,
+.sources-detail-list {
+  margin: 6px 0;
+  padding-left: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.sources-inline-list li,
+.sources-detail-list li {
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+/* ==========================================================================
+   Buttons（矩形・角丸最小・字間を広げた小〜中サイズ）
+   ========================================================================== */
+.fish-result-nav-buttons,
+.card-actions-row,
+.backup-buttons-row,
+.guard-actions,
+.about-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.primary-action-btn {
+  background-color: var(--navy-deep);
+  color: var(--paper-bg);
+  border: 1px solid var(--navy-deep);
+  border-radius: 2px;
+  padding: 9px 18px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.primary-action-btn:hover:not(:disabled) {
+  background-color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+.primary-action-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.secondary-action-btn,
+.back-link-btn {
+  background-color: var(--paper-bg);
+  color: var(--ink-main);
+  border: 1px solid var(--rule-ink);
+  border-radius: 2px;
+  padding: 9px 16px;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.secondary-action-btn:hover,
+.back-link-btn:hover {
+  background-color: var(--paper-sub);
+  border-color: var(--accent-red);
+}
+
+.same-day-notice {
+  margin: 18px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule-subtle);
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+/* ==========================================================================
+   Reactions（単純なSVG線画アイコン＋矩形枠）
+   ========================================================================== */
+.fish-card-reactions,
+.fish-detail-reactions {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule-subtle);
+}
+
+.reaction-box {
+  margin-top: 8px;
+}
+
+.reaction-buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.reaction-btn {
+  background-color: var(--paper-bg);
+  color: var(--ink-main);
+  border: 1px solid var(--rule-ink);
+  border-radius: 2px;
+  padding: 7px 12px;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: border-color 0.12s, background-color 0.12s;
+}
+
+.reaction-btn:hover {
+  background-color: var(--paper-sub);
+}
+
+.reaction-btn.is-active {
+  background-color: var(--paper-sub);
+  border-color: var(--accent-red);
+  color: var(--ink-main);
+}
+
+.reaction-svg-icon {
+  flex-shrink: 0;
+  color: var(--ink-main);
+}
+
+.reaction-btn.is-active .reaction-svg-icon {
+  color: var(--accent-red);
+}
+
+.reaction-selected-pill {
+  font-size: 0.68rem;
+  background-color: var(--accent-red);
+  color: var(--paper-bg);
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.reaction-count-note {
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+}
+
+.reaction-self-report-note {
+  margin: 6px 0 0;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+
+/* ==========================================================================
+   Area Guide
+   ========================================================================== */
+.section-header {
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-ink);
+}
+
+.section-title {
+  margin: 0 0 4px;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--ink-main);
+}
+
+.section-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+.area-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.area-card {
+  background-color: var(--paper-sub);
+  border: 1px solid var(--rule-ink);
+  border-radius: 2px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.area-card-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--ink-main);
+  border-left: 3px solid var(--accent-red);
+  padding-left: 10px;
+}
+
+.area-card-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink-main);
+}
+
+.area-links-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.area-external-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--paper-bg);
+  border: 1px solid var(--rule-ink);
+  border-radius: 2px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--ink-main);
+}
+
+.area-external-link:hover {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+.area-disclaimer-note {
+  margin: 14px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule-subtle);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+/* ==========================================================================
+   Result Card Canvas Preview
+   ========================================================================== */
+.canvas-preview-wrapper {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 2px;
+  border: 1px solid var(--rule-ink);
+  background-color: var(--navy-deep);
+}
+
+.result-card-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ==========================================================================
+   Pokedex Grid（標本一覧台帳）
+   ========================================================================== */
+.pokedex-summary-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.page-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.38rem;
+  color: var(--ink-main);
+}
+
+.completion-stats-pill {
+  background-color: var(--paper-sub);
+  border: 1px solid var(--rule-ink);
+  padding: 4px 12px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.completion-progress-track {
+  width: 100%;
+  height: 6px;
+  background-color: var(--paper-muted);
+  border: 1px solid var(--rule-ink);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.completion-progress-fill {
+  height: 100%;
+  background-color: var(--accent-red);
+  transition: width 0.3s ease;
+}
+
+.completion-achieved-banner,
+.unobtained-hint-banner {
+  margin-top: 12px;
+  padding: 9px 14px;
+  border-radius: 2px;
+  font-size: 0.86rem;
+  background-color: var(--paper-sub);
+  border: 1px solid var(--rule-ink);
+  border-left: 3px solid var(--accent-red);
+  color: var(--ink-main);
+}
+
+.pokedex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.pokedex-grid-item {
+  position: relative;
+  background-color: var(--paper-bg);
+  border: 1px solid var(--rule-ink);
+  border-radius: 2px;
+  padding: 12px;
+  text-align: left;
+  color: var(--ink-main);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.12s;
+}
+
+.pokedex-grid-item.is-obtained::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--rule-subtle);
+  pointer-events: none;
+}
+
+.pokedex-grid-item.is-obtained:hover {
+  border-color: var(--accent-red);
+}
+
+.pokedex-grid-item.is-unobtained {
+  background-color: var(--navy-panel);
+  border-color: var(--rule-on-navy);
+  color: rgba(245, 240, 230, 0.72);
+}
+
+.pokedex-item-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+
+.pokedex-grid-item.is-unobtained .pokedex-item-top-row {
+  border-bottom-color: var(--rule-on-navy);
+}
+
+.pokedex-item-no {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.pokedex-grid-item.is-obtained .pokedex-item-no {
+  color: var(--accent-red);
+}
+
+.pokedex-item-rarity {
+  color: var(--ink-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.unobtained-tag {
+  font-size: 0.68rem;
+  background-color: transparent;
+  color: rgba(245, 240, 230, 0.65);
+  border: 1px solid var(--rule-on-navy);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.pokedex-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pokedex-item-name {
+  margin: 2px 0;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.pokedex-item-sci {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+
+.pokedex-item-depth {
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-main);
+}
+
+.pokedex-item-meta {
+  margin: 2px 0 0;
+  padding-top: 4px;
+  border-top: 1px solid var(--rule-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+
+.backup-textarea {
+  width: 100%;
+  margin-top: 12px;
+  background-color: var(--paper-sub);
+  color: var(--ink-main);
+  border: 1px solid var(--rule-ink);
+  border-radius: 2px;
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.backup-feedback {
+  margin-top: 8px;
+  font-size: 0.84rem;
+}
+
+.backup-feedback.is-success {
+  color: var(--ink-main);
+  border-left: 3px solid var(--ink-main);
+  padding-left: 8px;
+}
+
+.backup-feedback.is-error {
+  color: var(--accent-red);
+  border-left: 3px solid var(--accent-red);
+  padding-left: 8px;
+}
+
+/* ==========================================================================
+   Detail Table（標本台帳テーブル）
+   ========================================================================== */
+.detail-top-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-top-nav .back-link-btn {
+  background-color: transparent;
+  color: var(--paper-bg);
+  border: 1px solid var(--rule-on-navy);
+}
+
+.detail-top-nav .back-link-btn:hover {
+  border-color: var(--paper-bg);
+  background-color: rgba(245, 240, 230, 0.08);
+}
+
+.fish-names-table {
+  margin: 12px 0 0;
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--rule-ink);
+  padding-top: 10px;
+}
+
+.name-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule-subtle);
+  font-size: 0.9rem;
+  align-items: baseline;
+}
+
+.name-row dt {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.name-row dd {
+  margin: 0;
+  color: var(--ink-main);
+}
+
+.fish-detail-facts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+/* ==========================================================================
+   About
+   ========================================================================== */
+.about-block {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule-subtle);
+}
+
+.about-heading {
+  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  color: var(--ink-main);
+}
+
+.about-text {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.operator-highlight-box,
+.disclaimer-highlight-box {
+  background-color: var(--paper-sub);
+  padding: 16px;
+  border-radius: 2px;
+  border: 1px solid var(--rule-ink);
+}
+
+.operator-name {
+  font-family: var(--font-serif);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--ink-main);
+  border-left: 3px solid var(--accent-red);
+  padding-left: 10px;
+  margin: 4px 0 8px;
+}
+
+.disclaimer-list {
+  padding-left: 20px;
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}
+
+.disclaimer-list li {
+  margin-bottom: 8px;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.app-footer {
+  border-top: 1px solid var(--rule-on-navy);
+  background-color: var(--navy-deep);
+  padding: 20px 16px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(245, 240, 230, 0.72);
+}
+
+.footer-inner {
+  max-width: 1060px;
+  margin: 0 auto;
+}
+
+.footer-disclaimer,
+.footer-brand {
+  margin: 4px 0;
+  letter-spacing: 0.04em;
+}

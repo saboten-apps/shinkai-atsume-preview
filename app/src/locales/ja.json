@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "today": "本日の標本",
+    "pokedex": "深海魚図鑑",
+    "about": "案内・免責",
+    "langSwitchLabel": "EN",
+    "langCurrent": "JA"
+  },
+  "common": {
+    "tentativeBadge": "",
+    "specimenNumberLabel": "図鑑番号",
+    "rarityLabel": "出現ランク",
+    "depthLabel": "水深",
+    "depthUnitSuffix": "m",
+    "scientificNameLabel": "学名",
+    "scientificNamePending": "要確認（調査中）",
+    "englishNameLabel": "英名",
+    "englishNamePending": "裏取り中（学名・和名を表示）",
+    "japaneseNameLabel": "標準和名",
+    "aliasLabel": "地方名・別名",
+    "factLabel": "標本解説",
+    "eatOrDisplayLabel": "食用・展示の記録（出典ベース）",
+    "sourcesLabel": "出典・参考資料",
+    "needsCheckBadge": "一部項目は再確認中（needs_check）",
+    "needsCheckNotice": "※この生物の一部データ（学名・水深幅・展示状況の時点等）は現在追加の裏取り確認中です。記載内容は出典資料に基づいています。",
+    "backToPokedex": "図鑑一覧へ戻る",
+    "backToToday": "本日の標本へ戻る",
+    "viewDetail": "標本詳細・地域案内を見る",
+    "storageWarning": "この環境では図鑑データを端末に保存できません（プライベートブラウズまたは保存制限）。本日の結果と地域案内はそのまま閲覧できます。"
+  },
+  "gacha": {
+    "todayDatePrefix": "記録日（日本時間）",
+    "heroTitle": "駿河湾 深海標本録",
+    "heroSubtitle": "日本時間の日付に基づき、毎日1種の深海生物を選出・記録します（全端末で同日同一種）。",
+    "drawButton": "本日の標本を引き上げる（1日1回）",
+    "drawingStatus": "水深1,000mより引き上げ中…",
+    "drawnBadgeToday": "本日の記録（1日1回・共通選出）",
+    "newDiscoveryBadge": "新規登録（図鑑に記録されました）",
+    "alreadyInPokedexBadge": "図鑑登録済み",
+    "sameDayNotice": "本日の記録は完了しています。日本時間 0:00 以降に翌日の深海生物が選出されます。",
+    "factLanguageNotice": ""
+  },
+  "pokedex": {
+    "title": "駿河湾 深海生物図鑑（初期24種）",
+    "completionLabel": "収録数",
+    "speciesCountFormat": "{obtained} / {total} 種",
+    "completedBanner": "全24種の記録が完了しました。翌日以降も日々の標本確認とプレート画像の書き出しが可能です。",
+    "unobtainedName": "？？？",
+    "unobtainedBadge": "未記録",
+    "unobtainedHint": "未記録の標本です。日々の選出で引き当てると詳細データが解放されます。",
+    "obtainedDateLabel": "初回記録日",
+    "encounterCountLabel": "記録回数",
+    "backupSectionTitle": "図鑑データのバックアップ・復元",
+    "backupDescription": "図鑑の記録はお使いのブラウザ（localStorage）に保存されています。端末変更や公開先移行に備えて、JSON形式で書き出し・復元が行えます。",
+    "exportButton": "バックアップJSONを表示",
+    "downloadJsonButton": "JSONファイルを保存",
+    "importButton": "バックアップから復元",
+    "importPlaceholder": "ここにバックアップJSONを貼り付けてください",
+    "importSuccess": "図鑑データを復元しました（重複する日付の記録は二重加算されません）。",
+    "importError": "バックアップデータの形式が正しくありません。"
+  },
+  "detail": {
+    "pageTitle": "深海生物の標本詳細",
+    "unobtainedGuardTitle": "未記録の深海生物です",
+    "unobtainedGuardBody": "図鑑の詳細データは、日々の選出で引き当てた後に閲覧できます。",
+    "notFoundTitle": "該当する深海生物が見つかりません",
+    "obtainedStatusOwned": "図鑑登録済み",
+    "obtainedStatusToday": "本日選出",
+    "factUntranslatedNotice": ""
+  },
+  "reactions": {
+    "sectionTitle": "来訪・関心メモ",
+    "wantToGo": "行きたい",
+    "visited": "行ったよ",
+    "activeState": "記録済",
+    "countPlaceholder": "（この端末のみ）",
+    "selfReportNote": "※「行ったよ」は自己申告による記録です。段階0では端末内のみ状態を保持し、全体の集計は公開後に開始します。"
+  },
+  "area": {
+    "sectionTitle": "関連地域案内（沼津港・戸田）",
+    "sectionSubtitle": "沼津・駿河湾エリアの公式観光案内および地図検索へのリンクです。",
+    "noAssertionNotice": "※特定のお店や施設での深海魚の展示・提供・入荷を断定するものではありません。魚の提供・展示は各施設の当日の状況によります。",
+    "officialLinkPrefix": "公式案内：",
+    "mapLinkPrefix": "地図検索："
+  },
+  "card": {
+    "sectionTitle": "展示プレート画像の書き出し（PNG）",
+    "sectionDescription": "1200×630 px の展示プレート風カード画像を生成・保存できます。SNS等での記録共有にご利用ください。",
+    "downloadPngButton": "プレート画像（PNG）を保存",
+    "regenerateButton": "プレート画像を再描画",
+    "copyDraftButton": "投稿用テキスト草稿をコピー",
+    "copiedNotice": "コピーしました",
+    "cardHeaderToday": "本日の深海生物標本",
+    "cardHeaderArchive": "深海生物標本プレート",
+    "cardAreaHintTitle": "関連地域：沼津港エリア ／ 戸田エリア",
+    "cardDisclaimer": "バーチャルでの収集・探索を楽しむアプリです。"
+  },
+  "about": {
+    "title": "このアプリについて",
+    "conceptTitle": "概要",
+    "conceptBody": "駿河湾の深海生物を毎日1種集め、バーチャルの沼津を探して、街の景色と魚のカードを共有できるアプリです。",
+    "operatorTitle": "企画・運営",
+    "operatorName": "うみまちラボ沼津",
+    "operatorBody": "うみまちラボ沼津は、沼津・駿河湾周辺の海辺の暮らしや地域の魅力を記録・発信する地域プロジェクトです。",
+    "disclaimerTitle": "免責事項・ご利用上の注意",
+    "disclaimerItem1": "ガチャ・図鑑・探索はバーチャルでの体験です。実際の来店記録は作りません。",
+    "disclaimerItem2": "「行きたい」の選択と図鑑・発見記録は、この端末内に保存します。人数の集計やランキングはありません。",
+    "disclaimerItem3": "アプリ内の「出現ランク（★1〜★5）」は選出頻度の設定区分であり、生物学的な希少性や絶滅危険度を示すものではありません。",
+    "dataPolicyTitle": "出典とデータの保存について",
+    "dataPolicyBody": "掲載している深海生物の情報は、公的機関・研究機関・水族館・観光協会等の出典資料に基づき作成しています。また、図鑑の獲得履歴や設定はお使いのブラウザ（localStorage）に保存され、個人情報を外部サーバーへ送信することはありません。"
+  }
+}
