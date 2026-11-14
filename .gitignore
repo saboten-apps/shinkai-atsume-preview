@@ -7,3 +7,8 @@ dist/
 # 実データの生成物（スクリプト＋RESULT.mdの手順で再生成可能）
 realdata-test/*.glb
 realdata-test/zip-index.json
+
+# Per-chunk conversion diagnostics (summary is in station-manifest.json)
+realdata-test/station-*-stats.json
+realdata-test/corridor-road-stats.json
+realdata-test/corridor-veg-stats.json

@@ -31,7 +31,8 @@ const PREFIX = '22203_numazu-shi_2021_citygml_4_op/udx/dem/';
 const FILES = ['523846_dem_6697_op.gml', '523856_dem_6697_05_op.gml'];
 
 // keep triangles whose vertex bbox intersects this (slightly expanded) box
-const KEEP = { s: 35.0780, n: 35.0865, w: 138.8530, e: 138.8640 };
+const KEEP = process.env.STATION_CORRIDOR ? { s: 35.0780, n: 35.1060, w: 138.8500, e: 138.8690 } : { s: 35.0780, n: 35.0865, w: 138.8530, e: 138.8640 };
+const outputPrefix = process.env.STATION_CORRIDOR ? 'corridor' : 'port';
 // flat inland reference patch (town area south of the port apron) — reported
 // for reference; its median (ortho 1.46 m) proved ~0.6 m lower than the port
 // apron surface, so it is NOT used for calibration.
@@ -229,9 +230,9 @@ const head = Buffer.alloc(12); head.write('glTF', 0, 'ascii'); head.writeUInt32L
 const jh = Buffer.alloc(8); jh.writeUInt32LE(jsonBuf.length + jsonPad, 0); jh.write('JSON', 4, 'ascii');
 const bh = Buffer.alloc(8); bh.writeUInt32LE(binBuf.length, 0); bh.write('BIN\0', 4, 'ascii');
 const glb = Buffer.concat([head, jh, jsonBuf, Buffer.alloc(jsonPad, 0x20), bh, binBuf]);
-writeFileSync(new URL('./port-terrain.glb', import.meta.url), glb);
+writeFileSync(new URL(`./${outputPrefix}-terrain.glb`, import.meta.url), glb);
 console.log(`== dem: kept tris=${totalVerts / 3} verts=${totalVerts} glb=${glb.length}`);
 console.log(`   ENU range: x ${min[0].toFixed(1)}..${max[0].toFixed(1)}, y ${min[1].toFixed(1)}..${max[1].toFixed(1)}, z ${min[2].toFixed(1)}..${max[2].toFixed(1)}`);
-writeFileSync(new URL('./convert-dem-stats.json', import.meta.url),
+writeFileSync(new URL(`./${outputPrefix}-dem-stats.json`, import.meta.url),
   JSON.stringify({ theme: 'dem (CityGML TIN)', files: FILES, posListsScanned: scanned, anomalies, keptTriangles: totalVerts / 3, vertices: totalVerts, referencePatch: { n: patchHeights.length, medianOrthoH: medPatch }, buildingCluster: { n: clusterHeights.length, medianOrthoH: med, geoidN: N, groundTarget: GROUND_TARGET }, min, max, glbBytes: glb.length }, null, 1));
 console.log('done');

@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
           <h1 className="header-title">深海あつめ 3Dマップ</h1>
           <span className="badge-spike">技術検証プロトタイプ</span>
         </div>
-        <div className="header-sub">沼津港周辺・軽量3D都市モデル先行検証</div>
+        <div className="header-sub">沼津港〜沼津駅南口・3D都市モデル先行検証</div>
       </div>
 
       <div className="header-right">

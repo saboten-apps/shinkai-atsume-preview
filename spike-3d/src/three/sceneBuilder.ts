@@ -1,3 +1,4 @@
+import { streamStationBuildings } from './stationChunks';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
@@ -9,6 +10,7 @@ export interface SceneBuildResult {
     texture?: THREE.Texture;
   }[];
   ready: Promise<void>;
+  updateBuildings?: (position: THREE.Vector3) => void;
   updateWater?: (delta: number) => void;
   dispose?: () => void;
 }
@@ -98,7 +100,8 @@ function ensureWaterUVCoordinates(geometry: THREE.BufferGeometry, scale = 0.04) 
 export function buildNumazuPortScene(
   scene: THREE.Scene,
   onProgress?: (loaded: number, total: number) => void,
-  onCollisionGeometry?: (group: THREE.Group) => void
+  onCollisionGeometry?: (group: THREE.Group) => (() => void) | void,
+  onAreaStatus?: (text: string) => void
 ): SceneBuildResult {
   let isDisposed = false;
   const disposables: {
@@ -139,7 +142,7 @@ export function buildNumazuPortScene(
   // --- 1. 海面（濃紺平面 2400×2400 全面、y=41.5） ---
   // 指示書: 海の全面平面（従来の濃紺プレーン）は色を #183B52 に合わせて残す（y=41.5）。
   // その上に水面ポリゴン（海）を重ね、内港・河口・港沖の水際をデータどおりに読めるようにする。
-  const seaGeom = new THREE.PlaneGeometry(2400, 2400, 8, 8);
+  const seaGeom = new THREE.PlaneGeometry(6000, 6000, 8, 8);
   // 全面平面のUVもワールドENU座標スケール（0.04）に合わせてシームレスに同期
   const seaPos = seaGeom.attributes.position;
   const seaUv = seaGeom.attributes.uv;
@@ -172,12 +175,19 @@ export function buildNumazuPortScene(
   });
 
   // 東側一帯: x in [590, 1200] (幅610, 中心895), z in [-600, 720] (長さ1320, 中心60)
-  const eastLandGeom = new THREE.PlaneGeometry(610, 1320);
+  const eastLandGeom = new THREE.PlaneGeometry(700, 3500);
   const eastLand = new THREE.Mesh(eastLandGeom, landExtensionMat);
   eastLand.rotation.x = -Math.PI / 2;
-  eastLand.position.set(895, 41.55, 60);
+  eastLand.position.set(1400, 41.55, -1000);
   eastLand.receiveShadow = false;
   scene.add(track(eastLand));
+
+  // Cropped station terrain ends at z ≈ -2723. Continue inland as a plain
+  // backdrop outside the data footprint, rather than showing an ocean there.
+  const northLand = new THREE.Mesh(new THREE.PlaneGeometry(6000, 8000), landExtensionMat);
+  northLand.rotation.x = -Math.PI / 2;
+  northLand.position.set(0, 41.55, -6725);
+  scene.add(track(northLand));
 
   // 南側一帯: x in [-700, 1200] (幅1900, 中心250), z in [720, 1200] (長さ480, 中心960)
   const southLandGeom = new THREE.PlaneGeometry(1900, 480);
@@ -189,19 +199,19 @@ export function buildNumazuPortScene(
 
   // --- 3. PLATEAU実データ GLB の読み込み ---
   const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
-  // Complete 525-building dataset; preserve source UVs, photographs and colors.
-  const bldgUrl = `${baseUrl}data/port-bldg-tex-packed.glb`;
-  const roadUrl = `${baseUrl}data/port-road-packed.glb`;
-  const terrainUrl = `${baseUrl}data/port-terrain-packed.glb`;
-  const vegUrl = `${baseUrl}data/port-veg-packed.glb`;
-  const waterSeaUrl = `${baseUrl}data/port-water-sea-packed.glb`;
-  const waterRiverUrl = `${baseUrl}data/port-water-river-packed.glb`;
+  // Buildings, including the original port, stream separately by proximity.
+  const roadUrl = `${baseUrl}data/corridor-road-packed.glb`;
+  const terrainUrl = `${baseUrl}data/corridor-terrain-packed.glb`;
+  const vegUrl = `${baseUrl}data/corridor-veg-packed.glb`;
+  const waterSeaUrl = `${baseUrl}data/corridor-water-sea-packed.glb`;
+  const waterRiverUrl = `${baseUrl}data/corridor-water-river-packed.glb`;
 
   const loader = new GLTFLoader();
   loader.setMeshoptDecoder(MeshoptDecoder);
+  const station = streamStationBuildings(scene, loader, baseUrl, group => onCollisionGeometry?.(group), onAreaStatus);
 
   let loadedCount = 0;
-  const totalCount = 6;
+  const totalCount = 5;
 
   const loadGLTF = (url: string): Promise<THREE.Group> => {
     return new Promise((resolve, reject) => {
@@ -235,32 +245,13 @@ export function buildNumazuPortScene(
   };
 
   const ready = Promise.all([
-    loadGLTF(bldgUrl),
     loadGLTF(roadUrl),
     loadGLTF(terrainUrl),
     loadGLTF(vegUrl),
     loadGLTF(waterSeaUrl),
     loadGLTF(waterRiverUrl),
   ])
-    .then(([bldgScene, roadScene, terrainScene, vegScene, waterSeaScene, waterRiverScene]) => {
-      // Preserve every source material and texture instead of repainting buildings.
-      bldgScene.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          const materials = Array.isArray(child.material) ? child.material : [child.material];
-          for (const material of materials) {
-            if (material instanceof THREE.MeshStandardMaterial) {
-              material.roughness = 0.85;
-              material.metalness = 0.05;
-              if (material.map) material.color.set(0xffffff);
-            }
-          }
-          child.castShadow = false;
-          child.receiveShadow = false;
-        }
-      });
-      scene.add(track(bldgScene));
-      onCollisionGeometry?.(bldgScene);
-
+    .then(([roadScene, terrainScene, vegScene, waterSeaScene, waterRiverScene]) => {
       // 2) 道路 LOD3: 濃いスレート色（0x3d4b53系）、roughness 0.9、y +0.4 & polygonOffset
       roadScene.position.y += 0.4;
       roadScene.traverse((child) => {
@@ -366,6 +357,7 @@ export function buildNumazuPortScene(
 
   const dispose = () => {
     isDisposed = true;
+    station.dispose();
     disposables.forEach((item) => {
       if (item.geometry) item.geometry.dispose();
       if (item.material) item.material.dispose();
@@ -373,5 +365,5 @@ export function buildNumazuPortScene(
     });
   };
 
-  return { disposables, ready, updateWater, dispose };
+  return { disposables, ready: Promise.all([ready, station.ready]).then(() => {}), updateWater, updateBuildings: station.update, dispose };
 }

@@ -39,6 +39,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const flightRef = useRef<ReturnType<typeof setupPortFlight> | null>(null);
+  const [areaStatus, setAreaStatus] = useState('');
+  const locationRef = useRef<'port' | 'station'>('port');
   const [flying, setFlying] = useState(false);
   const controlsRef = useRef<OrbitControls | null>(null);
   const pinObjectsRef = useRef<Pin3DObject[]>([]);
@@ -95,7 +97,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     controls.target.set(-20, 43, -190); // 港と海が両方入る構図、yは地面41.7付近
     controls.maxPolarAngle = Math.PI / 2 - 0.05; // 地下に潜らないよう制限
     controls.minDistance = 40;
-    controls.maxDistance = 1400;
+    controls.maxDistance = 4000;
     controls.touches = {
       ONE: THREE.TOUCH.ROTATE,
       TWO: THREE.TOUCH.DOLLY_PAN,
@@ -119,9 +121,9 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     scene.add(fillLight);
 
     // --- 6. Build Port Geometry with PLATEAU Real Data ---
-    const { disposables, ready, updateWater, dispose: disposeScene } = buildNumazuPortScene(scene, (loaded, total) => {
+    const { disposables, ready, updateWater, updateBuildings, dispose: disposeScene } = buildNumazuPortScene(scene, (loaded, total) => {
       setLoadText(`PLATEAU実データを読み込み中 (${loaded}/${total})…`);
-    }, (group) => flight.addGeometry(group));
+    }, (group) => flight.addGeometry(group), setAreaStatus);
 
     ready
       .then(() => {
@@ -262,6 +264,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
       if (flight.isActive()) flight.update(delta, currentTime * 0.001);
       else controls.update();
+      updateBuildings?.(flight.isActive() ? camera.position : controls.target);
       renderer.render(scene, camera);
     };
 
@@ -327,18 +330,34 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       <div ref={mountRef} style={{position:'absolute', inset:0}} />
       <button
         type="button"
-        disabled={isLoading}
+        disabled={isLoading || (!flying && !!areaStatus)}
         onClick={() => {
           const flight = flightRef.current;
           if (!flight) return;
           const active = !flight.isActive();
-          flight.setMode(active);
+          flight.setMode(active, locationRef.current === 'station' ? new THREE.Vector3(210, 80, -2395) : undefined);
           setFlying(active);
         }}
-        style={{position:'absolute', right:12, top:12, zIndex:30, minHeight:48,
+        style={{position:'absolute', right:12, top:68, zIndex:30, minHeight:48,
           padding:'12px 18px', border:'2px solid white', borderRadius:16,
           background:'#e97940', color:'white', fontWeight:700, pointerEvents:'auto'}}
-      >{isLoading ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}<small style={{display:'block'}}>飛行テスト v4</small></button>
+      >{isLoading || (!flying && !!areaStatus) ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}<small style={{display:'block'}}>飛行テスト v4</small></button>
+      <div style={{position:'absolute',left:12,top:155,zIndex:25,display:'flex',gap:8}}>
+        {(['port', 'station'] as const).map(location => <button key={location} type="button" disabled={isLoading}
+          style={{padding:'10px 14px',background:'#183b52',color:'white',border:'1px solid #eee',borderRadius:8}}
+          onClick={() => {
+            flightRef.current?.setMode(false); setFlying(false);
+            locationRef.current = location;
+            targetCamFocusRef.current = null;
+            const controls = controlsRef.current;
+            if (!controls) return;
+            const target = location === 'station' ? new THREE.Vector3(210, 48, -2395) : new THREE.Vector3(-20, 43, -190);
+            controls.target.copy(target);
+            controls.object.position.copy(target).add(new THREE.Vector3(300, 310, 400));
+            controls.update();
+          }}>{location === 'port' ? '沼津港' : '沼津駅南口'}</button>)}
+      </div>
+      {areaStatus && <div role="status" style={{position:'absolute',left:12,bottom:45,zIndex:25,background:'#183b52',color:'white',padding:'8px 12px'}}>{areaStatus}</div>}
       {/* 読み込み中インジケーター（小さな表示） */}
       {isLoading && (
         <div className="map-loading-indicator">
