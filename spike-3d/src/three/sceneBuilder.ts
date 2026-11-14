@@ -13,6 +13,53 @@ export interface SceneBuildResult {
   dispose?: () => void;
 }
 
+function colorPortBuildings(geometry: THREE.BufferGeometry) {
+  const positions = geometry.getAttribute('position');
+  const original = geometry.getAttribute('color');
+  if (!positions || !original) return;
+
+  // Connect triangles across duplicated vertices at roof and wall seams.
+  const parents = Int32Array.from({ length: positions.count }, (_, i) => i);
+  function root(i: number): number {
+    while (i !== parents[i]) {
+      parents[i] = parents[parents[i]];
+      i = parents[i];
+    }
+    return i;
+  }
+  function join(a: number, b: number) {
+    parents[root(b)] = root(a);
+  }
+  const verticesByPosition = new Map<string, number>();
+  for (let i = 0; i < positions.count; i++) {
+    const key = [positions.getX(i), positions.getY(i), positions.getZ(i)].join(',');
+    const other = verticesByPosition.get(key);
+    if (other === undefined) verticesByPosition.set(key, i);
+    else join(i, other);
+  }
+  const index = geometry.index;
+  for (let i = 0; i + 2 < (index?.count ?? positions.count); i += 3) {
+    const a = index ? index.getX(i) : i;
+    join(a, index ? index.getX(i + 1) : i + 1);
+    join(a, index ? index.getX(i + 2) : i + 2);
+  }
+
+  // One coordinated wall/roof palette per connected building.
+  const palette = [
+    [0xe7c49a, 0x93634f], [0xccd9e3, 0x597895], [0xe4b6ac, 0x8c5f60],
+    [0xc8d6bd, 0x617e71], [0xe9daba, 0x8a765f], [0xd5c9df, 0x6f658c],
+  ].map(pair => pair.map(hex => new THREE.Color(hex)));
+  const colors = new Float32Array(positions.count * 3);
+  for (let i = 0; i < positions.count; i++) {
+    const building = root(i);
+    const hash = Math.imul(building + 1, 2654435761) >>> 0;
+    // The original GLB has dark gray roofs and light beige walls.
+    const roof = original.getX(i) < .45;
+    palette[hash % palette.length][roof ? 1 : 0].toArray(colors, i * 3);
+  }
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+}
+
 /**
  * 水面の微細なさざ波・うねりを表現するシームレス（ラップアラウンド可能）なノイズテクスチャを自前生成。
  * 整数周波数のサイン波を合成し、テクスチャ境界（u=0/1, v=0/1）で完全に連続。
@@ -237,11 +284,12 @@ export function buildNumazuPortScene(
     loadGLTF(waterRiverUrl),
   ])
     .then(([bldgScene, roadScene, terrainScene, vegScene, waterSeaScene, waterRiverScene]) => {
-      // 1) 建物 LOD2 (カラー版・目印49棟除外): 屋根/外壁を法線分類で塗り分け（壁 #CFCEC8／屋根 #777C7C、明度差付き）
+      // 1) 写真のない建物は、外壁と屋根を建物ごとの配色にする。
       bldgScene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
+          colorPortBuildings(child.geometry);
           child.material = new THREE.MeshStandardMaterial({
-            vertexColors: true, // GLBのCOLOR_0（屋根/外壁塗り分け・明度差）を使用
+            vertexColors: true,
             roughness: 0.85,
             metalness: 0.05,
           });
