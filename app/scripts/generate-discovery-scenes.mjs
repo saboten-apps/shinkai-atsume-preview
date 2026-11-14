@@ -4,7 +4,9 @@ import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
 import { readFile, writeFile } from 'node:fs/promises';
 const places = JSON.parse(await readFile(new URL('../src/features/exploration/hidingPlaces.v1.json', import.meta.url)));
-const browser = await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const proxyUrl = process.env.BROWSER_PROXY ? new URL(process.env.BROWSER_PROXY) : null;
+const proxy = proxyUrl ? {server:proxyUrl.origin,username:decodeURIComponent(proxyUrl.username),password:decodeURIComponent(proxyUrl.password),bypass:'127.0.0.1,localhost'} : undefined;
+const browser = await chromium.launch({proxy,executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 try {
   const page = await browser.newPage({viewport:{width:1200,height:630}});
   page.on('pageerror', e => console.error(e.message));
@@ -30,6 +32,7 @@ try {
         await new Promise(r=>setTimeout(r,100));
         if(i>25&&!getStatus())break;
       }
+      await model.groundReady?.();
       scene.updateMatrixWorld(true);
       const ray=new THREE.Raycaster(new THREE.Vector3(place.x,450,place.z),new THREE.Vector3(0,-1,0));
       const hits=ray.intersectObjects(scene.children,true).filter(h=>h.object.isMesh&&h.object.material?.isMeshStandardMaterial);
@@ -38,11 +41,13 @@ try {
         throw new Error(`Site overlaps a tall building: ${place.id}. Author a new place version before moving it.`);
       }
       camera.position.set(place.x+200,260,place.z+280);camera.lookAt(place.x,45,place.z);renderer.render(scene,camera);
-      return {x:place.x,z:place.z,surfaceY,status:getStatus(),image:renderer.domElement.toDataURL('image/webp',.88).split(',')[1]};
+      const photoTiles = scene.children.filter(o => o.userData.aerialGround).length;
+      if (!photoTiles) throw new Error('Aerial photos did not load; keeping existing postcards.');
+      return {photoTiles,x:place.x,z:place.z,surfaceY,status:getStatus(),image:renderer.domElement.toDataURL('image/webp',.88).split(',')[1]};
     },place);
     await writeFile(new URL(`../public/map/cards/${place.id}.webp`,import.meta.url),Buffer.from(result.image,'base64'));
     place.x=result.x;place.z=result.z;
-    report.push({id:place.id,x:place.x,z:place.z,surfaceY:result.surfaceY,status:result.status});
+    report.push({id:place.id,x:place.x,z:place.z,surfaceY:result.surfaceY,photoTiles:result.photoTiles,status:result.status});
     console.log(JSON.stringify(report.at(-1)));
   }
   await writeFile(new URL('../public/map/cards/validation.json',import.meta.url),JSON.stringify({generatedAt:new Date().toISOString(),note:'Top surface raycast, not survey validation. Fish beacons float at ENU y=85.',places:report},null,2)+'\n');

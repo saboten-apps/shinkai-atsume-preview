@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T11:35:16.763Z",
+  "generatedAt": "2026-11-14T12:29:24.562Z",
   "note": "Top surface raycast, not survey validation. Fish beacons float at ENU y=85.",
   "places": [
     {
@@ -7,6 +7,7 @@
       "x": -10,
       "z": -270,
       "surfaceY": 42.27539794368897,
+      "photoTiles": 44,
       "status": ""
     },
     {
@@ -14,6 +15,7 @@
       "x": -180,
       "z": 30,
       "surfaceY": 51.52626851882134,
+      "photoTiles": 44,
       "status": ""
     },
     {
@@ -21,6 +23,7 @@
       "x": -230,
       "z": -170,
       "surfaceY": 43.6012054973653,
+      "photoTiles": 44,
       "status": ""
     },
     {
@@ -28,6 +31,7 @@
       "x": 180,
       "z": -180,
       "surfaceY": 41.50000000000004,
+      "photoTiles": 44,
       "status": ""
     },
     {
@@ -35,6 +39,7 @@
       "x": 0,
       "z": -450,
       "surfaceY": 50.9897756048962,
+      "photoTiles": 44,
       "status": ""
     },
     {
@@ -42,6 +47,7 @@
       "x": 400,
       "z": -700,
       "surfaceY": 56.833210733499996,
+      "photoTiles": 44,
       "status": ""
     },
     {
@@ -49,6 +55,7 @@
       "x": 470,
       "z": -1300,
       "surfaceY": 46.352778980030244,
+      "photoTiles": 42,
       "status": ""
     },
     {
@@ -56,6 +63,7 @@
       "x": 100,
       "z": -1150,
       "surfaceY": 41.55,
+      "photoTiles": 44,
       "status": ""
     },
     {
@@ -63,6 +71,7 @@
       "x": 180,
       "z": -1985,
       "surfaceY": 46.8950021286667,
+      "photoTiles": 44,
       "status": ""
     },
     {
@@ -70,6 +79,7 @@
       "x": 210,
       "z": -2395,
       "surfaceY": 47.53683960016254,
+      "photoTiles": 44,
       "status": ""
     }
   ]
