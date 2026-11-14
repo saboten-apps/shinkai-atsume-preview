@@ -182,7 +182,10 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       if (contextIsLost || !dataReady || loadingArea) throw new Error('Scenery is still loading');
       const wasVisible = beacon.visible;
       beacon.visible = false;
-      if (!renderFrame()) throw new Error('3D render interrupted');
+      scene.userData.forceReflectionUpdate=true;
+      const rendered=renderFrame();
+      scene.userData.forceReflectionUpdate=false;
+      if (!rendered) throw new Error('3D render interrupted');
       const url = renderer.domElement.toDataURL('image/png');
       beacon.visible = wasVisible;
       return url;

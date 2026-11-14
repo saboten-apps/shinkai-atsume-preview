@@ -38,38 +38,13 @@ export function createPortSky(scene: THREE.Scene) {
   sky.renderOrder = -10;
   scene.add(sky);
 
-  // 広い裾野と雪の境界を持つ富士山の遠景。地形や衝突判定には使わない。
-  const profile = [[8900, 0], [7200, 420], [5100, 980], [3450, 1590],
-    [2470, 2160], [1770, 2700], [1180, 3230], [710, 3630], [350, 3710]];
-  const geometry = new THREE.LatheGeometry(profile.map(([radius, height]) => new THREE.Vector2(radius, height)), 64);
-  const positions = geometry.getAttribute('position');
-  const color = new THREE.Color();
-  const rock = new THREE.Color(0x7499b2);
-  const snow = new THREE.Color(0xf4f7f4);
-  const colors: number[] = [];
-  for (let i = 0; i < positions.count; i++) {
-    const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
-    const angle = Math.atan2(z, x);
-    const ridge = 1 + .035 * Math.sin(angle * 9) + .025 * Math.cos(angle * 13);
-    positions.setXYZ(i, x * ridge, y + Math.sin(angle * 3) * Math.min(y, 160) * .25, z * ridge);
-    const snowline = 2710 + 230 * Math.sin(angle * 7) + 110 * Math.cos(angle * 13);
-    color.copy(rock).lerp(snow, THREE.MathUtils.smoothstep(y, snowline - 80, snowline + 140));
-    color.multiplyScalar(.95 + .055 * Math.cos(angle * 11));
-    colors.push(color.r, color.g, color.b);
-  }
-  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-  geometry.computeVertexNormals();
-  const mountain = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
-    vertexColors: true, fog: false, side: THREE.DoubleSide,
-  }));
-  mountain.position.set(-4000, 30, -27300);
-  scene.add(mountain);
-
   const airFog = new THREE.FogExp2(0xc3dce8, .00035);
   const waterFog = new THREE.FogExp2(0x27546b, .012);
   const waterColor = new THREE.Color(0x27546b);
   function setUnderwater(underwater: boolean) {
-    sky.visible = mountain.visible = !underwater;
+    sky.visible = !underwater;
+    scene.userData.underwater=underwater;
+    for(const object of scene.children)if(object.userData.regionalLandscape)object.visible=!underwater;
     scene.fog = underwater ? waterFog : airFog;
     scene.background = underwater ? waterColor : null;
   }
@@ -78,11 +53,10 @@ export function createPortSky(scene: THREE.Scene) {
   return {
     setUnderwater,
     dispose() {
-      scene.remove(sky, mountain);
+      scene.remove(sky);
       sky.geometry.dispose();
       sky.material.dispose();
-      geometry.dispose();
-      mountain.material.dispose();
+
     },
   };
 }

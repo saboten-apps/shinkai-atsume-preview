@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T12:29:24.562Z",
+  "generatedAt": "2026-11-14T22:39:17.445Z",
   "note": "Top surface raycast, not survey validation. Fish beacons float at ENU y=85.",
   "places": [
     {
@@ -30,7 +30,7 @@
       "id": "port-east",
       "x": 180,
       "z": -180,
-      "surfaceY": 41.50000000000004,
+      "surfaceY": 41.338925683999996,
       "photoTiles": 44,
       "status": ""
     },
@@ -62,7 +62,7 @@
       "id": "city-middle",
       "x": 100,
       "z": -1150,
-      "surfaceY": 41.55,
+      "surfaceY": 40.89510020067783,
       "photoTiles": 44,
       "status": ""
     },

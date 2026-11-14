@@ -182,6 +182,8 @@ export function createAerialGround(scene: THREE.Scene, terrain: THREE.Group, wat
   })();
   return {
     ready,
+    waterMask,
+    maskBounds: new THREE.Vector4(bounds.min.x,bounds.min.z,1/span.x,1/span.z),
     update(position: THREE.Vector3) {
       origin.copy(position);
       if(performance.now()<nextUpdate)return;
