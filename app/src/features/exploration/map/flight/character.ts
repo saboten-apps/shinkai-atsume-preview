@@ -13,6 +13,7 @@ export class HumanoidCharacter {
   private chestLight: THREE.PointLight;
   private suitMat: THREE.MeshStandardMaterial;
 
+  private walkPhase=0;
   private currentYaw: number = 0;
   private currentPitch: number = 0;
   private currentUp: THREE.Vector3 = new THREE.Vector3(0, 1, 0);
@@ -136,6 +137,7 @@ export class HumanoidCharacter {
 
     // 左脚
     this.leftLeg = new THREE.Group();
+    this.leftLeg.name='left-leg';
     this.leftLeg.position.set(0.14, 0.54, 0);
     const leftLegMesh = new THREE.Mesh(legGeom, suitMat);
     leftLegMesh.position.y = -0.24;
@@ -144,6 +146,7 @@ export class HumanoidCharacter {
 
     // 右脚
     this.rightLeg = new THREE.Group();
+    this.rightLeg.name='right-leg';
     this.rightLeg.position.set(-0.14, 0.54, 0);
     const rightLegMesh = new THREE.Mesh(legGeom, suitMat);
     rightLegMesh.position.y = -0.24;
@@ -233,11 +236,14 @@ export class HumanoidCharacter {
       this.leftLeg.rotation.x = speedRatio * 0.35;
       this.rightLeg.rotation.x = speedRatio * 0.35;
     } else {
-      // 接地：直立
-      this.leftArm.rotation.set(0, 0, 0.08);
-      this.rightArm.rotation.set(0, 0, -0.08);
-      this.leftLeg.rotation.set(0, 0, 0);
-      this.rightLeg.rotation.set(0, 0, 0);
+      // Distance-driven stride: stop swinging when the player stops.
+      this.walkPhase+=speed*dt*4.8;
+      const stride=Math.sin(this.walkPhase)*.52*speedRatio;
+      this.leftArm.rotation.set(-stride*.75,0,.08);
+      this.rightArm.rotation.set(stride*.75,0,-.08);
+      this.leftLeg.rotation.set(stride,0,0);
+      this.rightLeg.rotation.set(-stride,0,0);
+      this.modelRoot.position.y=Math.abs(Math.sin(this.walkPhase))*.025*speedRatio;
     }
 
     // 5. 状態に応じたライトと自発光の最適化（白飛び防止と水中視認性の両立）
@@ -247,6 +253,9 @@ export class HumanoidCharacter {
       this.chestLight.intensity = 1.2;
       this.chestLight.distance = 5.0;
       this.suitMat.emissiveIntensity = 0.40;
+    } else if(state==='ground'){
+      this.backpackLight.intensity=.2;this.chestLight.intensity=.15;
+      this.suitMat.emissiveIntensity=.15;
     } else {
       this.backpackLight.intensity = 0.6;
       this.backpackLight.distance = 4.0;

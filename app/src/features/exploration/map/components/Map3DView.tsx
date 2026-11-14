@@ -157,9 +157,11 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     scene.add(fillLight);
 
     // --- 6. Build Port Geometry with PLATEAU Real Data ---
-    const { disposables, ready, updateWater, updateBuildings, dispose: disposeScene } = buildNumazuPortScene(scene, (loaded, total) => {
+    const { disposables, ready, updateWater, updateBuildings, isWaterAt, dispose: disposeScene } = buildNumazuPortScene(scene, (loaded, total) => {
       if (alive) setLoadText(`PLATEAU実データを読み込み中 (${loaded}/${total})…`);
     }, (group) => flight.addGeometry(group), text => { loadingArea = !!text; if (alive) setAreaStatus(text); });
+
+    flight.setWaterQuery(isWaterAt);
 
     ready
       .then(() => {
@@ -344,7 +346,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           const length = direction.length();
           raycaster.set(camera.position, direction.normalize());
           const hits = raycaster.intersectObjects(scene.children, true);
-          visible = visible && !loadingArea && Math.abs(p.y - beacon.position.y) < 30 && !hits.some(h => h.object !== beacon && h.distance < length - 7 && h.object instanceof THREE.Mesh && h.object.material instanceof THREE.MeshStandardMaterial);
+          visible = visible && !loadingArea && (flight.getStatus().state==='ground'||Math.abs(p.y - beacon.position.y) < 30) && !hits.some(h => h.object !== beacon && h.distance < length - 7 && h.object instanceof THREE.Mesh && h.object.material instanceof THREE.MeshStandardMaterial);
         }
         searchRef.current.onPosition({ x:p.x, z:p.z }, visible);
       }

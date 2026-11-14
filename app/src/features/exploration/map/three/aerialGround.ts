@@ -19,7 +19,7 @@ export function createAerialGround(scene: THREE.Scene, terrain: THREE.Group, wat
   const span = bounds.getSize(new THREE.Vector3());
   const canvas = document.createElement('canvas');
   canvas.width = 1024; canvas.height = 2048;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d',{willReadFrequently:true})!;
   ctx.fillStyle = '#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.fillStyle = '#000';
   const corner = new THREE.Vector3();
@@ -135,6 +135,7 @@ export function createAerialGround(scene: THREE.Scene, terrain: THREE.Group, wat
     notifyIdle();
   }
 
+  let lastMaskPixel=-1,lastWet=true;
   const ready = (async () => {
     const meshes: THREE.Mesh[] = [];
     terrain.traverse(object => { if (object instanceof THREE.Mesh) meshes.push(object); });
@@ -183,6 +184,13 @@ export function createAerialGround(scene: THREE.Scene, terrain: THREE.Group, wat
   return {
     ready,
     waterMask,
+    isWaterAt(x:number,z:number){
+      const px=Math.floor((x-bounds.min.x)/span.x*canvas.width),py=Math.floor((z-bounds.min.z)/span.z*canvas.height);
+      if(px<0||py<0||px>=canvas.width||py>=canvas.height)return true;
+      const pixel=py*canvas.width+px;
+      if(pixel!==lastMaskPixel){lastMaskPixel=pixel;lastWet=ctx.getImageData(px,py,1,1).data[1]<128;}
+      return lastWet;
+    },
     maskBounds: new THREE.Vector4(bounds.min.x,bounds.min.z,1/span.x,1/span.z),
     update(position: THREE.Vector3) {
       origin.copy(position);
