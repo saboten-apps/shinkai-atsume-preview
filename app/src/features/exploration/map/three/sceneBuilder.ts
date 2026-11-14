@@ -1,3 +1,5 @@
+import { styleRegionalLandscape } from './regionalLandscape';
+import { createWaterSurface } from './waterSurface';
 import { createAerialGround } from './aerialGround';
 import { streamStationBuildings } from './stationChunks';
 import * as THREE from 'three';
@@ -15,83 +17,6 @@ export interface SceneBuildResult {
   updateWater?: (delta: number) => void;
   groundReady?: () => Promise<void>;
   dispose?: () => void;
-}
-
-/**
- * 水面の微細なさざ波・うねりを表現するシームレス（ラップアラウンド可能）なノイズテクスチャを自前生成。
- * 整数周波数のサイン波を合成し、テクスチャ境界（u=0/1, v=0/1）で完全に連続。
- * コントラストを抑え（roughness 0.25〜0.55）、静止画でも色判別を阻害せずハイライトの揺らぎのみを表現する。
- */
-function createWaterNoiseTexture(size = 128): THREE.DataTexture {
-  const data = new Uint8Array(size * size * 4);
-  const raw = new Float32Array(size * size);
-
-  const waves = [
-    { kx: 1, kz: 1, amp: 0.22, phase: 0.3 },
-    { kx: 2, kz: -1, amp: 0.18, phase: 1.1 },
-    { kx: -1, kz: 2, amp: 0.16, phase: 2.4 },
-    { kx: 3, kz: 2, amp: 0.12, phase: 0.7 },
-    { kx: 2, kz: -3, amp: 0.10, phase: 1.9 },
-    { kx: -3, kz: -1, amp: 0.09, phase: 3.1 },
-    { kx: 4, kz: 1, amp: 0.07, phase: 0.5 },
-    { kx: 1, kz: -4, amp: 0.06, phase: 2.8 },
-  ];
-
-  let minVal = Infinity;
-  let maxVal = -Infinity;
-
-  for (let y = 0; y < size; y++) {
-    const v = y / size;
-    for (let x = 0; x < size; x++) {
-      const u = x / size;
-      let val = 0;
-      for (const w of waves) {
-        val += w.amp * Math.sin(2 * Math.PI * (w.kx * u + w.kz * v) + w.phase);
-      }
-      raw[y * size + x] = val;
-      if (val < minVal) minVal = val;
-      if (val > maxVal) maxVal = val;
-    }
-  }
-
-  const range = maxVal - minVal || 1;
-  const targetMin = 0.25;
-  const targetMax = 0.55;
-
-  for (let i = 0; i < size * size; i++) {
-    const norm = (raw[i] - minVal) / range;
-    const rough = targetMin + norm * (targetMax - targetMin);
-    const byteVal = Math.round(rough * 255);
-    const idx = i * 4;
-    data[idx] = byteVal;     // R
-    data[idx + 1] = byteVal; // G (Three.js MeshStandardMaterial reads roughness from G)
-    data[idx + 2] = byteVal; // B
-    data[idx + 3] = 255;     // A
-  }
-
-  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.minFilter = THREE.LinearMipmapLinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-  texture.generateMipmaps = true;
-  texture.needsUpdate = true;
-  return texture;
-}
-
-/**
- * 水面GLBにはTEXCOORD_0（UV）が含まれないため、ワールドENU座標 (x, z) から一貫したスケールでUVを生成
- */
-function ensureWaterUVCoordinates(geometry: THREE.BufferGeometry, scale = 0.04) {
-  if (!geometry.attributes.uv) {
-    const pos = geometry.attributes.position;
-    const uvs = new Float32Array(pos.count * 2);
-    for (let i = 0; i < pos.count; i++) {
-      uvs[i * 2] = pos.getX(i) * scale;
-      uvs[i * 2 + 1] = pos.getZ(i) * scale;
-    }
-    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-  }
 }
 
 /**
@@ -137,37 +62,7 @@ export function buildNumazuPortScene(
     return obj;
   }
 
-  // --- 水面 roughnessMap ノイズテクスチャ（海用・川用） ---
-  const seaRoughnessMap = createWaterNoiseTexture(128);
-  const riverRoughnessMap = createWaterNoiseTexture(128);
-  disposables.push({ texture: seaRoughnessMap }, { texture: riverRoughnessMap });
-
-  // --- 1. 海面（濃紺平面 2400×2400 全面、y=41.5） ---
-  // 指示書: 海の全面平面（従来の濃紺プレーン）は色を #183B52 に合わせて残す（y=41.5）。
-  // その上に水面ポリゴン（海）を重ね、内港・河口・港沖の水際をデータどおりに読めるようにする。
-  const seaGeom = new THREE.PlaneGeometry(6000, 6000, 8, 8);
-  // 全面平面のUVもワールドENU座標スケール（0.04）に合わせてシームレスに同期
-  const seaPos = seaGeom.attributes.position;
-  const seaUv = seaGeom.attributes.uv;
-  for (let i = 0; i < seaPos.count; i++) {
-    const lx = seaPos.getX(i);
-    const ly = seaPos.getY(i);
-    // rotation.x = -Math.PI / 2 のため、ワールド x = lx, z = -ly
-    seaUv.setXY(i, lx * 0.04, -ly * 0.04);
-  }
-  seaUv.needsUpdate = true;
-
-  const seaMat = new THREE.MeshStandardMaterial({
-    color: 0x183b52, // #183B52 に統一
-    roughness: 0.35,
-    metalness: 0.1,
-    roughnessMap: seaRoughnessMap,
-  });
-  const sea = new THREE.Mesh(seaGeom, seaMat);
-  sea.rotation.x = -Math.PI / 2;
-  sea.position.set(0, 41.5, 0);
-  sea.receiveShadow = false;
-  scene.add(track(sea));
+  const water = createWaterSurface(scene);
 
   // --- 2. 周囲の敷き分け（南と東の地続き表現、y=41.55） ---
   // 生成り色の平面を y=41.55 に、z > +720 の南側一帯と x > +590 の東側一帯だけに敷く（地形範囲の外側）。
@@ -214,7 +109,7 @@ export function buildNumazuPortScene(
   const station = streamStationBuildings(scene, loader, baseUrl, group => onCollisionGeometry?.(group), onAreaStatus);
 
   let loadedCount = 0;
-  const totalCount = 5;
+  const totalCount = 6;
 
   const loadGLTF = (url: string): Promise<THREE.Group> => {
     return new Promise((resolve, reject) => {
@@ -247,6 +142,15 @@ export function buildNumazuPortScene(
       );
     });
   };
+
+  const regionalReady=loadGLTF(`${import.meta.env.BASE_URL}environment/numazu-region.glb`)
+    .then(group=>{
+      if(isDisposed)return;
+      styleRegionalLandscape(group);
+      group.visible=!scene.userData.underwater;
+      scene.add(group);
+    })
+    .catch(error=>{if(!isDisposed)console.warn('Regional landscape unavailable:',error);});
 
   const ready = Promise.all([
     loadGLTF(roadUrl),
@@ -307,40 +211,13 @@ export function buildNumazuPortScene(
       });
       scene.add(track(vegScene));
 
-      // 5) 海水面ポリゴン（海・内港）: y=41.55 にオフセット、頂点カラー #183B52、roughnessMap 適用
       waterSeaScene.position.y = 41.55;
-      waterSeaScene.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          ensureWaterUVCoordinates(child.geometry, 0.04);
-          child.material = new THREE.MeshStandardMaterial({
-            vertexColors: true, // GLBのCOLOR_0 (#183B52)
-            roughness: 0.35,
-            metalness: 0.1,
-            roughnessMap: seaRoughnessMap,
-          });
-          child.castShadow = false;
-          child.receiveShadow = false;
-        }
-      });
-      scene.add(track(waterSeaScene));
-
-      // 6) 川水面ポリゴン（狩野川）: y=41.62 にオフセット、頂点カラー（河口 #183B52 〜 狩野川 #527B78 灰緑）、roughnessMap 適用
       waterRiverScene.position.y = 41.62;
-      waterRiverScene.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          ensureWaterUVCoordinates(child.geometry, 0.04);
-          child.material = new THREE.MeshStandardMaterial({
-            vertexColors: true, // GLBのCOLOR_0 (河口混合グラデーション〜#527B78)
-            roughness: 0.4,
-            metalness: 0.05,
-            roughnessMap: riverRoughnessMap,
-          });
-          child.castShadow = false;
-          child.receiveShadow = false;
-        }
-      });
-      scene.add(track(waterRiverScene));
+      water.attach(waterSeaScene);
+      water.attach(waterRiverScene);
+      scene.add(waterSeaScene,waterRiverScene);
       aerial = createAerialGround(scene, terrainScene, [waterSeaScene, waterRiverScene]);
+      water.setShoreMask(aerial.waterMask,aerial.maskBounds);
       void aerial.ready.catch(error => { if(!isDisposed) console.warn('Ground photos unavailable:', error); });
     })
     .catch((err) => {
@@ -348,28 +225,11 @@ export function buildNumazuPortScene(
       throw err;
     });
 
-  // --- 水面アニメーション更新関数 ---
-  let seaOffsetX = 0;
-  let seaOffsetY = 0;
-  let riverOffsetY = 0;
-
-  const updateWater = (delta: number) => {
-    // 海: 極低速の微細な揺らぎ（波浪・うねり）
-    seaOffsetX = (seaOffsetX + delta * 0.003) % 1;
-    seaOffsetY = (seaOffsetY + delta * 0.002) % 1;
-    seaRoughnessMap.offset.set(seaOffsetX, seaOffsetY);
-
-    // 川: 下流方向（北＝−z側）へ低速でスクロール
-    // ワールドENU (x, z) から v = z * scale でUV生成しているため、
-    // offset.y を増加させることで波紋模様が北（-z側）へ流れる
-    riverOffsetY = (riverOffsetY + delta * 0.025) % 1;
-    riverRoughnessMap.offset.set(0, riverOffsetY);
-  };
-
   const dispose = () => {
     isDisposed = true;
     station.dispose();
     aerial?.dispose();
+    water.dispose();
     disposables.forEach((item) => {
       if (item.geometry) item.geometry.dispose();
       if (item.material) item.material.dispose();
@@ -377,5 +237,5 @@ export function buildNumazuPortScene(
     });
   };
 
-  return { disposables, ready: Promise.all([ready, station.ready]).then(() => {}), updateWater, updateBuildings: position => { station.update(position); aerial?.update(position); }, groundReady: async () => { await aerial?.settled(); }, dispose };
+  return { disposables, ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}), updateWater: water.update, updateBuildings: position => { station.update(position); aerial?.update(position); }, groundReady: async () => { await aerial?.settled(); }, dispose };
 }

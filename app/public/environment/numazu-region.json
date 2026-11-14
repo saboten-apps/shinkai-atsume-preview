@@ -1,0 +1,62 @@
+{
+  "source": "地理院タイル（標高タイル DEM10B）を加工",
+  "sourceUrl": "https://maps.gsi.go.jp/development/ichiran.html",
+  "zoom": 10,
+  "bbox": {
+    "west": 138.6,
+    "east": 139.13,
+    "south": 34.97,
+    "north": 35.43
+  },
+  "origin": {
+    "lat": 35.0815,
+    "lon": 138.8576,
+    "height": 0
+  },
+  "geoidOffset": 39.7065,
+  "verticalExaggeration": 1,
+  "grid": {
+    "width": 388,
+    "height": 412
+  },
+  "triangles": 261548,
+  "maxElevation": 3741.94,
+  "tiles": [
+    "https://cyberjapandata.gsi.go.jp/xyz/dem_png/10/906/404.png",
+    "https://cyberjapandata.gsi.go.jp/xyz/dem_png/10/907/404.png",
+    "https://cyberjapandata.gsi.go.jp/xyz/dem_png/10/906/405.png",
+    "https://cyberjapandata.gsi.go.jp/xyz/dem_png/10/907/405.png"
+  ],
+  "checkpoints": [
+    {
+      "name": "愛鷹山・越前岳",
+      "lon": 138.7938888888889,
+      "lat": 35.238055555555555,
+      "sampleElevation": 1427.3600000000001,
+      "nearbyMax": 1487.89
+    },
+    {
+      "name": "沼津アルプス・鷲頭山周辺",
+      "lon": 138.901111,
+      "lat": 35.06,
+      "sampleElevation": 233.8,
+      "nearbyMax": 302.47
+    },
+    {
+      "name": "沼津アルプス・香貫山周辺",
+      "lon": 138.8758,
+      "lat": 35.0918,
+      "sampleElevation": 147.23,
+      "nearbyMax": 172.53
+    },
+    {
+      "name": "富士山",
+      "lon": 138.7274,
+      "lat": 35.3606,
+      "sampleElevation": 3741.94,
+      "nearbyMax": 3741.94
+    }
+  ],
+  "bytes": 746204,
+  "sha256": "74c9fa88ee8067a74984b0b33b1ce91a66ac633a493ad43b41c3aa0c5de20626"
+}
