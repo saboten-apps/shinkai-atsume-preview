@@ -365,3 +365,52 @@ node validate-glb.mjs ../spike-3d/public/data/port-bldg-tex-packed.glb
 ```
 
 HTTPプロキシを必要とするNode環境では取得コマンドに `NODE_USE_ENV_PROXY=1` を指定する。
+
+
+## 14. 沼津駅南口までの拡張（2026-11-14）
+
+建物の抽出範囲は緯度35.080〜35.1048、経度138.853〜138.8655。
+既存の港LOD2 43タイルをURIで除外し、追加372タイルを27区画に分割した。
+港を含む415タイル・28区画の建物は7,327棟、元写真あり6,463棟。
+元写真なし864棟と未撮影面の扱いは§13と同じで、実写画像の捏造や別建物への流用は行わない。
+
+追加区画の写真はPillowでアトラスの長辺を最大1024pxに縮小（WebP品質85）、UVと写真の対応を保持。
+追加建物は36,510,092 B、既存港を含め40,180,036 B。
+道路133タイル・植生58タイルを同じENU座標へ変換し、地形・水面も拡張した。
+DEMは元382,551三角形から、gltfpackの許容誤差0.00005・属性境界をまたぐ簡略化で94,394三角形・900,128 Bへ軽量化。
+共通データ（道路・植生・地形・海・川）は合計1,590,688 B。
+
+表示は注視点（飛行中はカメラ）の水平距離を使い、区画境界から500m以内で読込み、900m超で解放する。
+港も同じライフサイクルに含め、駅付近で港の写真がメモリに残らないようにした。
+衝突形状は250mの格子に分割し、現在地から格子の外接半径＋300m以内でのみOctreeを構築する。
+データの北端外には平坦な背景陸を置くが、これは実地形・衝突には使用しない。
+2Dマップは従来の港周辺を維持。
+
+### 再生成
+
+Node依存に加え、PythonのPillowが必要。
+
+```bash
+cd realdata-test
+npm ci
+python -m pip install Pillow
+node fetch-zip-index.mjs
+node build-station-corridor.mjs
+STATION_CORRIDOR=1 node convert-dem-to-glb.mjs
+npx gltfpack -i corridor-terrain.glb -o ../spike-3d/public/data/corridor-terrain-packed.glb -cc -si 0.2 -se 0.00005 -sp
+STATION_CORRIDOR=1 node convert-water-split.mjs
+npx gltfpack -i corridor-water-sea.glb -o ../spike-3d/public/data/corridor-water-sea-packed.glb -cc
+npx gltfpack -i corridor-water-river.glb -o ../spike-3d/public/data/corridor-water-river-packed.glb -cc
+node validate-station-corridor.mjs
+```
+
+プロキシ環境では各取得コマンドに `NODE_USE_ENV_PROXY=1` を指定。
+元の港モデルは§13の手順で再生成可能。
+タイルURI、境界、棟数、写真保有数、ソースと圧縮後の三角形数は `spike-3d/public/data/station-manifest.json` に記録。
+
+### 検証
+
+- 構造検証で港と追加区画のタイル重複なし、全28区画の画像・UV参照・BIN長と三角形数を確認。
+- 区画切替で画像2枚と衝突判定を解放するライフサイクルをブラウザで検証。
+- 駅座標に置いた屋根の着地位置 y=48.001、衝突形状を削除すると y=41.37まで落下することを検証。
+- 実画面の表示・移動とビルドの確認はPRに記録。ソフトウェア描画によるブラウザ検証のため、実機スマホのFPSは未計測。

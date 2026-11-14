@@ -153,7 +153,8 @@ function buildGlb({ positions, colors, indices, nodeName, meshName, materialName
 
 // ---------- main ----------
 const Z = 15;
-const BBOX = { west: 138.855, south: 35.080, east: 138.862, north: 35.085 };
+const BBOX = process.env.STATION_CORRIDOR ? { west: 138.850, south: 35.078, east: 138.869, north: 35.106 } : { west: 138.855, south: 35.080, east: 138.862, north: 35.085 };
+const outputPrefix = process.env.STATION_CORRIDOR ? 'corridor' : 'port';
 const x0 = lon2tileX(BBOX.west, Z), x1 = lon2tileX(BBOX.east, Z);
 const y0 = lat2tileY(BBOX.north, Z), y1 = lat2tileY(BBOX.south, Z);
 const WATER_CODES = new Set(['204']);
@@ -227,13 +228,13 @@ const seaOut = buildGlb({
   nodeName: 'numazu-port-water-sea', meshName: 'water_sea', materialName: 'water-sea-vertexcolor',
   extras: { source: 'PLATEAU 3D Tiles Numazu City 2021, luse (land use) MVT z15, class_code 204 (water surface), split subset: sea/harbor — polygon area >= 30000 m2 (forced, overrides centroid) or centroid ENU x <= 100', frame: frameNote, heightNote, coloring: 'flat vertex color #183B52 (Astra round-3 design, DESIGN-astra-round3.md)' },
 });
-writeFileSync(new URL('./port-water-sea.glb', import.meta.url), seaOut.glb);
+writeFileSync(new URL(`./${outputPrefix}-water-sea.glb`, import.meta.url), seaOut.glb);
 const riverOut = buildGlb({
   positions: acc.river.pos, colors: acc.river.col, indices: acc.river.idx,
   nodeName: 'numazu-port-water-river', meshName: 'water_river', materialName: 'water-river-vertexcolor',
   extras: { source: 'PLATEAU 3D Tiles Numazu City 2021, luse (land use) MVT z15, class_code 204 (water surface), split subset: river — polygon area < 30000 m2 and centroid ENU x > 100 (Kano River side, east)', frame: frameNote, heightNote, coloring: 'per-vertex gradient (Astra round-3 design): #183B52 at the river-mouth point (219,-411), blending to #527B78 over the last 40 m of distance to the mouth; vertices >= 40 m from the mouth are full #527B78' },
 });
-writeFileSync(new URL('./port-water-river.glb', import.meta.url), riverOut.glb);
+writeFileSync(new URL(`./${outputPrefix}-water-river.glb`, import.meta.url), riverOut.glb);
 
 const stats = {
   theme: 'luse_water_split', waterClassCode: '204',
@@ -247,7 +248,7 @@ const stats = {
   riverPolygons: riverPolyList.sort((a, b) => b.areaM2 - a.areaM2),
   seaPolygonsTop: seaPolyList.sort((a, b) => b.areaM2 - a.areaM2).slice(0, 8),
 };
-writeFileSync(new URL('./convert-water-split-stats.json', import.meta.url), JSON.stringify(stats, null, 1));
+writeFileSync(new URL(`./${outputPrefix}-water-stats.json`, import.meta.url), JSON.stringify(stats, null, 1));
 console.log(`== water-split: features=${waterFeatures} polys=${totalPolys} (sea=${acc.sea.polys} river=${acc.river.polys}) skipped=${skippedDegenerate}`);
 console.log(`   sea:   area=${stats.sea.areaM2} m2 verts=${seaOut.totVerts} tris=${seaOut.totTris} glb=${seaOut.glb.length}`);
 console.log(`   river: area=${stats.river.areaM2} m2 verts=${riverOut.totVerts} tris=${riverOut.totTris} glb=${riverOut.glb.length}`);

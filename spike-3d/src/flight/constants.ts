@@ -53,9 +53,9 @@ export const FREE_FLIGHT_CONFIG = {
   decelFactor: 4.5,        // 入力なし時の減速・ホバー停止係数
   waterBuoyancy: 0.8,      // 水中浮力 (上向き微速 m/s)
   bounds: {
-    minX: -450.0,
-    maxX: 450.0,
-    minZ: -650.0,
+    minX: -500.0,
+    maxX: 700.0,
+    minZ: -2580.0,
     maxZ: 300.0,
     minY: 27.5,
     maxY: 420.0,
