@@ -337,7 +337,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         style={{position:'absolute', right:12, top:12, zIndex:30, minHeight:48,
           padding:'12px 18px', border:'2px solid white', borderRadius:16,
           background:'#e97940', color:'white', fontWeight:700, pointerEvents:'auto'}}
-      >{isLoading ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}<small style={{display:'block'}}>飛行テスト v2</small></button>
+      >{isLoading ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}<small style={{display:'block'}}>飛行テスト v3</small></button>
       {/* 読み込み中インジケーター（小さな表示） */}
       {isLoading && (
         <div className="map-loading-indicator">

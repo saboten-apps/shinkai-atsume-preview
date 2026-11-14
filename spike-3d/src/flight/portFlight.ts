@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Octree } from 'three/examples/jsm/math/Octree.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { FreeFlightController } from './freeFlight';
+import { FreeFlightController, SEA } from './freeFlight';
 import { HumanoidCharacter } from './character';
 
 class ExpandedOctree extends Octree {
@@ -16,7 +16,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   const trees: Octree[] = [];
   const ui = document.createElement('div');
   ui.className = 'flight-ui';
-  ui.innerHTML = `<button class="flight-toggle">飛んでみる</button><div class="flight-instructions" hidden>左スティックで移動 ・ 画面右をドラッグで見回す <span class="flight-depth"></span></div><div class="flight-pad" hidden><div class="flight-knob"></div></div><div class="flight-vertical" hidden><button data-dir="1">上がる</button><button data-dir="-1">下がる</button></div>`;
+  ui.innerHTML = `<button class="flight-toggle">飛んでみる</button><div class="flight-instructions" hidden>左スティックで移動 ・ タップで自動飛行 ・ ドラッグで見回す <span class="flight-depth"></span></div><div class="flight-pad" hidden><div class="flight-knob"></div></div><div class="flight-vertical" hidden><button data-dir="1">上がる</button><button data-dir="-1">落下</button></div>`;
   container.appendChild(ui);
   const toggle = ui.querySelector<HTMLButtonElement>('.flight-toggle')!;
   const guide = ui.querySelector<HTMLElement>('.flight-instructions')!;
@@ -24,9 +24,23 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   const pad = ui.querySelector<HTMLElement>('.flight-pad')!;
   const knob = ui.querySelector<HTMLElement>('.flight-knob')!;
   const vertical = ui.querySelector<HTMLElement>('.flight-vertical')!;
+  const raycaster = new THREE.Raycaster();
+  const seaPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -SEA);
+  let destination: THREE.Vector3 | null = null;
+  let falling = false;
+  let bestDistance = Infinity;
+  let stalled = 0;
+  let startX = 0, startY = 0, dragged = false;
+
+  function cancelTravel() {
+    destination = null;
+    falling = false;
+  }
+
   let savedPosition = camera.position.clone();
   let lookId: number | null = null, lastX = 0, lastY = 0;
   function setMode(active: boolean) {
+    cancelTravel();
     if (active) savedPosition.copy(camera.position);
     controller.activate(active); controls.enabled = !active; character.group.visible = active;
     if (!active) { camera.position.copy(savedPosition); controls.update(); scene.fog = new THREE.FogExp2(0x0b1c2c, .00035); scene.background = new THREE.Color(0x0b1c2c); }
@@ -37,22 +51,85 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   toggle.hidden = true; // The visible start button is owned by React.
   toggle.onclick = () => setMode(!controller.active);
   function stick(e: PointerEvent) { const rect = pad.getBoundingClientRect(); let x = (e.clientX - rect.left - rect.width / 2) / (rect.width * .38); let y = -(e.clientY - rect.top - rect.height / 2) / (rect.height * .38); const m = Math.hypot(x,y); if (m > 1) { x /= m; y /= m; } controller.setStick(x,y); knob.style.transform = `translate(${x * 38}px, ${-y * 38}px)`; }
-  pad.onpointerdown = e => { e.preventDefault(); pad.setPointerCapture(e.pointerId); stick(e); };
+  pad.onpointerdown = e => { e.preventDefault(); cancelTravel(); pad.setPointerCapture(e.pointerId); stick(e); };
   pad.onpointermove = e => { if (pad.hasPointerCapture(e.pointerId)) stick(e); };
   const stopStick = () => { controller.setStick(0,0); knob.style.transform = ''; };
   pad.onpointerup = stopStick; pad.onpointercancel = stopStick; pad.onlostpointercapture = stopStick;
-  vertical.querySelectorAll<HTMLButtonElement>('button').forEach(button => {
-    button.onpointerdown = e => { e.preventDefault(); button.setPointerCapture(e.pointerId); controller.setVertical(Number(button.dataset.dir)); };
-    button.onpointerup = button.onpointercancel = button.onlostpointercapture = () => controller.setVertical(0);
-  });
-  function lookDown(e: PointerEvent) { if (!controller.active || lookId !== null) return; lookId = e.pointerId; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); }
-  function lookMove(e: PointerEvent) { if (e.pointerId !== lookId) return; controller.addLookDelta(-(e.clientX-lastX)*.005, -(e.clientY-lastY)*.005); lastX=e.clientX; lastY=e.clientY; }
-  function lookUp(e: PointerEvent) { if (e.pointerId === lookId) lookId = null; }
+  const rise = vertical.querySelector<HTMLButtonElement>('[data-dir="1"]')!;
+  const drop = vertical.querySelector<HTMLButtonElement>('[data-dir="-1"]')!;
+  rise.onpointerdown = e => {
+    e.preventDefault();
+    cancelTravel();
+    rise.setPointerCapture(e.pointerId);
+    controller.setVertical(1);
+  };
+  rise.onpointerup = rise.onpointercancel = rise.onlostpointercapture = () => controller.setVertical(0);
+  drop.onclick = () => {
+    const start = !falling && controller.state === 'air';
+    cancelTravel();
+    falling = start;
+  };
+
+  function lookDown(e: PointerEvent) {
+    if (!controller.active || lookId !== null || e.button !== 0) return;
+    lookId = e.pointerId;
+    startX = lastX = e.clientX;
+    startY = lastY = e.clientY;
+    dragged = false;
+    canvas.setPointerCapture(e.pointerId);
+  }
+  function lookMove(e: PointerEvent) {
+    if (e.pointerId !== lookId) return;
+    if (!dragged && Math.hypot(e.clientX - startX, e.clientY - startY) < 8) return;
+    dragged = true;
+    controller.addLookDelta(-(e.clientX - lastX) * .005, -(e.clientY - lastY) * .005);
+    lastX = e.clientX;
+    lastY = e.clientY;
+  }
+  function lookUp(e: PointerEvent) {
+    if (e.pointerId !== lookId) return;
+    lookId = null;
+    if (e.type !== 'pointerup' || dragged || !controller.active) return;
+    const rect = canvas.getBoundingClientRect();
+    raycaster.setFromCamera(new THREE.Vector2(
+      (e.clientX - rect.left) / rect.width * 2 - 1,
+      1 - (e.clientY - rect.top) / rect.height * 2
+    ), camera);
+    const ray = raycaster.ray;
+    let point = ray.direction.y < 0 ? ray.intersectPlane(seaPlane, new THREE.Vector3()) : null;
+    let distance = point ? point.distanceTo(ray.origin) : Infinity;
+    for (const tree of trees) {
+      const hit = tree.rayIntersect(ray);
+      if (hit && hit.distance < distance) {
+        point = hit.position;
+        distance = hit.distance;
+      }
+    }
+    if (!point || distance > 1000) return;
+    cancelTravel();
+    destination = point.clone().add(new THREE.Vector3(0, 3, 0));
+    stalled = 0;
+    bestDistance = Infinity;
+  }
   canvas.addEventListener('pointerdown', lookDown); canvas.addEventListener('pointermove', lookMove); canvas.addEventListener('pointerup', lookUp); canvas.addEventListener('pointercancel', lookUp);
   return {
     setMode,
     addGeometry(group: THREE.Group) { group.updateWorldMatrix(true, true); const tree = new ExpandedOctree(); tree.fromGraphNode(group); trees.push(tree); },
-    update(dt: number, time: number) { if (!controller.active) return; controller.update(dt, trees, character, camera, time); const data=controller.getHookData(); depth.textContent = data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; scene.fog = new THREE.FogExp2(data.state === 'water' ? 0x27546b : 0x0b1c2c, data.state === 'water' ? .012 : .00035); scene.background = new THREE.Color(data.state === 'water' ? 0x27546b : 0x0b1c2c); },
+    update(dt: number, time: number) { if (!controller.active) return; controller.update(dt, trees, character, camera, time, destination, falling);
+      if (falling && controller.state !== 'air') falling = false;
+      drop.textContent = falling ? '落下停止' : '落下';
+      if (destination) {
+        const gap = controller.position.distanceTo(destination);
+        if (gap < bestDistance - .2) {
+          bestDistance = gap;
+          stalled = 0;
+        } else stalled += dt;
+        if (gap < .8 || stalled > 1.5) {
+          destination = null;
+          controller.velocity.set(0, 0, 0);
+        }
+      }
+       const data=controller.getHookData(); depth.textContent = data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; scene.fog = new THREE.FogExp2(data.state === 'water' ? 0x27546b : 0x0b1c2c, data.state === 'water' ? .012 : .00035); scene.background = new THREE.Color(data.state === 'water' ? 0x27546b : 0x0b1c2c); },
     isActive() { return controller.active; },
     dispose() { canvas.removeEventListener('pointerdown',lookDown); canvas.removeEventListener('pointermove',lookMove); canvas.removeEventListener('pointerup',lookUp); canvas.removeEventListener('pointercancel',lookUp); ui.remove(); scene.remove(character.group); character.group.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.geometry.dispose(); const mats = Array.isArray(obj.material) ? obj.material : [obj.material]; mats.forEach(m => m.dispose()); } }); }
   };

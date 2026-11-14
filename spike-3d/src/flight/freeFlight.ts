@@ -8,7 +8,7 @@ import {
 import { HumanoidCharacter } from './character';
 import { Octree } from 'three/examples/jsm/math/Octree.js';
 import { Capsule } from 'three/examples/jsm/math/Capsule.js';
-const SEA = 41.5;
+export const SEA = 41.5;
 
 export class FreeFlightController {
   public active: boolean = false;
@@ -121,7 +121,9 @@ export class FreeFlightController {
     colliders: Octree[],
     character: HumanoidCharacter,
     camera: THREE.PerspectiveCamera,
-    time: number
+    time: number,
+    destination: THREE.Vector3 | null = null,
+    falling = false
   ): void {
     if (!this.active) return;
 
@@ -185,12 +187,19 @@ export class FreeFlightController {
       targetVel.y += FREE_FLIGHT_CONFIG.waterBuoyancy;
     }
 
+    if (destination) {
+      targetVel.subVectors(destination, this.position).clampLength(0, maxSpeed / 2).multiplyScalar(2);
+    }
+    const previousVertical = this.velocity.y;
+
     // 4. 加速・減速（慣性とホバー停止）
-    const hasInput = inputMag > 0.05;
+    const hasInput = inputMag > 0.05 || destination !== null || falling;
     const accelRate = hasInput ? FREE_FLIGHT_CONFIG.accelFactor : FREE_FLIGHT_CONFIG.decelFactor;
     const lerpAlpha = 1.0 - Math.pow(0.01, accelRate * dt * 0.15);
 
     this.velocity.lerp(targetVel, THREE.MathUtils.clamp(lerpAlpha, 0, 1));
+
+    if (falling) this.velocity.y = Math.max(-18, Math.min(0, previousVertical) - 9.8 * dt);
 
     // 入力ゼロ時の微小速度カット（確実なホバー静止）
     if (!hasInput && this.velocity.length() < 0.15) {
@@ -199,7 +208,7 @@ export class FreeFlightController {
 
     // 接地中の離陸判定：前進入力または上昇入力があれば接地解除
     if (this.isGroundedOnSurface) {
-      if (effectiveVert > 0.1 || Math.abs(effectiveStickY) > 0.2 || Math.abs(effectiveStickX) > 0.2) {
+      if (destination || effectiveVert > 0.1 || Math.abs(effectiveStickY) > 0.2 || Math.abs(effectiveStickX) > 0.2) {
         this.isGroundedOnSurface = false;
       } else {
         // 接地中は下向き速度をカット
