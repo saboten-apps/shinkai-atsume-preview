@@ -733,11 +733,11 @@ a {
   100% { transform: rotate(360deg); }
 }
 
-.flight-ui { position:absolute; inset:0; pointer-events:none; z-index:5; color:white; font-family:system-ui,sans-serif; }
+.flight-ui { position:absolute; inset:0; pointer-events:none; z-index:21; color:white; font-family:system-ui,sans-serif; }
 .flight-ui button, .flight-pad { pointer-events:auto; touch-action:none; }
 .flight-ui [hidden] { display:none !important; }
-.flight-toggle { position:absolute; top:12px; left:12px; border:0; border-radius:18px; padding:10px 15px; background:#e97940; color:white; font-weight:bold; box-shadow:0 2px 8px #0005; }
-.flight-instructions { position:absolute; top:57px; left:12px; right:12px; width:fit-content; padding:6px 10px; border-radius:12px; background:#0b223bcc; font-size:11px; }
+.flight-toggle { position:absolute; top:12px; right:12px; min-height:44px; border:0; border-radius:18px; padding:10px 15px; background:#e97940; color:white; font-weight:bold; box-shadow:0 2px 8px #0005; }
+.flight-instructions { position:absolute; top:110px; left:12px; right:12px; width:fit-content; padding:6px 10px; border-radius:12px; background:#0b223bcc; font-size:11px; }
 .flight-depth { display:block; font-weight:bold; }
 .flight-pad { position:absolute; bottom:24px; left:18px; width:112px; height:112px; border:2px solid #ffffff88; border-radius:50%; background:#173f5899; display:grid; place-items:center; }
 .flight-knob { width:40px; height:40px; border-radius:50%; background:#fff9; pointer-events:none; }
