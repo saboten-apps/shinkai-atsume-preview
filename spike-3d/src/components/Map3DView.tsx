@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { setupPortFlight } from '../flight/portFlight';
 import { MapPin, PerformanceStats } from '../types';
 import { buildNumazuPortScene } from '../three/sceneBuilder';
 import { createPinMarkers, updatePinAnimations, Pin3DObject } from '../three/pinMarkers';
@@ -99,6 +100,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     };
     controlsRef.current = controls;
 
+    const flight = setupPortFlight(container, scene, camera, controls, renderer.domElement);
+
     // --- 5. Lights ---
     // 850m四方の実都市空間を標本図鑑トーンで照らす環境光・太陽光
     const ambientLight = new THREE.AmbientLight(0xf5f0e6, 0.9);
@@ -115,7 +118,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     // --- 6. Build Port Geometry with PLATEAU Real Data ---
     const { disposables, ready, updateWater, dispose: disposeScene } = buildNumazuPortScene(scene, (loaded, total) => {
       setLoadText(`PLATEAU実データを読み込み中 (${loaded}/${total})…`);
-    });
+    }, (group) => flight.addGeometry(group));
 
     ready
       .then(() => {
@@ -150,6 +153,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     };
 
     const handlePointerUp = (e: MouseEvent | TouchEvent) => {
+      if (flight.isActive()) return;
       const duration = performance.now() - touchStartTime;
       let clientX = touchStartX;
       let clientY = touchStartY;
@@ -253,7 +257,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         }
       }
 
-      controls.update();
+      if (flight.isActive()) flight.update(delta, currentTime * 0.001);
+      else controls.update();
       renderer.render(scene, camera);
     };
 
@@ -270,6 +275,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       dom.removeEventListener('touchstart', handlePointerDown);
       dom.removeEventListener('touchend', handlePointerUp);
 
+      flight.dispose();
       controls.dispose();
       renderer.dispose();
       if (container.contains(dom)) {

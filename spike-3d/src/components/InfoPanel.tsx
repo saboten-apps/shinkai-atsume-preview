@@ -58,7 +58,7 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({
             <div className="specimen-content">
               <div className="specimen-figure">
                 <img
-                  src={fish.illustration.startsWith('/') ? fish.illustration : `/${fish.illustration}`}
+                  src={fish.illustration.startsWith('data:') || fish.illustration.startsWith('/') ? fish.illustration : `${import.meta.env.BASE_URL}${fish.illustration}`}
                   alt={fish.name_ja}
                   className="specimen-image"
                   loading="lazy"

@@ -100,7 +100,8 @@ function ensureWaterUVCoordinates(geometry: THREE.BufferGeometry, scale = 0.04) 
  */
 export function buildNumazuPortScene(
   scene: THREE.Scene,
-  onProgress?: (loaded: number, total: number) => void
+  onProgress?: (loaded: number, total: number) => void,
+  onCollisionGeometry?: (group: THREE.Group) => void
 ): SceneBuildResult {
   const disposables: {
     geometry?: THREE.BufferGeometry;
@@ -249,6 +250,7 @@ export function buildNumazuPortScene(
         }
       });
       scene.add(track(bldgScene));
+      onCollisionGeometry?.(bldgScene);
 
       // 2) 道路 LOD3: 濃いスレート色（0x3d4b53系）、roughness 0.9、y +0.4 & polygonOffset
       roadScene.position.y += 0.4;
@@ -281,6 +283,7 @@ export function buildNumazuPortScene(
         }
       });
       scene.add(track(terrainScene));
+      onCollisionGeometry?.(terrainScene);
 
       // 4) 植生（VEG）: 深緑（0x243e2b）、roughness 1.0
       vegScene.traverse((child) => {
@@ -351,6 +354,7 @@ export function buildNumazuPortScene(
               }
             });
             scene.add(track(heroScene));
+            onCollisionGeometry?.(heroScene);
           },
           undefined,
           (err) => {
