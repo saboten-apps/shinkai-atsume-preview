@@ -1,3 +1,4 @@
+import { createAerialGround } from './aerialGround';
 import { streamStationBuildings } from './stationChunks';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -12,6 +13,7 @@ export interface SceneBuildResult {
   ready: Promise<void>;
   updateBuildings?: (position: THREE.Vector3) => void;
   updateWater?: (delta: number) => void;
+  groundReady?: () => Promise<void>;
   dispose?: () => void;
 }
 
@@ -104,6 +106,7 @@ export function buildNumazuPortScene(
   onAreaStatus?: (text: string) => void
 ): SceneBuildResult {
   let isDisposed = false;
+  let aerial: ReturnType<typeof createAerialGround> | undefined;
   const disposables: {
     geometry?: THREE.BufferGeometry;
     material?: THREE.Material;
@@ -253,14 +256,17 @@ export function buildNumazuPortScene(
     loadGLTF(waterRiverUrl),
   ])
     .then(([roadScene, terrainScene, vegScene, waterSeaScene, waterRiverScene]) => {
-      // 2) 道路 LOD3: 濃いスレート色（0x3d4b53系）、roughness 0.9、y +0.4 & polygonOffset
+      // Keep photographic lane markings visible through a subtle asphalt tint.
       roadScene.position.y += 0.4;
       roadScene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           child.material = new THREE.MeshStandardMaterial({
-            color: 0x3d4b53,
+            color: 0x39414a,
+            transparent: true,
+            opacity: .16,
+            depthWrite: false,
             roughness: 0.9,
-            metalness: 0.1,
+            metalness: 0,
             polygonOffset: true,
             polygonOffsetFactor: -1,
             polygonOffsetUnits: -1,
@@ -285,6 +291,7 @@ export function buildNumazuPortScene(
       });
       scene.add(track(terrainScene));
       onCollisionGeometry?.(terrainScene);
+
 
       // 4) 植生（VEG）: 深緑（0x243e2b）、roughness 1.0
       vegScene.traverse((child) => {
@@ -333,6 +340,8 @@ export function buildNumazuPortScene(
         }
       });
       scene.add(track(waterRiverScene));
+      aerial = createAerialGround(scene, terrainScene, [waterSeaScene, waterRiverScene]);
+      void aerial.ready.catch(error => { if(!isDisposed) console.warn('Ground photos unavailable:', error); });
     })
     .catch((err) => {
       if (!isDisposed) console.error('Error during PLATEAU real data integration:', err);
@@ -360,6 +369,7 @@ export function buildNumazuPortScene(
   const dispose = () => {
     isDisposed = true;
     station.dispose();
+    aerial?.dispose();
     disposables.forEach((item) => {
       if (item.geometry) item.geometry.dispose();
       if (item.material) item.material.dispose();
@@ -367,5 +377,5 @@ export function buildNumazuPortScene(
     });
   };
 
-  return { disposables, ready: Promise.all([ready, station.ready]).then(() => {}), updateWater, updateBuildings: station.update, dispose };
+  return { disposables, ready: Promise.all([ready, station.ready]).then(() => {}), updateWater, updateBuildings: position => { station.update(position); aerial?.update(position); }, groundReady: async () => { await aerial?.settled(); }, dispose };
 }
