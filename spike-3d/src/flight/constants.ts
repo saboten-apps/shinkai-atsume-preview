@@ -47,8 +47,8 @@ export const INITIAL_FREE_LOOK = {
 
 // 自由飛行モード（FREE）の物理・動作パラメータ
 export const FREE_FLIGHT_CONFIG = {
-  maxSpeedAir: 18.0,       // 空中最高速度 (m/s)
-  maxSpeedWater: 10.8,     // 水中最高速度 (m/s, 約6割)
+  maxSpeedAir: 22.0,       // 空中最高速度 (m/s)
+  maxSpeedWater: 10.8,     // 水中最高速度 (m/s)
   accelFactor: 8.0,        // スティック入力への追従加速度係数
   decelFactor: 4.5,        // 入力なし時の減速・ホバー停止係数
   waterBuoyancy: 0.8,      // 水中浮力 (上向き微速 m/s)
