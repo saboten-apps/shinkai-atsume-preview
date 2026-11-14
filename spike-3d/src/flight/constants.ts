@@ -58,7 +58,7 @@ export const FREE_FLIGHT_CONFIG = {
     minZ: -650.0,
     maxZ: 300.0,
     minY: 27.5,
-    maxY: 220.0,
+    maxY: 420.0,
   },
   cameraDistance: 9.0,     // キャラクター後方距離 (m)
   cameraHeight: 2.0,       // キャラクター上方オフセット (m)
