@@ -1,3 +1,4 @@
+import { loadBuildingDetail } from './buildingDetail';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
@@ -9,6 +10,7 @@ export interface SceneBuildResult {
     texture?: THREE.Texture;
   }[];
   ready: Promise<void>;
+  updateBuildings?: (position: THREE.Vector3) => void;
   updateWater?: (delta: number) => void;
   dispose?: () => void;
 }
@@ -141,8 +143,8 @@ function ensureWaterUVCoordinates(geometry: THREE.BufferGeometry, scale = 0.04) 
  * PLATEAU実データ（沼津港周辺 建物頂点カラー・道路・DEM地形・VEG植生・海/川水面、および目印建物実テクスチャ版）と周囲環境を構築
  * - 第4弾統合:
  *   1. 建物初期表示: port-bldg-color-nohero-packed.glb（目印建物49棟を除いた476棟、370KB、屋根 #777C7C／外壁 #CFCEC8）
- *   2. 目印建物実テクスチャ: port-bldg-hero-tex-packed.glb（49棟・実写真テクスチャ内蔵、1.27MB）を初期表示完了後に遅延ロード
- *   3. ヒーロー版マテリアル: GLB内蔵テクスチャと中立グレー頂点カラーをそのまま活用（生成りティントなし）
+ *   2. 目印建物実テクスチャ: port-bldg-hero-tex-packed.glb（49棟）を形状と画像のバイト範囲に分けて取得
+ *   3. 目印建物: 単色で表示し、近くの区画だけ写真を適用
  *   4. 水面・周囲環境: 第3弾仕様（海・川分離、自前ノイズ roughnessMap、UVスクロールアニメーション）を完全維持
  */
 export function buildNumazuPortScene(
@@ -157,8 +159,8 @@ export function buildNumazuPortScene(
   }[] = [];
 
   let isDisposed = false;
-  let delayedLoadTimeoutId: ReturnType<typeof setTimeout> | null = null;
-  let idleCallbackId: number | null = null;
+  const detailAbort = new AbortController();
+  let buildingDetail: Awaited<ReturnType<typeof loadBuildingDetail>> | undefined;
 
   function track<T extends THREE.Object3D>(obj: T): T {
     obj.traverse((child) => {
@@ -381,46 +383,22 @@ export function buildNumazuPortScene(
       });
       scene.add(track(waterRiverScene));
 
-      // --- 第4弾: 目印建物49棟 実写真テクスチャ版の遅延ロード ---
-      // 初回レンダリング後にバックグラウンドで遅延ロードし、完了次第シーンに追加する
-      const loadHeroTextures = () => {
-        if (isDisposed) return;
-        loader.load(
-          heroBldgUrl,
-          (gltf) => {
-            if (isDisposed) {
-              track(gltf.scene);
-              return;
-            }
-            const heroScene = gltf.scene;
-            heroScene.traverse((child) => {
-              if (child instanceof THREE.Mesh) {
-                // 指示書: ヒーロー版のマテリアルはGLB内蔵のテクスチャと色をそのまま使う
-                // （頂点カラーの生成りティントを掛けない。テクスチャ面にはCOLOR_0が無く、無テクスチャ面のCOLOR_0は源データの中立グレー）
-                child.castShadow = false;
-                child.receiveShadow = false;
-              }
-            });
-            scene.add(track(heroScene));
-            onCollisionGeometry?.(heroScene);
-          },
-          undefined,
-          (err) => {
-            // 指示書: 失敗してもカラー表示のまま壊れないこと（ヒーロー49棟はカラー版から抜けているので、
-            // 失敗時はその49棟が欠ける。許容するが、コンソールエラーで落とさない）
-            console.warn('Hero buildings texture GLB delayed load failed (fallback to color-only scene):', err);
+      void loadBuildingDetail(heroBldgUrl, loader, detailAbort.signal).then(detail => {
+        track(detail.group);
+        if (isDisposed) {
+          for (const item of disposables) {
+            item.geometry?.dispose();
+            item.material?.dispose();
+            item.texture?.dispose();
           }
-        );
-      };
-
-      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        idleCallbackId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(
-          loadHeroTextures,
-          { timeout: 1000 }
-        );
-      } else {
-        delayedLoadTimeoutId = setTimeout(loadHeroTextures, 300);
-      }
+          return;
+        }
+        buildingDetail = detail;
+        scene.add(detail.group);
+        onCollisionGeometry?.(detail.group);
+      }).catch(error => {
+        if (!detailAbort.signal.aborted) console.warn('Building detail could not be loaded:', error);
+      });
     })
     .catch((err) => {
       console.error('Error during PLATEAU real data integration:', err);
@@ -446,14 +424,8 @@ export function buildNumazuPortScene(
 
   const dispose = () => {
     isDisposed = true;
-    if (delayedLoadTimeoutId !== null) {
-      clearTimeout(delayedLoadTimeoutId);
-      delayedLoadTimeoutId = null;
-    }
-    if (idleCallbackId !== null && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
-      (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleCallbackId);
-      idleCallbackId = null;
-    }
+    detailAbort.abort();
+    buildingDetail?.dispose();
     disposables.forEach((item) => {
       if (item.geometry) item.geometry.dispose();
       if (item.material) item.material.dispose();
@@ -461,5 +433,5 @@ export function buildNumazuPortScene(
     });
   };
 
-  return { disposables, ready, updateWater, dispose };
+  return { disposables, ready, updateWater, updateBuildings: position => buildingDetail?.update(position), dispose };
 }
