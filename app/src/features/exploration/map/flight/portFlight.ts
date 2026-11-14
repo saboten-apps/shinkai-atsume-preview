@@ -31,7 +31,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   }
   const ui = document.createElement('div');
   ui.className = 'flight-ui';
-  ui.innerHTML = `<button class="flight-toggle">飛んでみる</button><div class="flight-instructions" hidden>左スティックで移動 ・ タップで自動飛行 ・ ドラッグで見回す <span class="flight-depth"></span></div><div class="flight-pad" hidden><div class="flight-knob"></div></div><div class="flight-vertical" hidden><button data-dir="1">上がる</button><button data-dir="-1">落下</button></div>`;
+  ui.innerHTML = `<button class="flight-toggle">飛んでみる</button><div class="flight-instructions" hidden><span class="flight-depth"></span></div><div class="flight-pad" hidden><div class="flight-knob"></div></div><div class="flight-vertical" hidden><button data-dir="1">上がる</button><button data-dir="-1">落下</button></div>`;
   container.appendChild(ui);
   const toggle = ui.querySelector<HTMLButtonElement>('.flight-toggle')!;
   const guide = ui.querySelector<HTMLElement>('.flight-instructions')!;
