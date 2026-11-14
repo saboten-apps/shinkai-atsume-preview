@@ -37,6 +37,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   onWebGLError,
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const flightRef = useRef<ReturnType<typeof setupPortFlight> | null>(null);
+  const [flying, setFlying] = useState(false);
   const controlsRef = useRef<OrbitControls | null>(null);
   const pinObjectsRef = useRef<Pin3DObject[]>([]);
   const targetCamFocusRef = useRef<THREE.Vector3 | null>(null);
@@ -101,6 +103,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     controlsRef.current = controls;
 
     const flight = setupPortFlight(container, scene, camera, controls, renderer.domElement);
+    flightRef.current = flight;
 
     // --- 5. Lights ---
     // 850m四方の実都市空間を標本図鑑トーンで照らす環境光・太陽光
@@ -275,6 +278,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       dom.removeEventListener('touchstart', handlePointerDown);
       dom.removeEventListener('touchend', handlePointerUp);
 
+      flightRef.current = null;
       flight.dispose();
       controls.dispose();
       renderer.dispose();
@@ -310,7 +314,6 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
   return (
     <div
-      ref={mountRef}
       style={{
         width: '100%',
         height: '100%',
@@ -320,6 +323,21 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         touchAction: 'none',
       }}
     >
+      <div ref={mountRef} style={{position:'absolute', inset:0}} />
+      <button
+        type="button"
+        disabled={isLoading}
+        onClick={() => {
+          const flight = flightRef.current;
+          if (!flight) return;
+          const active = !flight.isActive();
+          flight.setMode(active);
+          setFlying(active);
+        }}
+        style={{position:'absolute', right:12, top:12, zIndex:30, minHeight:48,
+          padding:'12px 18px', border:'2px solid white', borderRadius:16,
+          background:'#e97940', color:'white', fontWeight:700, pointerEvents:'auto'}}
+      >{isLoading ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}<small style={{display:'block'}}>飛行テスト v2</small></button>
       {/* 読み込み中インジケーター（小さな表示） */}
       {isLoading && (
         <div className="map-loading-indicator">
