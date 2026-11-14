@@ -199,7 +199,7 @@ export class FreeFlightController {
 
     this.velocity.lerp(targetVel, THREE.MathUtils.clamp(lerpAlpha, 0, 1));
 
-    if (falling) this.velocity.y = Math.max(-18, Math.min(0, previousVertical) - 9.8 * dt);
+    if (falling) this.velocity.y = Math.min(0, previousVertical) - 9.8 * dt;
 
     // 入力ゼロ時の微小速度カット（確実なホバー静止）
     if (!hasInput && this.velocity.length() < 0.15) {
@@ -217,10 +217,16 @@ export class FreeFlightController {
     }
 
     // 5. 位置の更新
-    this.position.addScaledVector(this.velocity, dt);
-
-    // 6. 衝突判定・AABB押し出し解決
-    this.resolveCollisions(colliders);
+    // 高速落下時は移動を分割して薄い屋根をすり抜けにくくする。
+    const steps = falling ? Math.max(1, Math.ceil(this.velocity.length() * dt / .25)) : 1;
+    for (let step = 0; step < steps; step++) {
+      this.position.addScaledVector(this.velocity, dt / steps);
+      this.resolveCollisions(colliders);
+      if (falling && (this.isGroundedOnSurface || this.position.y < SEA)) {
+        this.velocity.y = 0;
+        break;
+      }
+    }
 
     // 7. 移動範囲のクランプ
     const bounds = FREE_FLIGHT_CONFIG.bounds;

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { createPortSky } from '../three/portSky';
 import { setupPortFlight } from '../flight/portFlight';
 import { MapPin, PerformanceStats } from '../types';
 import { buildNumazuPortScene } from '../three/sceneBuilder';
@@ -60,12 +61,11 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     // --- 1. Scene & Fog ---
     // 指示書: FogExp2 の濃度は 0.0008 程度に下げる
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b1c2c); // 深海ネイビー
-    scene.fog = new THREE.FogExp2(0x0b1c2c, 0.00035);
+    const scenery = createPortSky(scene);
 
     // --- 2. Camera ---
     // 指示書: 初期位置およそ (330, 300, 470)、注視点 (-30, 43, -140)（港と海が両方入る構図）
-    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 5000);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 55000);
     camera.position.set(295, 265, 345);
 
     // --- 3. Renderer ---
@@ -102,7 +102,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     };
     controlsRef.current = controls;
 
-    const flight = setupPortFlight(container, scene, camera, controls, renderer.domElement);
+    const flight = setupPortFlight(container, scene, camera, controls, renderer.domElement, scenery.setUnderwater);
     flightRef.current = flight;
 
     // --- 5. Lights ---
@@ -280,6 +280,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
       flightRef.current = null;
       flight.dispose();
+      scenery.dispose();
       controls.dispose();
       renderer.dispose();
       if (container.contains(dom)) {
@@ -337,7 +338,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         style={{position:'absolute', right:12, top:12, zIndex:30, minHeight:48,
           padding:'12px 18px', border:'2px solid white', borderRadius:16,
           background:'#e97940', color:'white', fontWeight:700, pointerEvents:'auto'}}
-      >{isLoading ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}<small style={{display:'block'}}>飛行テスト v3</small></button>
+      >{isLoading ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}<small style={{display:'block'}}>飛行テスト v4</small></button>
       {/* 読み込み中インジケーター（小さな表示） */}
       {isLoading && (
         <div className="map-loading-indicator">

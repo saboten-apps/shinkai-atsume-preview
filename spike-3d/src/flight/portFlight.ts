@@ -8,7 +8,7 @@ class ExpandedOctree extends Octree {
   calcBox() { super.calcBox(); this.box?.max.addScalar(0.01); return this; }
 }
 
-export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, camera: THREE.PerspectiveCamera, controls: OrbitControls, canvas: HTMLCanvasElement) {
+export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, camera: THREE.PerspectiveCamera, controls: OrbitControls, canvas: HTMLCanvasElement, setUnderwater: (value: boolean) => void) {
   const controller = new FreeFlightController();
   const character = new HumanoidCharacter();
   character.group.visible = false;
@@ -43,7 +43,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
     cancelTravel();
     if (active) savedPosition.copy(camera.position);
     controller.activate(active); controls.enabled = !active; character.group.visible = active;
-    if (!active) { camera.position.copy(savedPosition); controls.update(); scene.fog = new THREE.FogExp2(0x0b1c2c, .00035); scene.background = new THREE.Color(0x0b1c2c); }
+    if (!active) { camera.position.copy(savedPosition); controls.update(); setUnderwater(false); }
     guide.hidden = !active; pad.hidden = !active; vertical.hidden = !active;
     toggle.textContent = active ? 'マップに戻る' : '飛んでみる';
     controller.setStick(0, 0); controller.setVertical(0);
@@ -129,7 +129,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
           controller.velocity.set(0, 0, 0);
         }
       }
-       const data=controller.getHookData(); depth.textContent = data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; scene.fog = new THREE.FogExp2(data.state === 'water' ? 0x27546b : 0x0b1c2c, data.state === 'water' ? .012 : .00035); scene.background = new THREE.Color(data.state === 'water' ? 0x27546b : 0x0b1c2c); },
+       const data=controller.getHookData(); depth.textContent = data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; setUnderwater(data.state === 'water'); },
     isActive() { return controller.active; },
     dispose() { canvas.removeEventListener('pointerdown',lookDown); canvas.removeEventListener('pointermove',lookMove); canvas.removeEventListener('pointerup',lookUp); canvas.removeEventListener('pointercancel',lookUp); ui.remove(); scene.remove(character.group); character.group.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.geometry.dispose(); const mats = Array.isArray(obj.material) ? obj.material : [obj.material]; mats.forEach(m => m.dispose()); } }); }
   };
