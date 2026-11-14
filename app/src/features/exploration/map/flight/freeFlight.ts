@@ -32,6 +32,11 @@ export class FreeFlightController {
   private hasScriptVertical: boolean = false;
 
   private isGroundedOnSurface: boolean = false;
+  private walkingOffEdge = false;
+  private waterQuery: (x:number,z:number)=>boolean = () => true;
+
+  public setWaterQuery(query:(x:number,z:number)=>boolean):void { this.waterQuery=query; }
+  private isSubmerged():boolean { return this.position.y < SEA && this.waterQuery(this.position.x,this.position.z); }
 
 
   constructor() {
@@ -55,6 +60,7 @@ export class FreeFlightController {
     this.pitch = THREE.MathUtils.degToRad(INITIAL_FREE_LOOK.pitchDeg);
     this.state = 'air';
     this.isGroundedOnSurface = false;
+    this.walkingOffEdge = false;
     this.stickInput.set(0, 0);
     this.verticalInput = 0;
     this.scriptStick.set(0, 0);
@@ -66,8 +72,9 @@ export class FreeFlightController {
   public teleport(x: number, y: number, z: number): void {
     this.position.set(x, y, z);
     this.velocity.set(0, 0, 0);
-    this.state = y < SEA ? 'water' : 'air';
+    this.state = this.isSubmerged() ? 'water' : 'air';
     this.isGroundedOnSurface = false;
+    this.walkingOffEdge = false;
     this.stickInput.set(0, 0);
     this.verticalInput = 0;
   }
@@ -132,8 +139,12 @@ export class FreeFlightController {
     const effectiveStickY = this.hasScriptStick ? this.scriptStick.y : this.stickInput.y;
     const effectiveVert = this.hasScriptVertical ? this.scriptVertical : this.verticalInput;
 
-    const inWater = this.position.y < SEA;
-    const maxSpeed = inWater ? FREE_FLIGHT_CONFIG.maxSpeedWater : FREE_FLIGHT_CONFIG.maxSpeedAir;
+    const wasGrounded = this.isGroundedOnSurface;
+    const inWater = this.isSubmerged();
+    const takingOff = effectiveVert > .1;
+    if(takingOff || inWater)this.walkingOffEdge=false;
+    const walking = !inWater && !takingOff && (wasGrounded || this.walkingOffEdge);
+    const maxSpeed = walking ? FREE_FLIGHT_CONFIG.maxSpeedGround : inWater ? FREE_FLIGHT_CONFIG.maxSpeedWater : FREE_FLIGHT_CONFIG.maxSpeedAir;
 
     // 2. カメラ方向ベクトルの算出
     // 水平前進ベクトル (yaw 基準, +Zが南、-Zが北、+Xが東、-Xが西)
@@ -156,7 +167,7 @@ export class FreeFlightController {
     if (Math.abs(effectiveStickY) > 0.02) {
       if (effectiveStickY > 0) {
         // 前進：カメラ視線方向へ（下を向けば急降下、上を向けば上昇）
-        targetVel.addScaledVector(forward3D, effectiveStickY);
+        targetVel.addScaledVector(walking ? forwardH : forward3D, effectiveStickY);
       } else {
         // 後退：水平後退
         targetVel.addScaledVector(forwardH, effectiveStickY);
@@ -188,7 +199,9 @@ export class FreeFlightController {
     }
 
     if (destination) {
-      targetVel.subVectors(destination, this.position).clampLength(0, maxSpeed / 2).multiplyScalar(2);
+      targetVel.subVectors(destination, this.position);
+      if(walking)targetVel.y=0;
+      targetVel.clampLength(0,maxSpeed/2).multiplyScalar(2);
     }
     const previousVertical = this.velocity.y;
 
@@ -206,27 +219,30 @@ export class FreeFlightController {
       this.velocity.set(0, 0, 0);
     }
 
-    // 接地中の離陸判定：前進入力または上昇入力があれば接地解除
-    if (this.isGroundedOnSurface) {
-      if (destination || effectiveVert > 0.1 || Math.abs(effectiveStickY) > 0.2 || Math.abs(effectiveStickX) > 0.2) {
-        this.isGroundedOnSurface = false;
-      } else {
-        // 接地中は下向き速度をカット
-        if (this.velocity.y < 0) this.velocity.y = 0;
-      }
-    }
+    // Only an explicit upward command takes off. Looking up while walking stays horizontal.
+    if(takingOff)this.isGroundedOnSurface=false;
+    if(walking){this.velocity.y=Math.min(0,previousVertical)-9.8*dt;}
 
     // 5. 位置の更新
     // 高速落下時は移動を分割して薄い屋根をすり抜けにくくする。
-    const steps = falling ? Math.max(1, Math.ceil(this.velocity.length() * dt / .25)) : 1;
+    const steps = (falling || walking) ? Math.max(1, Math.ceil(this.velocity.length() * dt / .25)) : 1;
     for (let step = 0; step < steps; step++) {
       this.position.addScaledVector(this.velocity, dt / steps);
       this.resolveCollisions(colliders);
-      if (falling && (this.isGroundedOnSurface || this.position.y < SEA)) {
+      if (falling && (this.isGroundedOnSurface || this.isSubmerged())) {
         this.velocity.y = 0;
         break;
       }
     }
+
+    // Keep contact over small gaps and slopes; a real ledge transitions into a fall.
+    if(!takingOff && this.velocity.y<=.5)this.snapToGround(colliders,wasGrounded ? .45 : .06);
+    if(this.isGroundedOnSurface){
+      this.walkingOffEdge=false;
+      const horizontal=Math.hypot(this.velocity.x,this.velocity.z);
+      if(horizontal>FREE_FLIGHT_CONFIG.maxSpeedGround){const scale=FREE_FLIGHT_CONFIG.maxSpeedGround/horizontal;this.velocity.x*=scale;this.velocity.z*=scale;}
+      this.velocity.y=0;
+    } else if(wasGrounded&&!takingOff&&!this.isSubmerged())this.walkingOffEdge=true;
 
     // 7. 移動範囲のクランプ
     const bounds = FREE_FLIGHT_CONFIG.bounds;
@@ -235,9 +251,10 @@ export class FreeFlightController {
     this.position.y = THREE.MathUtils.clamp(this.position.y, bounds.minY, bounds.maxY);
 
     // 8. 状態の更新 ('ground' | 'air' | 'water')
-    if (this.position.y < SEA) {
+    if (this.isSubmerged()) {
       this.state = 'water';
       this.isGroundedOnSurface = false;
+      this.walkingOffEdge = false;
     } else if (this.isGroundedOnSurface) {
       this.state = 'ground';
     } else {
@@ -254,7 +271,7 @@ export class FreeFlightController {
     if (horizSpeed > 0.4) {
       charTargetYaw = Math.atan2(this.velocity.x, -this.velocity.z);
     }
-    character.updatePose(charTargetYaw, curSpeed, maxSpeed, this.state, dt, time);
+    character.updatePose(charTargetYaw, curSpeed, this.state==='ground'?FREE_FLIGHT_CONFIG.maxSpeedGround:maxSpeed, this.state, dt, time);
 
     // 10. 三人称追従カメラの更新（Roll=0度固定、水面出入りも同一カメラでシームレス）
     this.updateCamera(camera, colliders);
@@ -288,6 +305,7 @@ export class FreeFlightController {
 
     // カメラ希望位置：注視点から後方へ距離 9m
     const desiredCamPos = targetLookAt.clone().addScaledVector(camOffset, -config.cameraDistance);
+    if(this.state==='ground')desiredCamPos.y=Math.max(desiredCamPos.y,this.position.y+1.8);
 
     // 遮蔽判定（キャラ→希望位置の線分と全コライダーの交差を判定し最適位置へクランプ）
     const dir = desiredCamPos.clone().sub(targetLookAt); const distance = dir.length(); dir.normalize();
@@ -317,10 +335,24 @@ export class FreeFlightController {
         const push = hit.normal.clone().multiplyScalar(hit.depth + 0.001);
         capsule.translate(push); this.position.add(push);
         const v = this.velocity.dot(hit.normal); if (v < 0) this.velocity.addScaledVector(hit.normal, -v);
-        if (hit.normal.y > 0.7 && this.position.y >= SEA) landed = true;
+        if (hit.normal.y > 0.7 && !this.isSubmerged()) landed = true;
       }
     }
     this.isGroundedOnSurface = landed;
+  }
+
+  private snapToGround(colliders:Octree[],reach:number):void {
+    if(this.isSubmerged())return;
+    const ray=new THREE.Ray(this.position.clone().add(new THREE.Vector3(0,.35,0)),new THREE.Vector3(0,-1,0));
+    let nearest=Infinity,groundY:number|undefined;
+    for(const tree of colliders){
+      const hit=tree.rayIntersect(ray);
+      if(!hit || hit.distance> .35+reach || hit.distance>=nearest)continue;
+      if(hit.triangle.getNormal(new THREE.Vector3()).y<.7)continue;
+      if(hit.position.y<SEA && this.waterQuery(this.position.x,this.position.z))continue;
+      nearest=hit.distance;groundY=hit.position.y;
+    }
+    if(groundY!==undefined){this.position.y=groundY+.001;this.velocity.y=0;this.isGroundedOnSurface=true;}
   }
 
   /**

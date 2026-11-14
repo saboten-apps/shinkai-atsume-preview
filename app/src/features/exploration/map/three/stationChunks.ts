@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { brightenBuildingMaterial } from './buildingAppearance';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 type Chunk = { id: string; url: string; min: number[]; max: number[] };
@@ -65,8 +66,7 @@ export function streamStationBuildings(
         if (!(object instanceof THREE.Mesh)) return;
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
           if (!(material instanceof THREE.MeshStandardMaterial)) continue;
-          material.roughness = .85; material.metalness = .05;
-          if (material.map) material.color.set(0xffffff);
+          brightenBuildingMaterial(material);
         }
       });
       scene.add(gltf.scene);

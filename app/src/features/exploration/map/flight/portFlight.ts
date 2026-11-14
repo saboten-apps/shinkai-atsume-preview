@@ -131,7 +131,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
     }
     if (!point || distance > 1000) return;
     cancelTravel();
-    destination = point.clone().add(new THREE.Vector3(0, 3, 0));
+    destination = point.clone().add(new THREE.Vector3(0, controller.state==='ground'?.001:3, 0));
     stalled = 0;
     bestDistance = Infinity;
   }
@@ -173,7 +173,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
       if (falling && controller.state !== 'air') falling = false;
       drop.textContent = falling ? '落下停止' : '落下';
       if (destination) {
-        const gap = controller.position.distanceTo(destination);
+        const gap = controller.state==='ground' ? Math.hypot(controller.position.x-destination.x,controller.position.z-destination.z) : controller.position.distanceTo(destination);
         if (gap < bestDistance - .2) {
           bestDistance = gap;
           stalled = 0;
@@ -183,8 +183,10 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
           controller.velocity.set(0, 0, 0);
         }
       }
-       const data=controller.getHookData(); depth.textContent = data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; setUnderwater(data.state === 'water'); },
+       const data=controller.getHookData(); rise.textContent=data.state==='ground'?'飛び立つ':'上がる';drop.disabled=data.state==='ground'; depth.textContent = data.state==='ground'?'徒歩':data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; setUnderwater(data.state === 'water'); },
     getPosition() { return controller.position; },
+    getStatus() { return controller.getHookData(); },
+    setWaterQuery(query:(x:number,z:number)=>boolean){controller.setWaterQuery(query);},
     isActive() { return controller.active; },
     dispose() { canvas.removeEventListener('pointerdown',lookDown); canvas.removeEventListener('pointermove',lookMove); canvas.removeEventListener('pointerup',lookUp); canvas.removeEventListener('pointercancel',lookUp); ui.remove(); cells.forEach(cell => cell.geometry.dispose()); cells.clear(); trees.length = 0; colliderMaterial.dispose(); scene.remove(character.group); character.group.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.geometry.dispose(); const mats = Array.isArray(obj.material) ? obj.material : [obj.material]; mats.forEach(m => m.dispose()); } }); }
   };

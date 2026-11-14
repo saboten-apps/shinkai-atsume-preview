@@ -70,6 +70,8 @@ export function createWaterSurface(scene: THREE.Scene) {
         vec2 maskUv=(p-uShoreBounds.xy)*uShoreBounds.zw;
         float within=step(0.0,maskUv.x)*step(0.0,maskUv.y)*step(maskUv.x,1.0)*step(maskUv.y,1.0);
         maskUv.y=1.0-maskUv.y;
+        // Low coastal ground can be below the shared sea datum; do not paint sea on land.
+        if(uHasShore>.5 && within>.5 && texture2D(uLandMask,maskUv).g>.5)discard;
         vec2 radius=uShoreBounds.zw*3.5;
         float nearLand=max(max(texture2D(uLandMask,maskUv+vec2(radius.x,0)).g,texture2D(uLandMask,maskUv-vec2(radius.x,0)).g),max(texture2D(uLandMask,maskUv+vec2(0,radius.y)).g,texture2D(uLandMask,maskUv-vec2(0,radius.y)).g))*uHasShore*within;
         float undulation=.96+.04*sin(a*.47+b*.23);

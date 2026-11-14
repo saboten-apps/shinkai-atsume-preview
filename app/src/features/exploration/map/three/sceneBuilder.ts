@@ -16,6 +16,7 @@ export interface SceneBuildResult {
   updateBuildings?: (position: THREE.Vector3) => void;
   updateWater?: (delta: number) => void;
   groundReady?: () => Promise<void>;
+  isWaterAt: (x:number,z:number)=>boolean;
   dispose?: () => void;
 }
 
@@ -180,6 +181,7 @@ export function buildNumazuPortScene(
         }
       });
       scene.add(track(roadScene));
+      onCollisionGeometry?.(roadScene);
 
       // 3) 地形（DEM TIN）: 生成りサンド（0xcfc5ae）、roughness 1.0
       terrainScene.traverse((child) => {
@@ -237,5 +239,5 @@ export function buildNumazuPortScene(
     });
   };
 
-  return { disposables, ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}), updateWater: water.update, updateBuildings: position => { station.update(position); aerial?.update(position); }, groundReady: async () => { await aerial?.settled(); }, dispose };
+  return { disposables, ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}), updateWater: water.update, updateBuildings: position => { station.update(position); aerial?.update(position); }, groundReady: async () => { await aerial?.settled(); }, isWaterAt:(x,z)=>aerial?.isWaterAt(x,z)??true, dispose };
 }
