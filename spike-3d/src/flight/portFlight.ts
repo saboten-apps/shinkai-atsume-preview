@@ -34,6 +34,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
     toggle.textContent = active ? 'マップに戻る' : '飛んでみる';
     controller.setStick(0, 0); controller.setVertical(0);
   }
+  toggle.hidden = true; // The visible start button is owned by React.
   toggle.onclick = () => setMode(!controller.active);
   function stick(e: PointerEvent) { const rect = pad.getBoundingClientRect(); let x = (e.clientX - rect.left - rect.width / 2) / (rect.width * .38); let y = -(e.clientY - rect.top - rect.height / 2) / (rect.height * .38); const m = Math.hypot(x,y); if (m > 1) { x /= m; y /= m; } controller.setStick(x,y); knob.style.transform = `translate(${x * 38}px, ${-y * 38}px)`; }
   pad.onpointerdown = e => { e.preventDefault(); pad.setPointerCapture(e.pointerId); stick(e); };
@@ -49,6 +50,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   function lookUp(e: PointerEvent) { if (e.pointerId === lookId) lookId = null; }
   canvas.addEventListener('pointerdown', lookDown); canvas.addEventListener('pointermove', lookMove); canvas.addEventListener('pointerup', lookUp); canvas.addEventListener('pointercancel', lookUp);
   return {
+    setMode,
     addGeometry(group: THREE.Group) { group.updateWorldMatrix(true, true); const tree = new ExpandedOctree(); tree.fromGraphNode(group); trees.push(tree); },
     update(dt: number, time: number) { if (!controller.active) return; controller.update(dt, trees, character, camera, time); const data=controller.getHookData(); depth.textContent = data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; scene.fog = new THREE.FogExp2(data.state === 'water' ? 0x27546b : 0x0b1c2c, data.state === 'water' ? .012 : .00035); scene.background = new THREE.Color(data.state === 'water' ? 0x27546b : 0x0b1c2c); },
     isActive() { return controller.active; },
