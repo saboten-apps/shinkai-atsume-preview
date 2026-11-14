@@ -66,7 +66,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     };tick();return()=>clearTimeout(timer);
   },[sound,found]);
   useEffect(()=>()=>{void audioRef.current?.close();},[]);
-  const switchMode=(next:SearchMode)=>{entryRef.current=position;setMode(next);setVisible(next==='2d');setSlow(false);slowCount.current=0;};
+  const switchMode=(next:SearchMode)=>{entryRef.current=position;setMode(next);setNotice('');setVisible(next==='2d');setSlow(false);slowCount.current=0;};
   const discover=()=>{
     if(!fish || !hint.near || (mode==='3d'&&!visible))return;
     const record:Discovery={date,fishId:fish.id,placeId:place.id,version:HIDE_VERSION,mode,foundAt:new Date().toISOString()};

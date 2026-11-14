@@ -335,13 +335,13 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         const p = flight.isActive() ? flight.getPosition() : controls.target;
         const dist = Math.hypot(p.x - beacon.position.x, p.z - beacon.position.z);
         beacon.visible = dist < 100;
-        let visible = dataReady && !loadingArea;
+        let visible = dataReady;
         if (flight.isActive()) {
           const direction = beacon.position.clone().sub(camera.position);
           const length = direction.length();
           raycaster.set(camera.position, direction.normalize());
           const hits = raycaster.intersectObjects(scene.children, true);
-          visible = visible && Math.abs(p.y - beacon.position.y) < 30 && !hits.some(h => h.object !== beacon && h.distance < length - 7 && h.object instanceof THREE.Mesh && h.object.material instanceof THREE.MeshStandardMaterial);
+          visible = visible && !loadingArea && Math.abs(p.y - beacon.position.y) < 30 && !hits.some(h => h.object !== beacon && h.distance < length - 7 && h.object instanceof THREE.Mesh && h.object.material instanceof THREE.MeshStandardMaterial);
         }
         searchRef.current.onPosition({ x:p.x, z:p.z }, visible);
       }
