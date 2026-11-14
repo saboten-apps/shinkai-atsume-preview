@@ -402,17 +402,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   }, [selectedPinId, pins]);
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        touchAction: 'none',
-      }}
-    >
-      <div ref={mountRef} style={{position:'absolute', inset:0}} />
+    <div className="search-world">
+      <div className="search-world-toolbar">
       <button
         type="button"
         disabled={isLoading || (!flying && !!areaStatus)}
@@ -423,13 +414,10 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           flight.setMode(active, searchRef.current ? new THREE.Vector3(controlsRef.current!.target.x, 90, controlsRef.current!.target.z) : locationRef.current === 'station' ? new THREE.Vector3(210, 80, -2395) : undefined);
           setFlying(active);
         }}
-        style={{position:'absolute', right:12, top:12, zIndex:30, minHeight:48,
-          padding:'12px 18px', border:'2px solid white', borderRadius:16,
-          background:'#e97940', color:'white', fontWeight:700, pointerEvents:'auto'}}
+        className="search-flight-button"
       >{isLoading || (!flying && !!areaStatus) ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}</button>
-      <div style={{position:'absolute',left:12,top:80,zIndex:25,display:'flex',gap:8}}>
+      <div className="search-world-destinations">
         {(['port', 'station'] as const).map(location => <button key={location} type="button" disabled={isLoading}
-          style={{padding:'10px 14px',background:'#183b52',color:'white',border:'1px solid #eee',borderRadius:8}}
           onClick={() => {
             flightRef.current?.setMode(false); setFlying(false);
             locationRef.current = location;
@@ -442,7 +430,9 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
             controls.update();
           }}>{location === 'port' ? '沼津港' : '沼津駅南口'}</button>)}
       </div>
-      {areaStatus && <div role="status" style={{position:'absolute',left:12,bottom:45,zIndex:25,background:'#183b52',color:'white',padding:'8px 12px'}}>{areaStatus}</div>}
+      </div>
+      <div ref={mountRef} className="search-world-canvas" />
+      {areaStatus && <div role="status" className="search-world-status">{areaStatus}</div>}
       {/* 読み込み中インジケーター（小さな表示） */}
       {isLoading && (
         <div className="map-loading-indicator">

@@ -3,3 +3,42 @@
 
 .search-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:30px sans-serif;color:#fff;text-shadow:0 1px 5px #000;pointer-events:none}
 .exploration-page{color:#f5f0e6}.search-intro,.search-found{color:#172d40}.search-credit{color:#b8c1c5}.search-credit a{color:#e9e2ce}.search-help{color:#d6dcdf}
+
+/* The world has its own control rail; labels never cover its flight controls. */
+.search-world {position:absolute;inset:0;display:flex;flex-direction:column;}
+.search-world-toolbar {display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;padding:6px 10px;background:#102b40;}
+.search-world-toolbar button {min-height:40px;padding:8px 12px;font-size:13px;white-space:nowrap;background:#193f55;color:#fff;border-color:#67818c;}
+.search-world-toolbar .search-flight-button {order:2;background:#d66a37;border-color:#f6b48b;}
+.search-world-destinations {display:flex;gap:6px;}
+.search-world-canvas {position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;}
+.search-world-status {position:absolute;top:60px;left:10px;right:10px;pointer-events:none;width:fit-content;padding:5px 10px;border-radius:6px;background:#102b40d9;color:#fff;font-size:11px;}
+.search-map .flight-instructions {top:12px;left:12px;right:auto;padding:5px 9px;font-size:12px;}
+.search-map .flight-depth {font-variant-numeric:tabular-nums;}
+.search-map .map-loading-indicator {top:60px;bottom:auto;font-size:11px;}
+.search-options[hidden] {display:none;}
+.search-options {padding:16px;margin-bottom:12px;border:1px solid #53646c;background:#102b40;color:#f5f0e6;border-radius:10px;}
+.search-options p,.search-options details {margin:12px 0;}
+.search-options-heading {display:flex;justify-content:space-between;gap:12px;align-items:center;}
+.search-options-credit {font-size:11px;line-height:1.7;color:#c0ccce;}
+.search-options-credit a {color:inherit;}
+body.exploration-immersive {overflow:hidden;overscroll-behavior:none;}
+.exploration-page.is-immersive {position:fixed;inset:0;z-index:1000;max-width:none;margin:0;padding:0;height:100vh;height:100dvh;display:flex;flex-direction:column;background:#0b1c2c;isolation:isolate;}
+.is-immersive .search-heading,.is-immersive>.search-credit {display:none;}
+.is-immersive .search-toolbar {flex:none;margin:0;padding:calc(6px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left));gap:8px;flex-wrap:nowrap;border-bottom:1px solid #ffffff1a;}
+.is-immersive .search-toolbar button {padding:8px 12px;min-height:40px;font-size:13px;background:#193448;color:#f5f0e6;border-color:#607682;white-space:nowrap;}
+.is-immersive .search-toolbar button[aria-pressed=true] {background:#f5f0e6;color:#142d40;}
+.is-immersive .search-detector {flex:none;gap:10px;padding:6px 14px;border-radius:0;min-height:44px;flex-wrap:nowrap;box-shadow:none;border-bottom:1px solid #ffffff1a;}
+.is-immersive .search-detector>span:first-child {font-size:25px;}
+.is-immersive .search-detector strong {font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.is-immersive .search-detector>span:last-child {width:auto;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:11px;}
+.is-immersive .search-map {flex:1;min-height:0;max-height:none;height:auto;border-radius:0;outline:none;width:100%;}
+.is-immersive .search-discover {flex:none;justify-content:space-between;flex-wrap:nowrap;padding:6px max(12px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));margin:0;gap:10px;}
+.is-immersive .search-discover button {padding:9px 14px;min-height:40px;font-size:13px;}
+.is-immersive .search-discover small {color:#a6bcc4;font-size:10px;white-space:nowrap;}
+.is-immersive .search-options {position:absolute;top:calc(54px + env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));max-height:calc(100dvh - 130px);overflow-y:auto;z-index:50;box-shadow:0 12px 30px #0008;}
+.is-immersive>.search-notice {position:absolute;bottom:65px;left:12px;right:12px;z-index:40;font-size:12px;}
+@media (max-width:360px) {.search-world-toolbar{padding:6px;gap:4px;}.search-world-toolbar button{padding:8px;font-size:12px;}.is-immersive .search-toolbar button{padding:8px 10px;}.is-immersive .search-discover small{font-size:9px;}}
+@media (max-height:500px) {.search-map .flight-pad{width:88px;height:88px;bottom:12px;}.search-map .flight-vertical{bottom:12px;gap:6px;}.search-map .flight-vertical button{padding:8px 12px;}.is-immersive .search-detector{min-height:36px;}.is-immersive .search-discover{padding-top:4px;padding-bottom:4px;}}
+.search-map .search-center {top:calc(50% + 26px);}
+.search-map:has(.flight-pad:not([hidden])) .search-center {display:none;}
+.is-immersive .search-discover .search-low-fps {font-size:12px;color:#ffd09e;background:transparent;border-color:#b68857;}
