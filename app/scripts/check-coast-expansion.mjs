@@ -1,0 +1,15 @@
+import {createRequire} from 'node:module';import assert from 'node:assert/strict';
+const {chromium}=createRequire(import.meta.url)('playwright');const proxy=process.env.BROWSER_PROXY?new URL(process.env.BROWSER_PROXY):null;
+const browser=await chromium.launch({executablePath:'/usr/bin/chromium',proxy:proxy?{server:proxy.origin,username:decodeURIComponent(proxy.username),password:decodeURIComponent(proxy.password),bypass:'127.0.0.1,localhost'}:undefined,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+try{const page=await browser.newPage({viewport:{width:1000,height:760}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(process.env.APP_URL||'http://127.0.0.1:5190/',{waitUntil:'domcontentloaded'});
+for(const area of [{id:'senbon',x:-738.6,z:-1220.4},{id:'ganyudo',x:205.8,z:620.6}]){
+ const result=await page.evaluate(async area=>{
+ const T=await import('/node_modules/.vite/deps/three.js');const {buildNumazuPortScene}=await import('/src/features/exploration/map/three/sceneBuilder.ts');const {createPortSky}=await import('/src/features/exploration/map/three/portSky.ts');const {FREE_FLIGHT_CONFIG}=await import('/src/features/exploration/map/flight/constants.ts');
+ const scene=new T.Scene(),sky=createPortSky(scene),model=buildNumazuPortScene(scene);await model.ready;
+ const p=new T.Vector3(area.x,60,area.z);for(let i=0;i<100;i++){model.updateBuildings(p,p);await new Promise(r=>setTimeout(r,50));}await model.groundReady();
+ scene.updateMatrixWorld(true);const ray=new T.Raycaster(new T.Vector3(area.x,500,area.z),new T.Vector3(0,-1,0));const hits=ray.intersectObjects(scene.children,true).filter(h=>h.object.userData.waterTerrain);const y=hits[0]?.point.y;
+ const renderer=new T.WebGLRenderer({antialias:true});renderer.setSize(1000,760);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;document.body.replaceChildren(renderer.domElement);const camera=new T.PerspectiveCamera(50,1000/760,.1,55000);camera.position.set(area.x+220,190,area.z+260);camera.lookAt(area.x,46,area.z);scene.add(new T.HemisphereLight(0xffffff,0x777766,2));const sun=new T.DirectionalLight(0xffffff,2);sun.position.set(300,500,200);scene.add(sun);renderer.render(scene,camera);
+ const canvas=renderer.domElement.toDataURL('image/png');const b=FREE_FLIGHT_CONFIG.bounds;const result={id:area.id,y,water:model.isWaterAt(area.x,area.z),inBounds:area.x>b.minX&&area.x<b.maxX&&area.z>b.minZ&&area.z<b.maxZ,canvas};model.dispose();sky.dispose?.();renderer.dispose();return result;
+ },area);
+ assert(result.inBounds);assert(Number.isFinite(result.y)&&result.y>35&&result.y<100);assert(!result.water,'Park destination is classified as water');const {writeFileSync}=await import('node:fs');writeFileSync(`/tmp/shinkai-${area.id}.png`,Buffer.from(result.canvas.split(',')[1],'base64'));delete result.canvas;console.log(JSON.stringify(result));}
+assert.deepEqual(errors,[]);console.log('PASS coast terrain, land classification, flight bounds and render');}finally{await browser.close();}

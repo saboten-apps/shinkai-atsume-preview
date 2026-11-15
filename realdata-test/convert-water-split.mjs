@@ -153,7 +153,7 @@ function buildGlb({ positions, colors, indices, nodeName, meshName, materialName
 
 // ---------- main ----------
 const Z = 15;
-const BBOX = process.env.STATION_CORRIDOR ? { west: 138.850, south: 35.078, east: 138.869, north: 35.106 } : { west: 138.855, south: 35.080, east: 138.862, north: 35.085 };
+const BBOX = process.env.COAST_EXPANSION ? {west:138.839,east:138.874,south:35.063,north:35.106} : process.env.STATION_CORRIDOR ? { west: 138.850, south: 35.078, east: 138.869, north: 35.106 } : { west: 138.855, south: 35.080, east: 138.862, north: 35.085 };
 const outputPrefix = process.env.STATION_CORRIDOR ? 'corridor' : 'port';
 const x0 = lon2tileX(BBOX.west, Z), x1 = lon2tileX(BBOX.east, Z);
 const y0 = lat2tileY(BBOX.north, Z), y1 = lat2tileY(BBOX.south, Z);

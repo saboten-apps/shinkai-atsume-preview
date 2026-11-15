@@ -29,10 +29,11 @@ for (const chunk of manifest.chunks) {
 }
 // Station south exit: ENU x about 210 m, z about -2395 m.
 assert(manifest.chunks.some(c => c.min[0] < 210 && c.max[0] > 210 && c.min[2] < -2395 && c.max[2] > -2395));
-assert.equal(ids.size,25);
+assert.equal(ids.size,56);
 assert.equal(manifest.lod,3);
-assert.equal(buildings,9002);
+assert.equal(buildings,20522);
 assert.equal(manifest.year,2023);
+for(const [x,z] of [[-738.6,-1220.4],[205.8,620.6]])assert(manifest.chunks.some(c=>c.min[0]<x+350&&c.max[0]>x-350&&c.min[2]<z+350&&c.max[2]>z-350),'Coastal area coverage missing');
 assert(manifest.chunks.every(c=>c.url.includes('2023-lod3-')));
 for (const name of ['road','terrain','veg','water-sea','water-river']) {
   const {json,bin} = parseGlb(readFileSync(new URL(`data/corridor-${name}-packed.glb`,publicDir)));
