@@ -103,7 +103,7 @@ export function streamStationBuildings(
       if (!disposed) { console.error(`Station chunk ${chunk.id}:`, error); retryAt.set(chunk.id, performance.now() + 10000); onStatus?.('街並みの読み込みを再試行しています…'); }
     }).finally(() => { loading = false; nextUpdate = 0; });
   }
-  return { ready, update, detailReady:()=>details.settled(), dispose() {
+  return { ready, update, detailReady:async()=>{await details.settled();await hall?.model.photoReady();}, dispose() {
     disposed = true; abort.abort();
     pilot?.dispose(); pilot = undefined;
     hall?.removeCollider?.();hall?.model.dispose();hall=undefined;
