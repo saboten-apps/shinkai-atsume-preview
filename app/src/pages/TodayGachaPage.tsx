@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import type { Locale } from '../config/appConfig';
 import { AreaGuideSection } from '../components/AreaGuideSection';
 import { DepthScaleBar } from '../components/DepthScaleBar';
@@ -14,6 +14,8 @@ import {
 } from '../lib/i18n';
 import { recordTelemetryEvent } from '../services/telemetryService';
 import type { CollectionState, DailyDrawResult, FishRecord } from '../types/schema';
+
+const MapDownload=lazy(()=>import('../features/exploration/MapDownload'));
 
 interface TodayGachaPageProps {
   locale: Locale;
@@ -100,6 +102,7 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
     }
   };
 
+  const [downloadOpen,setDownloadOpen]=useState(false);
   return (
     <div className="page-container today-page">
       {/* ヒーロー＆ガチャ操作枠 */}
@@ -134,6 +137,8 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
             <div className="gacha-explore-actions">
               <button className="primary-action-btn" onClick={()=>onExplore(activeDrawResult.jstDate)}>{locale==='ja'?'今日の魚を探しに行く':'Find today’s fish'} <span aria-hidden="true">→</span></button>
               <button className="secondary-action-btn" onClick={()=>onExplore(activeDrawResult.jstDate,'2d')}>{locale==='ja'?'軽い2D地図で探す':'Lightweight 2D map'}</button>
+              <button className="secondary-action-btn" aria-expanded={downloadOpen} onClick={()=>setDownloadOpen(!downloadOpen)}>{locale==='ja'?'街データを事前保存':'Save town data first'}</button>
+              {downloadOpen&&<Suspense fallback={null}><MapDownload en={locale==='en'}/></Suspense>}
             </div>
           </section>
           <article className="fish-result-card" aria-live="polite">

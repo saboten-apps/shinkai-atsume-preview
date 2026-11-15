@@ -30,7 +30,9 @@ for (const chunk of manifest.chunks) {
 // Station south exit: ENU x about 210 m, z about -2395 m.
 assert(manifest.chunks.some(c => c.min[0] < 210 && c.max[0] > 210 && c.min[2] < -2395 && c.max[2] > -2395));
 assert.equal(ids.size, 28);
-assert.equal(buildings, 7327);
+assert.equal(manifest.lod,3);
+assert.equal(buildings,7061);
+assert(manifest.chunks.every(c=>c.url.includes('lod3-')));
 for (const name of ['road','terrain','veg','water-sea','water-river']) {
   const {json,bin} = parseGlb(readFileSync(new URL(`data/corridor-${name}-packed.glb`,publicDir)));
   assert.equal(bin.length,json.buffers[0].byteLength);

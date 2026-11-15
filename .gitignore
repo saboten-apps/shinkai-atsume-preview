@@ -15,3 +15,5 @@ realdata-test/corridor-veg-stats.json
 
 # App mirror reuses the canonical model assets above at build time.
 app/public/map/data/
+
+realdata-test/lod3-*-stats.json
