@@ -31,7 +31,7 @@ const PREFIX = '22203_numazu-shi_2021_citygml_4_op/udx/dem/';
 const FILES = ['523846_dem_6697_op.gml', '523856_dem_6697_05_op.gml'];
 
 // keep triangles whose vertex bbox intersects this (slightly expanded) box
-const KEEP = process.env.STATION_CORRIDOR ? { s: 35.0780, n: 35.1060, w: 138.8500, e: 138.8690 } : { s: 35.0780, n: 35.0865, w: 138.8530, e: 138.8640 };
+const KEEP = process.env.COAST_EXPANSION ? {s:35.063,n:35.106,w:138.839,e:138.874} : process.env.STATION_CORRIDOR ? { s: 35.0780, n: 35.1060, w: 138.8500, e: 138.8690 } : { s: 35.0780, n: 35.0865, w: 138.8530, e: 138.8640 };
 const outputPrefix = process.env.STATION_CORRIDOR ? 'corridor' : 'port';
 // flat inland reference patch (town area south of the port apron) — reported
 // for reference; its median (ortho 1.46 m) proved ~0.6 m lower than the port

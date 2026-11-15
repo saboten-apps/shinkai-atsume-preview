@@ -484,7 +484,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
               controls.object.position.copy(target).add(new THREE.Vector3(nx * distance, 1, nz * distance));
               controls.update(); event.target.value = ''; return;
             }
-            const target = location === 'station' ? new THREE.Vector3(210, 48, -2395) : new THREE.Vector3(-20, 43, -190);
+            const target = location === 'senbon' ? new THREE.Vector3(-738.6,48,-1220.4) : location === 'ganyudo' ? new THREE.Vector3(205.8,48,620.6) : location === 'station' ? new THREE.Vector3(210, 48, -2395) : new THREE.Vector3(-20, 43, -190);
             controls.target.copy(target);
             controls.object.position.copy(target).add(new THREE.Vector3(300, 310, 400));
             controls.update();
@@ -492,6 +492,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           }}>
           <option value="" disabled>{search?.locale === 'en' ? 'Go to…' : '移動先…'}</option>
           <option value="port">沼津港</option><option value="station">沼津駅南口</option>
+          <option value="senbon">千本浜公園周辺</option><option value="ganyudo">我入道周辺</option>
           <option value="cityhall">{search?.locale === 'en' ? 'City Hall' : '市役所'}</option>
           <option value="pilot">{search?.locale === 'en' ? 'Building preview' : '建物の試作を見る'}</option>
         </select>

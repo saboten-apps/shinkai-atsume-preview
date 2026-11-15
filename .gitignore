@@ -19,3 +19,6 @@ app/public/map/data/
 realdata-test/lod3-*-stats.json
 
 realdata-test/2023-lod3-*-stats.json
+
+realdata-test/2023-coast-*-stats.json
+realdata-test/2023-lod2-*-stats.json

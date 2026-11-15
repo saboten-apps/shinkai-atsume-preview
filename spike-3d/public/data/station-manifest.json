@@ -1,8 +1,8 @@
 {
   "bbox": {
-    "west": 138.853,
-    "east": 138.8655,
-    "south": 35.08,
+    "west": 138.84,
+    "east": 138.874,
+    "south": 35.064,
     "north": 35.1048
   },
   "station": {
@@ -39,6 +39,61 @@
   },
   "chunks": [
     {
+      "id": "station-8-3",
+      "url": "data/2023-lod3-station-8-3-packed.glb",
+      "min": [
+        920.8762817382812,
+        46.15843963623047,
+        -2745.71728515625
+      ],
+      "max": [
+        1535.092041015625,
+        64.64628601074219,
+        -2491.859375
+      ],
+      "buildings": 461,
+      "withPhotos": 57,
+      "triangles": 17118,
+      "images": 2,
+      "tiles": [
+        "data/1/data35.b3dm",
+        "data/1/data36.b3dm",
+        "data/1/data40.b3dm",
+        "data/1/data41.b3dm",
+        "data/1/data99.b3dm"
+      ]
+    },
+    {
+      "id": "station-7-3",
+      "url": "data/2023-lod3-station-7-3-packed.glb",
+      "min": [
+        917.122314453125,
+        44.09825897216797,
+        -2536.150634765625
+      ],
+      "max": [
+        1548.6912841796875,
+        93.55696868896484,
+        -2062.2802734375
+      ],
+      "buildings": 796,
+      "withPhotos": 36,
+      "triangles": 24648,
+      "images": 2,
+      "tiles": [
+        "data/1/data37.b3dm",
+        "data/1/data38.b3dm",
+        "data/1/data42.b3dm",
+        "data/1/data43.b3dm",
+        "data/1/data101.b3dm",
+        "data/1/data484.b3dm",
+        "data/1/data485.b3dm",
+        "data/1/data489.b3dm",
+        "data/1/data490.b3dm",
+        "data/1/data538.b3dm"
+      ]
+    },
+    {
       "id": "station-8-2",
       "url": "data/2023-lod3-station-8-2-packed.glb",
       "min": [
@@ -47,15 +102,16 @@
         -2746.114501953125
       ],
       "max": [
-        811.139892578125,
+        931.0420532226562,
         69.96075439453125,
         -2508.485595703125
       ],
-      "buildings": 134,
-      "withPhotos": 134,
-      "triangles": 16120,
-      "images": 3,
+      "buildings": 161,
+      "withPhotos": 161,
+      "triangles": 18758,
+      "images": 4,
       "tiles": [
+        "data/1/data100.b3dm",
         "data/1/data104.b3dm",
         "data/1/data105.b3dm",
         "data/1/data120.b3dm"
@@ -70,18 +126,20 @@
         -2532.822265625
       ],
       "max": [
-        812.9503784179688,
+        944.4918212890625,
         95.33930969238281,
         -2065.6025390625
       ],
-      "buildings": 392,
-      "withPhotos": 392,
-      "triangles": 38730,
-      "images": 6,
+      "buildings": 601,
+      "withPhotos": 547,
+      "triangles": 51344,
+      "images": 8,
       "tiles": [
+        "data/1/data102.b3dm",
         "data/1/data106.b3dm",
         "data/1/data107.b3dm",
         "data/1/data122.b3dm",
+        "data/1/data539.b3dm",
         "data/1/data543.b3dm",
         "data/1/data544.b3dm",
         "data/1/data559.b3dm"
@@ -146,7 +204,7 @@
       "id": "station-8-0",
       "url": "data/2023-lod3-station-8-0-packed.glb",
       "min": [
-        -519.7013549804688,
+        -647.313232421875,
         47.39360427856445,
         -2744.11083984375
       ],
@@ -155,22 +213,23 @@
         85.99768829345703,
         -2512.177490234375
       ],
-      "buildings": 271,
+      "buildings": 291,
       "withPhotos": 265,
-      "triangles": 25184,
+      "triangles": 25656,
       "images": 3,
       "tiles": [
         "data/1/data352.b3dm",
         "data/1/data353.b3dm",
-        "data/1/data368.b3dm"
+        "data/1/data368.b3dm",
+        "data/1/data369.b3dm"
       ]
     },
     {
       "id": "station-7-0",
       "url": "data/2023-lod3-station-7-0-packed.glb",
       "min": [
-        -523.0990600585938,
-        46.06555938720703,
+        -770.5955810546875,
+        45.11751174926758,
         -2528.104248046875
       ],
       "max": [
@@ -178,17 +237,259 @@
         97.3111343383789,
         -2065.12451171875
       ],
-      "buildings": 387,
-      "withPhotos": 387,
-      "triangles": 38786,
-      "images": 6,
+      "buildings": 644,
+      "withPhotos": 554,
+      "triangles": 55482,
+      "images": 8,
       "tiles": [
         "data/1/data354.b3dm",
         "data/1/data355.b3dm",
         "data/1/data370.b3dm",
+        "data/1/data371.b3dm",
+        "data/1/data375.b3dm",
         "data/1/data778.b3dm",
         "data/1/data779.b3dm",
-        "data/1/data794.b3dm"
+        "data/1/data794.b3dm",
+        "data/1/data795.b3dm"
+      ]
+    },
+    {
+      "id": "station-8--1",
+      "url": "data/2023-lod3-station-8--1-packed.glb",
+      "min": [
+        -1244.08447265625,
+        45.450313568115234,
+        -2755.828125
+      ],
+      "max": [
+        -630.3693237304688,
+        74.05249786376953,
+        -2503.37744140625
+      ],
+      "buildings": 141,
+      "withPhotos": 0,
+      "triangles": 3028,
+      "images": 0,
+      "tiles": [
+        "data/1/data373.b3dm",
+        "data/1/data374.b3dm",
+        "data/1/data432.b3dm",
+        "data/1/data433.b3dm",
+        "data/1/data437.b3dm"
+      ]
+    },
+    {
+      "id": "station-7--1",
+      "url": "data/2023-lod3-station-7--1-packed.glb",
+      "min": [
+        -1246.47802734375,
+        44.406776428222656,
+        -2532.101318359375
+      ],
+      "max": [
+        -632.7754516601562,
+        76.47281646728516,
+        -2063.383056640625
+      ],
+      "buildings": 520,
+      "withPhotos": 0,
+      "triangles": 13044,
+      "images": 0,
+      "tiles": [
+        "data/1/data376.b3dm",
+        "data/1/data434.b3dm",
+        "data/1/data435.b3dm",
+        "data/1/data439.b3dm",
+        "data/1/data799.b3dm",
+        "data/1/data800.b3dm",
+        "data/1/data855.b3dm",
+        "data/1/data856.b3dm",
+        "data/1/data860.b3dm"
+      ]
+    },
+    {
+      "id": "station-8--2",
+      "url": "data/2023-lod3-station-8--2-packed.glb",
+      "min": [
+        -1728.0447998046875,
+        44.78715133666992,
+        -2750.509521484375
+      ],
+      "max": [
+        -1231.8092041015625,
+        59.81365966796875,
+        -2510.54638671875
+      ],
+      "buildings": 475,
+      "withPhotos": 0,
+      "triangles": 12884,
+      "images": 0,
+      "tiles": [
+        "data/1/data438.b3dm",
+        "data/1/data453.b3dm",
+        "data/1/data454.b3dm",
+        "data/1/data458.b3dm"
+      ]
+    },
+    {
+      "id": "station-7--2",
+      "url": "data/2023-lod3-station-7--2-packed.glb",
+      "min": [
+        -1730.2271728515625,
+        44.79612350463867,
+        -2529.759521484375
+      ],
+      "max": [
+        -1231.62451171875,
+        60.92043685913086,
+        -2068.650146484375
+      ],
+      "buildings": 696,
+      "withPhotos": 0,
+      "triangles": 18120,
+      "images": 0,
+      "tiles": [
+        "data/1/data440.b3dm",
+        "data/1/data455.b3dm",
+        "data/1/data456.b3dm",
+        "data/1/data460.b3dm",
+        "data/1/data861.b3dm",
+        "data/1/data871.b3dm",
+        "data/1/data872.b3dm",
+        "data/1/data876.b3dm"
+      ]
+    },
+    {
+      "id": "station-6-3",
+      "url": "data/2023-lod3-station-6-3-packed.glb",
+      "min": [
+        925.4249267578125,
+        43.351959228515625,
+        -2084.4580078125
+      ],
+      "max": [
+        1533.051025390625,
+        79.192138671875,
+        -1847.451416015625
+      ],
+      "buildings": 142,
+      "withPhotos": 70,
+      "triangles": 8664,
+      "images": 2,
+      "tiles": [
+        "data/1/data486.b3dm",
+        "data/1/data487.b3dm",
+        "data/1/data491.b3dm",
+        "data/1/data492.b3dm",
+        "data/1/data540.b3dm"
+      ]
+    },
+    {
+      "id": "station-5-3",
+      "url": "data/2023-lod3-station-5-3-packed.glb",
+      "min": [
+        920.9734497070312,
+        44.41423034667969,
+        -1850.0198974609375
+      ],
+      "max": [
+        1531.483154296875,
+        129.6814727783203,
+        -1399.1756591796875
+      ],
+      "buildings": 709,
+      "withPhotos": 0,
+      "triangles": 21488,
+      "images": 0,
+      "tiles": [
+        "data/1/data494.b3dm",
+        "data/1/data495.b3dm",
+        "data/1/data496.b3dm",
+        "data/1/data497.b3dm",
+        "data/1/data499.b3dm",
+        "data/1/data500.b3dm",
+        "data/1/data501.b3dm",
+        "data/1/data502.b3dm",
+        "data/1/data548.b3dm",
+        "data/1/data550.b3dm"
+      ]
+    },
+    {
+      "id": "station-4-3",
+      "url": "data/2023-lod3-station-4-3-packed.glb",
+      "min": [
+        918.7340087890625,
+        45.202152252197266,
+        -1411.574462890625
+      ],
+      "max": [
+        1395.197509765625,
+        78.6115951538086,
+        -1167.3804931640625
+      ],
+      "buildings": 252,
+      "withPhotos": 0,
+      "triangles": 7996,
+      "images": 0,
+      "tiles": [
+        "data/1/data518.b3dm",
+        "data/1/data521.b3dm",
+        "data/1/data522.b3dm",
+        "data/1/data580.b3dm"
+      ]
+    },
+    {
+      "id": "station-3-3",
+      "url": "data/2023-lod3-station-3-3-packed.glb",
+      "min": [
+        915.1468505859375,
+        42.5656623840332,
+        -1188.2728271484375
+      ],
+      "max": [
+        1429.850341796875,
+        72.3553466796875,
+        -726.6952514648438
+      ],
+      "buildings": 571,
+      "withPhotos": 5,
+      "triangles": 16766,
+      "images": 1,
+      "tiles": [
+        "data/1/data519.b3dm",
+        "data/1/data523.b3dm",
+        "data/1/data524.b3dm",
+        "data/1/data526.b3dm",
+        "data/1/data527.b3dm",
+        "data/1/data531.b3dm",
+        "data/1/data532.b3dm",
+        "data/1/data582.b3dm",
+        "data/1/data590.b3dm"
+      ]
+    },
+    {
+      "id": "station-2-3",
+      "url": "data/2023-lod3-station-2-3-packed.glb",
+      "min": [
+        918.2742309570312,
+        42.29448699951172,
+        -746.75390625
+      ],
+      "max": [
+        1534.18896484375,
+        63.99396896362305,
+        -508.37744140625
+      ],
+      "buildings": 399,
+      "withPhotos": 35,
+      "triangles": 16008,
+      "images": 2,
+      "tiles": [
+        "data/1/data528.b3dm",
+        "data/1/data529.b3dm",
+        "data/1/data533.b3dm",
+        "data/1/data534.b3dm",
+        "data/1/data592.b3dm"
       ]
     },
     {
@@ -196,19 +497,20 @@
       "url": "data/2023-lod3-station-6-2-packed.glb",
       "min": [
         435.9456481933594,
-        44.136810302734375,
+        43.793216705322266,
         -2078.4130859375
       ],
       "max": [
-        811.9666748046875,
-        79.65962219238281,
-        -1948.103271484375
+        930.1932373046875,
+        83.19207000732422,
+        -1947.1700439453125
       ],
-      "buildings": 99,
-      "withPhotos": 99,
-      "triangles": 8188,
-      "images": 3,
+      "buildings": 134,
+      "withPhotos": 134,
+      "triangles": 11634,
+      "images": 4,
       "tiles": [
+        "data/1/data541.b3dm",
         "data/1/data545.b3dm",
         "data/1/data546.b3dm",
         "data/1/data561.b3dm"
@@ -223,15 +525,17 @@
         -1789.1009521484375
       ],
       "max": [
-        817.25146484375,
+        931.7871704101562,
         86.38252258300781,
         -1372.86328125
       ],
-      "buildings": 249,
-      "withPhotos": 208,
-      "triangles": 24734,
-      "images": 6,
+      "buildings": 393,
+      "withPhotos": 221,
+      "triangles": 29618,
+      "images": 7,
       "tiles": [
+        "data/1/data549.b3dm",
+        "data/1/data551.b3dm",
         "data/1/data553.b3dm",
         "data/1/data554.b3dm",
         "data/1/data555.b3dm",
@@ -304,15 +608,16 @@
         -1411.7608642578125
       ],
       "max": [
-        810.550048828125,
+        928.1817016601562,
         65.34259033203125,
         -1175.74755859375
       ],
-      "buildings": 301,
+      "buildings": 414,
       "withPhotos": 283,
-      "triangles": 30558,
+      "triangles": 34226,
       "images": 3,
       "tiles": [
+        "data/1/data581.b3dm",
         "data/1/data585.b3dm",
         "data/1/data586.b3dm",
         "data/1/data601.b3dm"
@@ -323,21 +628,23 @@
       "url": "data/2023-lod3-station-3-2-packed.glb",
       "min": [
         440.19146728515625,
-        42.215633392333984,
-        -1188.4827880859375
+        42.21410369873047,
+        -1191.5911865234375
       ],
       "max": [
-        823.5271606445312,
+        930.518310546875,
         83.55546569824219,
-        -732.3704223632812
+        -724.4595947265625
       ],
-      "buildings": 455,
-      "withPhotos": 455,
-      "triangles": 52338,
-      "images": 6,
+      "buildings": 587,
+      "withPhotos": 518,
+      "triangles": 67994,
+      "images": 8,
       "tiles": [
+        "data/1/data583.b3dm",
         "data/1/data587.b3dm",
         "data/1/data588.b3dm",
+        "data/1/data591.b3dm",
         "data/1/data595.b3dm",
         "data/1/data596.b3dm",
         "data/1/data603.b3dm",
@@ -350,18 +657,19 @@
       "min": [
         436.7881164550781,
         42.05809783935547,
-        -742.9315185546875
+        -747.7742309570312
       ],
       "max": [
-        826.2127075195312,
-        61.99993896484375,
+        931.693115234375,
+        65.70365142822266,
         -500.0116271972656
       ],
-      "buildings": 207,
-      "withPhotos": 207,
-      "triangles": 21860,
-      "images": 3,
+      "buildings": 261,
+      "withPhotos": 261,
+      "triangles": 29160,
+      "images": 4,
       "tiles": [
+        "data/1/data593.b3dm",
         "data/1/data597.b3dm",
         "data/1/data598.b3dm",
         "data/1/data613.b3dm"
@@ -448,25 +756,165 @@
       ]
     },
     {
+      "id": "station-1-3",
+      "url": "data/2023-lod3-station-1-3-packed.glb",
+      "min": [
+        918.2288208007812,
+        41.82091522216797,
+        -520.5230102539062
+      ],
+      "max": [
+        1534.200927734375,
+        64.5674057006836,
+        -62.31013870239258
+      ],
+      "buildings": 832,
+      "withPhotos": 1,
+      "triangles": 24284,
+      "images": 1,
+      "tiles": [
+        "data/1/data644.b3dm",
+        "data/1/data645.b3dm",
+        "data/1/data646.b3dm",
+        "data/1/data647.b3dm",
+        "data/1/data649.b3dm",
+        "data/1/data650.b3dm",
+        "data/1/data651.b3dm",
+        "data/1/data652.b3dm",
+        "data/1/data707.b3dm",
+        "data/1/data709.b3dm"
+      ]
+    },
+    {
+      "id": "station-0-3",
+      "url": "data/2023-lod3-station-0-3-packed.glb",
+      "min": [
+        914.71484375,
+        41.88535690307617,
+        -77.6237564086914
+      ],
+      "max": [
+        1530.664306640625,
+        57.799991607666016,
+        180.2645263671875
+      ],
+      "buildings": 380,
+      "withPhotos": 0,
+      "triangles": 10548,
+      "images": 0,
+      "tiles": [
+        "data/1/data654.b3dm",
+        "data/1/data655.b3dm",
+        "data/1/data659.b3dm",
+        "data/1/data660.b3dm",
+        "data/1/data717.b3dm"
+      ]
+    },
+    {
+      "id": "station--1-3",
+      "url": "data/2023-lod3-station--1-3-packed.glb",
+      "min": [
+        907.5015258789062,
+        41.47106170654297,
+        139.3274383544922
+      ],
+      "max": [
+        1533.8583984375,
+        56.56540298461914,
+        618.6029052734375
+      ],
+      "buildings": 668,
+      "withPhotos": 0,
+      "triangles": 16144,
+      "images": 0,
+      "tiles": [
+        "data/1/data656.b3dm",
+        "data/1/data657.b3dm",
+        "data/1/data661.b3dm",
+        "data/1/data662.b3dm",
+        "data/1/data686.b3dm",
+        "data/1/data687.b3dm",
+        "data/1/data691.b3dm",
+        "data/1/data692.b3dm",
+        "data/1/data719.b3dm",
+        "data/1/data747.b3dm"
+      ]
+    },
+    {
+      "id": "station--2-3",
+      "url": "data/2023-lod3-station--2-3-packed.glb",
+      "min": [
+        924.9324340820312,
+        41.000186920166016,
+        573.2081298828125
+      ],
+      "max": [
+        1529.2828369140625,
+        57.47917938232422,
+        828.7182006835938
+      ],
+      "buildings": 293,
+      "withPhotos": 0,
+      "triangles": 7728,
+      "images": 0,
+      "tiles": [
+        "data/1/data688.b3dm",
+        "data/1/data689.b3dm",
+        "data/1/data693.b3dm",
+        "data/1/data694.b3dm",
+        "data/1/data749.b3dm"
+      ]
+    },
+    {
+      "id": "station--3-3",
+      "url": "data/2023-lod3-station--3-3-packed.glb",
+      "min": [
+        1116.680908203125,
+        41.110870361328125,
+        811.2723999023438
+      ],
+      "max": [
+        1535.6795654296875,
+        62.23931884765625,
+        1148.1636962890625
+      ],
+      "buildings": 130,
+      "withPhotos": 0,
+      "triangles": 3840,
+      "images": 0,
+      "tiles": [
+        "data/1/data696.b3dm",
+        "data/1/data697.b3dm",
+        "data/1/data698.b3dm",
+        "data/1/data699.b3dm",
+        "data/1/data701.b3dm",
+        "data/1/data702.b3dm",
+        "data/1/data703.b3dm"
+      ]
+    },
+    {
       "id": "station-1-2",
       "url": "data/2023-lod3-station-1-2-packed.glb",
       "min": [
         461.1902160644531,
-        41.893463134765625,
+        41.204891204833984,
         -556.6083984375
       ],
       "max": [
-        823.8741455078125,
+        938.7398681640625,
         64.77429962158203,
-        -287.6138000488281
+        -61.8472900390625
       ],
-      "buildings": 116,
-      "withPhotos": 22,
-      "triangles": 7014,
-      "images": 3,
+      "buildings": 323,
+      "withPhotos": 27,
+      "triangles": 13296,
+      "images": 4,
       "tiles": [
+        "data/1/data708.b3dm",
+        "data/1/data710.b3dm",
         "data/1/data712.b3dm",
         "data/1/data713.b3dm",
+        "data/1/data714.b3dm",
         "data/1/data728.b3dm"
       ]
     },
@@ -474,47 +922,86 @@
       "id": "port",
       "url": "data/2023-lod3-port-packed.glb",
       "min": [
-        -487.8546142578125,
+        -442.7481384277344,
         40.70195007324219,
         -337.52276611328125
       ],
       "max": [
-        816.0557250976562,
+        699.8917236328125,
         86.58653259277344,
-        381.3628845214844
+        178.92518615722656
       ],
-      "buildings": 1344,
-      "withPhotos": 271,
-      "triangles": 75956,
-      "images": 14,
+      "buildings": 528,
+      "withPhotos": 267,
+      "triangles": 55780,
+      "images": 13,
       "tiles": [
-        "data/1/data714.b3dm",
         "data/1/data715.b3dm",
-        "data/1/data722.b3dm",
         "data/1/data723.b3dm",
-        "data/1/data724.b3dm",
-        "data/1/data725.b3dm",
         "data/1/data729.b3dm",
         "data/1/data733.b3dm",
         "data/1/data734.b3dm",
         "data/1/data736.b3dm",
         "data/1/data737.b3dm",
-        "data/1/data738.b3dm",
-        "data/1/data739.b3dm",
         "data/1/data741.b3dm",
         "data/1/data742.b3dm",
-        "data/1/data743.b3dm",
-        "data/1/data744.b3dm",
         "data/1/data884.b3dm",
         "data/1/data885.b3dm",
         "data/1/data889.b3dm",
         "data/1/data890.b3dm",
         "data/1/data892.b3dm",
         "data/1/data893.b3dm",
-        "data/1/data894.b3dm",
-        "data/1/data896.b3dm",
-        "data/1/data900.b3dm",
-        "data/1/data903.b3dm"
+        "data/1/data896.b3dm"
+      ]
+    },
+    {
+      "id": "station-0-2",
+      "url": "data/2023-lod3-station-0-2-packed.glb",
+      "min": [
+        676.711669921875,
+        41.49037170410156,
+        -76.14108276367188
+      ],
+      "max": [
+        929.9400024414062,
+        53.497962951660156,
+        157.48208618164062
+      ],
+      "buildings": 195,
+      "withPhotos": 0,
+      "triangles": 5548,
+      "images": 0,
+      "tiles": [
+        "data/1/data718.b3dm",
+        "data/1/data722.b3dm"
+      ]
+    },
+    {
+      "id": "station--1-2",
+      "url": "data/2023-lod3-station--1-2-packed.glb",
+      "min": [
+        436.9324951171875,
+        41.44124984741211,
+        146.200927734375
+      ],
+      "max": [
+        934.8877563476562,
+        60.78791809082031,
+        606.504150390625
+      ],
+      "buildings": 830,
+      "withPhotos": 0,
+      "triangles": 19876,
+      "images": 0,
+      "tiles": [
+        "data/1/data720.b3dm",
+        "data/1/data724.b3dm",
+        "data/1/data725.b3dm",
+        "data/1/data738.b3dm",
+        "data/1/data748.b3dm",
+        "data/1/data752.b3dm",
+        "data/1/data753.b3dm",
+        "data/1/data760.b3dm"
       ]
     },
     {
@@ -542,10 +1029,106 @@
       ]
     },
     {
+      "id": "station--1-1",
+      "url": "data/2023-lod3-station--1-1-packed.glb",
+      "min": [
+        -42.53852081298828,
+        42.22001266479492,
+        145.90489196777344
+      ],
+      "max": [
+        453.8484802246094,
+        61.454952239990234,
+        604.1220703125
+      ],
+      "buildings": 663,
+      "withPhotos": 0,
+      "triangles": 14316,
+      "images": 0,
+      "tiles": [
+        "data/1/data739.b3dm",
+        "data/1/data743.b3dm",
+        "data/1/data744.b3dm",
+        "data/1/data761.b3dm",
+        "data/1/data765.b3dm",
+        "data/1/data766.b3dm",
+        "data/1/data894.b3dm"
+      ]
+    },
+    {
+      "id": "station--2-2",
+      "url": "data/2023-lod3-station--2-2-packed.glb",
+      "min": [
+        438.7150573730469,
+        41.38418197631836,
+        592.0658569335938
+      ],
+      "max": [
+        929.6434936523438,
+        67.70367431640625,
+        818.151123046875
+      ],
+      "buildings": 251,
+      "withPhotos": 0,
+      "triangles": 6148,
+      "images": 0,
+      "tiles": [
+        "data/1/data750.b3dm",
+        "data/1/data754.b3dm",
+        "data/1/data755.b3dm",
+        "data/1/data762.b3dm"
+      ]
+    },
+    {
+      "id": "station--3-2",
+      "url": "data/2023-lod3-station--3-2-packed.glb",
+      "min": [
+        469.1438903808594,
+        42.62412643432617,
+        816.0543823242188
+      ],
+      "max": [
+        997.4093627929688,
+        62.18233108520508,
+        1021.9837036132812
+      ],
+      "buildings": 16,
+      "withPhotos": 0,
+      "triangles": 684,
+      "images": 0,
+      "tiles": [
+        "data/1/data757.b3dm",
+        "data/1/data758.b3dm",
+        "data/1/data769.b3dm"
+      ]
+    },
+    {
+      "id": "station--2-1",
+      "url": "data/2023-lod3-station--2-1-packed.glb",
+      "min": [
+        241.41305541992188,
+        43.190650939941406,
+        586.6129150390625
+      ],
+      "max": [
+        460.1173400878906,
+        59.79548263549805,
+        762.5980834960938
+      ],
+      "buildings": 66,
+      "withPhotos": 0,
+      "triangles": 1588,
+      "images": 0,
+      "tiles": [
+        "data/1/data763.b3dm",
+        "data/1/data767.b3dm"
+      ]
+    },
+    {
       "id": "station-6-0",
       "url": "data/2023-lod3-station-6-0-packed.glb",
       "min": [
-        -521.629638671875,
+        -641.3810424804688,
         44.423057556152344,
         -2088.510498046875
       ],
@@ -554,47 +1137,103 @@
         86.37450408935547,
         -1842.8216552734375
       ],
-      "buildings": 203,
-      "withPhotos": 203,
-      "triangles": 24704,
-      "images": 3,
+      "buildings": 329,
+      "withPhotos": 329,
+      "triangles": 33816,
+      "images": 4,
       "tiles": [
         "data/1/data780.b3dm",
         "data/1/data781.b3dm",
-        "data/1/data796.b3dm"
+        "data/1/data796.b3dm",
+        "data/1/data797.b3dm"
       ]
     },
     {
       "id": "station-5-0",
       "url": "data/2023-lod3-station-5-0-packed.glb",
       "min": [
-        -528.8563842773438,
+        -763.1017456054688,
         42.43812942504883,
-        -1853.6683349609375
+        -1855.1385498046875
       ],
       "max": [
         -131.77601623535156,
         88.9779052734375,
         -1389.431396484375
       ],
-      "buildings": 625,
-      "withPhotos": 608,
-      "triangles": 57188,
-      "images": 6,
+      "buildings": 888,
+      "withPhotos": 706,
+      "triangles": 71748,
+      "images": 8,
       "tiles": [
         "data/1/data788.b3dm",
         "data/1/data789.b3dm",
         "data/1/data790.b3dm",
         "data/1/data791.b3dm",
         "data/1/data804.b3dm",
-        "data/1/data806.b3dm"
+        "data/1/data805.b3dm",
+        "data/1/data806.b3dm",
+        "data/1/data807.b3dm",
+        "data/1/data811.b3dm"
+      ]
+    },
+    {
+      "id": "station-6--1",
+      "url": "data/2023-lod3-station-6--1-packed.glb",
+      "min": [
+        -1244.4345703125,
+        43.30235290527344,
+        -2080.63720703125
+      ],
+      "max": [
+        -633.3495483398438,
+        61.853294372558594,
+        -1840.2484130859375
+      ],
+      "buildings": 512,
+      "withPhotos": 25,
+      "triangles": 14130,
+      "images": 1,
+      "tiles": [
+        "data/1/data801.b3dm",
+        "data/1/data802.b3dm",
+        "data/1/data857.b3dm",
+        "data/1/data858.b3dm",
+        "data/1/data862.b3dm"
+      ]
+    },
+    {
+      "id": "station-5--1",
+      "url": "data/2023-lod3-station-5--1-packed.glb",
+      "min": [
+        -1335.554443359375,
+        43.165340423583984,
+        -1864.7586669921875
+      ],
+      "max": [
+        -629.4407958984375,
+        61.43793869018555,
+        -1503.8681640625
+      ],
+      "buildings": 307,
+      "withPhotos": 5,
+      "triangles": 8602,
+      "images": 1,
+      "tiles": [
+        "data/1/data809.b3dm",
+        "data/1/data810.b3dm",
+        "data/1/data812.b3dm",
+        "data/1/data865.b3dm",
+        "data/1/data866.b3dm",
+        "data/1/data867.b3dm",
+        "data/1/data869.b3dm"
       ]
     },
     {
       "id": "station-4-0",
       "url": "data/2023-lod3-station-4-0-packed.glb",
       "min": [
-        -524.6845092773438,
+        -643.2754516601562,
         41.712562561035156,
         -1414.88134765625
       ],
@@ -603,21 +1242,22 @@
         60.09071350097656,
         -1175.04248046875
       ],
-      "buildings": 284,
-      "withPhotos": 279,
-      "triangles": 31350,
-      "images": 3,
+      "buildings": 358,
+      "withPhotos": 288,
+      "triangles": 34742,
+      "images": 4,
       "tiles": [
         "data/1/data820.b3dm",
         "data/1/data821.b3dm",
-        "data/1/data836.b3dm"
+        "data/1/data836.b3dm",
+        "data/1/data837.b3dm"
       ]
     },
     {
       "id": "station-3-0",
       "url": "data/2023-lod3-station-3-0-packed.glb",
       "min": [
-        -527.0234375,
+        -641.6005249023438,
         41.593753814697266,
         -1187.0426025390625
       ],
@@ -626,9 +1266,9 @@
         64.70096588134766,
         -723.0228881835938
       ],
-      "buildings": 436,
+      "buildings": 553,
       "withPhotos": 218,
-      "triangles": 32300,
+      "triangles": 36020,
       "images": 5,
       "tiles": [
         "data/1/data822.b3dm",
@@ -636,54 +1276,221 @@
         "data/1/data830.b3dm",
         "data/1/data831.b3dm",
         "data/1/data838.b3dm",
-        "data/1/data846.b3dm"
+        "data/1/data839.b3dm",
+        "data/1/data846.b3dm",
+        "data/1/data847.b3dm"
       ]
     },
     {
       "id": "station-2-0",
       "url": "data/2023-lod3-station-2-0-packed.glb",
       "min": [
-        -534.7807006835938,
+        -601.888427734375,
         41.34737777709961,
         -744.907958984375
       ],
       "max": [
         -151.37171936035156,
-        58.16196823120117,
+        60.56686019897461,
         -507.3512268066406
       ],
-      "buildings": 173,
+      "buildings": 192,
       "withPhotos": 99,
-      "triangles": 12876,
+      "triangles": 13324,
       "images": 2,
       "tiles": [
         "data/1/data832.b3dm",
         "data/1/data833.b3dm",
-        "data/1/data848.b3dm"
+        "data/1/data848.b3dm",
+        "data/1/data849.b3dm"
+      ]
+    },
+    {
+      "id": "station-4--1",
+      "url": "data/2023-lod3-station-4--1-packed.glb",
+      "min": [
+        -812.060302734375,
+        43.37482833862305,
+        -1410.6739501953125
+      ],
+      "max": [
+        -633.4771728515625,
+        56.85527038574219,
+        -1211.794189453125
+      ],
+      "buildings": 63,
+      "withPhotos": 0,
+      "triangles": 1964,
+      "images": 0,
+      "tiles": [
+        "data/1/data841.b3dm",
+        "data/1/data842.b3dm"
+      ]
+    },
+    {
+      "id": "station-3--1",
+      "url": "data/2023-lod3-station-3--1-packed.glb",
+      "min": [
+        -960.88134765625,
+        43.453372955322266,
+        -1358.9046630859375
+      ],
+      "max": [
+        -629.9473266601562,
+        60.91973876953125,
+        -787.459228515625
+      ],
+      "buildings": 66,
+      "withPhotos": 0,
+      "triangles": 1896,
+      "images": 0,
+      "tiles": [
+        "data/1/data843.b3dm",
+        "data/1/data844.b3dm",
+        "data/1/data851.b3dm",
+        "data/1/data880.b3dm"
+      ]
+    },
+    {
+      "id": "station-6--2",
+      "url": "data/2023-lod3-station-6--2-packed.glb",
+      "min": [
+        -1569.1922607421875,
+        42.63808059692383,
+        -2074.961181640625
+      ],
+      "max": [
+        -1232.71533203125,
+        59.55186080932617,
+        -1897.120361328125
+      ],
+      "buildings": 80,
+      "withPhotos": 0,
+      "triangles": 2268,
+      "images": 0,
+      "tiles": [
+        "data/1/data863.b3dm",
+        "data/1/data873.b3dm",
+        "data/1/data874.b3dm"
       ]
     },
     {
       "id": "station-1-0",
       "url": "data/2023-lod3-station-1-0-packed.glb",
       "min": [
-        -520.886474609375,
+        -651.6302490234375,
         41.45225143432617,
         -524.669189453125
       ],
       "max": [
         -150.07606506347656,
         63.29892349243164,
-        -290.3506774902344
+        -169.85940551757812
       ],
-      "buildings": 100,
+      "buildings": 111,
       "withPhotos": 80,
-      "triangles": 9788,
+      "triangles": 10000,
       "images": 2,
       "tiles": [
         "data/1/data887.b3dm",
         "data/1/data888.b3dm",
-        "data/1/data898.b3dm"
+        "data/1/data898.b3dm",
+        "data/1/data899.b3dm",
+        "data/1/data900.b3dm"
+      ]
+    },
+    {
+      "id": "station-1--1",
+      "url": "data/2023-lod3-station-1--1-packed.glb",
+      "min": [
+        -704.896240234375,
+        42.5579833984375,
+        -436.2066345214844
+      ],
+      "max": [
+        -610.915283203125,
+        62.136783599853516,
+        -337.4256286621094
+      ],
+      "buildings": 3,
+      "withPhotos": 0,
+      "triangles": 56,
+      "images": 0,
+      "tiles": [
+        "data/1/data902.b3dm"
+      ]
+    },
+    {
+      "id": "station-0-0",
+      "url": "data/2023-lod3-station-0-0-packed.glb",
+      "min": [
+        -487.1983337402344,
+        42.28939437866211,
+        156.5617218017578
+      ],
+      "max": [
+        -412.4140930175781,
+        50.636634826660156,
+        201.23373413085938
+      ],
+      "buildings": 4,
+      "withPhotos": 4,
+      "triangles": 988,
+      "images": 1,
+      "tiles": [
+        "data/1/data903.b3dm"
+      ]
+    },
+    {
+      "id": "station--2-0",
+      "url": "data/2023-lod3-station--2-0-packed.glb",
+      "min": [
+        47.23914337158203,
+        44.57699203491211,
+        381.0344543457031
+      ],
+      "max": [
+        85.36746978759766,
+        55.876731872558594,
+        448.8511962890625
+      ],
+      "buildings": 6,
+      "withPhotos": 0,
+      "triangles": 112,
+      "images": 0,
+      "tiles": [
+        "data/1/data905.b3dm"
+      ]
+    },
+    {
+      "id": "station--5-3",
+      "url": "data/2023-lod3-station--5-3-packed.glb",
+      "min": [
+        1508.3427734375,
+        42.54557418823242,
+        1307.9453125
+      ],
+      "max": [
+        1516.641357421875,
+        55.436100006103516,
+        1315.9801025390625
+      ],
+      "buildings": 1,
+      "withPhotos": 0,
+      "triangles": 12,
+      "images": 0,
+      "tiles": [
+        "data/3/data450.b3dm"
       ]
     }
-  ]
+  ],
+  "expansion": {
+    "areas": [
+      "千本浜公園周辺",
+      "我入道周辺"
+    ],
+    "lod2SupplementUsed": false,
+    "lod3Ids": 20522,
+    "lod2TilesChecked": 211
+  }
 }

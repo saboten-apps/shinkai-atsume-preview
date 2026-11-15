@@ -1,5 +1,7 @@
 # 沼津市2023年度の建物
 
+千本浜・我入道への追加拡張は COAST-EXPANSION.md を参照。以下は駅～港への初回導入時の記録。
+
 建物は公式PLATEAU配信APIの2023年度LOD3に更新。地形・道路・植生・水面は2021年度を継続。
 公式カタログ: https://api.plateauview.mlit.go.jp/datacatalog/plateau-datasets
 配布元: https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2023

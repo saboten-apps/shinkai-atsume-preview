@@ -68,8 +68,8 @@ export function buildNumazuPortScene(
   const water = createWaterSurface(scene);
 
   // A shallow virtual floor, independent of real bathymetry. Hidden from aerial views.
-  const virtualBed=new THREE.Mesh(new THREE.PlaneGeometry(2400,4200),new THREE.MeshStandardMaterial({color:0x426b69,roughness:1}));
-  virtualBed.rotation.x=-Math.PI/2;virtualBed.position.set(100,27,-1100);virtualBed.userData.virtualWaterBed=true;virtualBed.visible=false;scene.add(track(virtualBed));
+  const virtualBed=new THREE.Mesh(new THREE.PlaneGeometry(5000,6500),new THREE.MeshStandardMaterial({color:0x426b69,roughness:1}));
+  virtualBed.rotation.x=-Math.PI/2;virtualBed.position.set(0,27,-400);virtualBed.userData.virtualWaterBed=true;virtualBed.visible=false;scene.add(track(virtualBed));
 
   // --- 2. 周囲の敷き分け（南と東の地続き表現、y=41.55） ---
   // 生成り色の平面を y=41.55 に、z > +720 の南側一帯と x > +590 の東側一帯だけに敷く（地形範囲の外側）。
@@ -79,28 +79,12 @@ export function buildNumazuPortScene(
     metalness: 0.0,
   });
 
-  // 東側一帯: x in [590, 1200] (幅610, 中心895), z in [-600, 720] (長さ1320, 中心60)
-  const eastLandGeom = new THREE.PlaneGeometry(700, 3500);
-  const eastLand = new THREE.Mesh(eastLandGeom, landExtensionMat);
-  eastLand.rotation.x = -Math.PI / 2;
-  eastLand.position.set(1400, 41.55, -1000);
-  eastLand.receiveShadow = false;
-  scene.add(track(eastLand));
-
   // Cropped station terrain ends at z ≈ -2723. Continue inland as a plain
   // backdrop outside the data footprint, rather than showing an ocean there.
   const northLand = new THREE.Mesh(new THREE.PlaneGeometry(6000, 8000), landExtensionMat);
   northLand.rotation.x = -Math.PI / 2;
   northLand.position.set(0, 41.55, -6725);
   scene.add(track(northLand));
-
-  // 南側一帯: x in [-700, 1200] (幅1900, 中心250), z in [720, 1200] (長さ480, 中心960)
-  const southLandGeom = new THREE.PlaneGeometry(1900, 480);
-  const southLand = new THREE.Mesh(southLandGeom, landExtensionMat);
-  southLand.rotation.x = -Math.PI / 2;
-  southLand.position.set(250, 41.55, 960);
-  southLand.receiveShadow = false;
-  scene.add(track(southLand));
 
   // --- 3. PLATEAU実データ GLB の読み込み ---
   const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '') + '/map/';
