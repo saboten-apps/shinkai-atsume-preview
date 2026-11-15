@@ -25,7 +25,7 @@ interface TodayGachaPageProps {
   };
   onNavigateToFish: (fishId: string) => void;
   onNavigateToPokedex: () => void;
-  onExplore: (date: string) => void;
+  onExplore: (date: string, mode?: '3d'|'2d') => void;
 }
 
 export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
@@ -129,6 +129,13 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
       {/* ガチャ結果表示後 */}
       {activeDrawResult && (
         <>
+          <section className="gacha-explore-launch">
+            <div className="gacha-explore-summary"><FishIllustration fishId={activeDrawResult.fish.id} illustration={activeDrawResult.fish.illustration} altText={getFishDisplayName(activeDrawResult.fish,locale)} isObtained size="sm"/><div><p>{locale==='ja'?'今日の魚と、街へ。':'Your fish. Your city.'}</p><h2>{getFishDisplayName(activeDrawResult.fish,locale)}</h2><p>{locale==='ja'?'沼津のどこかに隠れています。探して景色入りカードにしよう。':'It’s hiding somewhere in Numazu. Find it and make a scenery postcard.'}</p></div></div>
+            <div className="gacha-explore-actions">
+              <button className="primary-action-btn" onClick={()=>onExplore(activeDrawResult.jstDate)}>{locale==='ja'?'今日の魚を探しに行く':'Find today’s fish'} <span aria-hidden="true">→</span></button>
+              <button className="secondary-action-btn" onClick={()=>onExplore(activeDrawResult.jstDate,'2d')}>{locale==='ja'?'軽い2D地図で探す':'Lightweight 2D map'}</button>
+            </div>
+          </section>
           <article className="fish-result-card" aria-live="polite">
             <div className="specimen-plate-topbar">
               <div className="specimen-plate-no">
@@ -282,14 +289,6 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
 
             <p className="same-day-notice">{t.gacha.sameDayNotice}</p>
           </article>
-
-          <section className="gacha-hero-card">
-            <h2>{locale === 'ja' ? '今日の魚は、沼津のどこかにいます。' : "Today's fish is somewhere in Numazu."}</h2>
-            <p>{locale === 'ja' ? 'ヒントを頼りに街を探して、景色入りカードを作ろう。' : 'Follow the hints and make a discovery postcard.'}</p>
-            <button className="primary-action-btn" onClick={() => onExplore(activeDrawResult.jstDate)}>
-              {locale === 'ja' ? '今日の魚を探しに行く' : 'Find today’s fish'}
-            </button>
-          </section>
 
           {/* 結果カードPNG生成（1200×630） */}
           <ResultCardSection

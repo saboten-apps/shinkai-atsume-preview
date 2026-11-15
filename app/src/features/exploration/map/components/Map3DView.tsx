@@ -12,6 +12,8 @@ export interface Search3DBridge {
   target: { x: number; z: number };
   onPosition: (p: { x: number; z: number }, visible: boolean) => void;
   onCaptureReady: (capture: (() => string) | null) => void;
+  autoFly?: boolean;
+  onReady?: () => void;
 }
 interface Map3DViewProps {
   search?: Search3DBridge;
@@ -69,6 +71,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
     let alive = true;
     let dataReady = false;
+    let entered = false;
     let contextIsLost = false;
     let loadingArea = true;
     let width = container.clientWidth || window.innerWidth;
@@ -165,6 +168,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
     ready
       .then(() => {
+        if(!alive)return;
         dataReady = true;
         if (alive) setIsLoading(false);
       })
@@ -352,6 +356,14 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       }
       beacon.rotation.y += delta;
       if (!renderFrame()) cancelAnimationFrame(animationFrameId);
+      else if(dataReady&&!entered){
+        entered=true;
+        if(searchRef.current?.autoFly){
+          flight.setMode(true,new THREE.Vector3(searchRef.current.start.x,90,searchRef.current.start.z));
+          setFlying(true);
+        }
+        searchRef.current?.onReady?.();
+      }
     };
 
     animationFrameId = requestAnimationFrame(animate);
