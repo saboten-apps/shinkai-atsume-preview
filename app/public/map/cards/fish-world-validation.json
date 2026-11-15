@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-15T03:14:09.116Z",
+  "generatedAt": "2026-11-15T04:30:57.153Z",
   "note": "Actual scenery at fish-world-v1 anchors. Water depths are virtual; terrain remains a separate collision layer.",
   "places": [
     {
@@ -70,7 +70,7 @@
       "id": "fish-world-f09",
       "x": 0,
       "z": -450,
-      "surfaceY": 50.9897756048962,
+      "surfaceY": 53.810319611783406,
       "photoTiles": 44,
       "status": ""
     },
@@ -158,7 +158,7 @@
       "id": "fish-world-f20",
       "x": -180,
       "z": 30,
-      "surfaceY": 51.52626851882134,
+      "surfaceY": 54.68105380239887,
       "photoTiles": 44,
       "status": ""
     },

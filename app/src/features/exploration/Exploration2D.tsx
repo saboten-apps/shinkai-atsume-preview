@@ -1,4 +1,6 @@
 import React, { useRef } from 'react';
+import water from './waterOutline.v1.json';
+import city from './cityStructures.v1.json';
 import { FISH_SITES, targetGlow } from './fishWorld';
 import catalog from '../../../data/fish.json';
 import { BOUNDS, clampPosition, type Position } from './domain';
@@ -14,13 +16,13 @@ export default function Exploration2D({ position, onMove, en,targetFishId,target
     onMove(clampPosition({ x: point.x, z: point.y }));
   };
   return <div className="search-2d">
-    <p>{en ? 'Tap the map to move your virtual search marker. No GPS needed.' : '地図をタップして探索マーカーを移動。実際の移動やGPSは不要です。'}</p>
+    <p>{en ? 'North (station) is up; south (harbor) is down. Tap to move.' : '上が北（駅側）、下が南（港側）。タップして移動できます。'}</p>
     <svg ref={svgRef} viewBox={`${BOUNDS.minX} ${BOUNDS.minZ} 1200 2880`} onPointerDown={select} role="img" aria-label={en ? 'Schematic map from harbor to station' : '港から駅までの模式地図'}>
       <rect x="-500" y="-2580" width="1200" height="2880" fill="#ddd6bf" />
-      <path d="M700 -2200 Q300 -1900 460 -1300 Q620 -850 350 -450 L700 -100 Z" fill="#467b91" />
-      <path d="M-500 -40 L-330 -160 -230 -80 -110 -240 0 -70 160 -170 270 50 700 180 V300 H-500Z" fill="#467b91" />
+      <path d={water.sea} fill="#467b91" fillRule="evenodd"/><path d={water.river} fill="#467b91" fillRule="evenodd"/>
       <g stroke="#f5f0e6" strokeWidth="22" fill="none"><path d="M210 -2450 L100 -1900 100 -1150 -20 -190" /><path d="M-400 -2000 H500 M-400 -1500 H450 M-400 -1000 H400 M-350 -500 H400" /></g>
       <g fill="#23394b" fontSize="55" fontFamily="sans-serif"><text x="-240" y="-2400">{en ? 'Station south' : '沼津駅南側'}</text><text x="-300" y="-1250">{en ? 'Town' : '街なか'}</text><text x="320" y="-700" fontSize="42">{en ? 'River' : '川沿い'}</text><text x="-300" y="-280">{en ? 'Numazu harbor' : '沼津港'}</text></g>
+      <g>{city.bridges.map(bridge=><g key={bridge.id}><path d={`M${bridge.a.x} ${bridge.a.z}L${bridge.b.x} ${bridge.b.z}`} stroke="#eee9d7" strokeWidth="22"/><text x={bridge.center.x+25} y={bridge.center.z-28} fill="#18394b" stroke="#eee9d7" strokeWidth="5" paintOrder="stroke" fontSize="36">{en?bridge.nameEn:bridge.name}</text></g>)}</g>
       <g aria-label={en?'Fish in virtual Numazu':'街にいる魚'}>{FISH_SITES.map(site=>{
         const p=site.fishId===targetFishId?target:site;
         const distance=Math.hypot(position.x-p.x,position.z-p.z);

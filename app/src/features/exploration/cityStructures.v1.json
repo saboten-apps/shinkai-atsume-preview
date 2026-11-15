@@ -1,0 +1,115 @@
+{
+  "source": "地理院タイル（国土地理院・ベクトル地図）を加工",
+  "sourceUrls": [
+    "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/15/29022/12967.pbf",
+    "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/15/29022/12968.pbf",
+    "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/15/29022/12969.pbf",
+    "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/15/29022/12970.pbf",
+    "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/15/29023/12967.pbf",
+    "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/15/29023/12968.pbf",
+    "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/15/29023/12969.pbf",
+    "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/15/29023/12970.pbf"
+  ],
+  "note": "Bridge centerlines and names from GSI; deck width, elevation and details are approximations for this game.",
+  "bridges": [
+    {
+      "id": "eitai",
+      "name": "永代橋",
+      "nameEn": "Eitai Bridge",
+      "a": {
+        "x": -0.86,
+        "z": -1368.38
+      },
+      "b": {
+        "x": 171.07,
+        "z": -1348.9
+      },
+      "width": 12,
+      "center": {
+        "x": 85.10499999999999,
+        "z": -1358.64
+      },
+      "sourceFeatureCode": 2703
+    },
+    {
+      "id": "onari",
+      "name": "御成橋",
+      "nameEn": "Onari Bridge",
+      "a": {
+        "x": 212.89,
+        "z": -1606.49
+      },
+      "b": {
+        "x": 76.67,
+        "z": -1631.57
+      },
+      "width": 14,
+      "center": {
+        "x": 144.78,
+        "z": -1619.03
+      },
+      "sourceFeatureCode": 2703
+    },
+    {
+      "id": "misono",
+      "name": "三園橋",
+      "nameEn": "Misono Bridge",
+      "a": {
+        "x": 502.94,
+        "z": -1803.71
+      },
+      "b": {
+        "x": 484.1,
+        "z": -1953.69
+      },
+      "width": 12,
+      "center": {
+        "x": 493.52,
+        "z": -1878.7
+      },
+      "sourceFeatureCode": 2703
+    },
+    {
+      "id": "minato",
+      "name": "港大橋",
+      "nameEn": "Minato Bridge",
+      "a": {
+        "x": 288.26,
+        "z": -385.17
+      },
+      "b": {
+        "x": 483.45,
+        "z": -410.02
+      },
+      "width": 12,
+      "center": {
+        "x": 385.855,
+        "z": -397.595
+      },
+      "sourceFeatureCode": 2703
+    }
+  ],
+  "watergate": {
+    "id": "watergate",
+    "name": "沼津港大型展望水門（びゅうお）",
+    "nameEn": "View-O Watergate",
+    "a": {
+      "x": -283.63,
+      "z": -5.55
+    },
+    "b": {
+      "x": -268.47,
+      "z": 50.22
+    },
+    "center": {
+      "x": -276.05,
+      "z": 22.335
+    },
+    "referenceUrl": "https://numazukanko.jp/spot/10020",
+    "referenceEntrance": {
+      "lat": 35.081188,
+      "lon": 138.854715
+    },
+    "sourceFeatureCode": 5515
+  }
+}
