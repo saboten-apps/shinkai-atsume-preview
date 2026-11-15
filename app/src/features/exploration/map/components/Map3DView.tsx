@@ -334,7 +334,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
       if (flight.isActive()) flight.update(delta, currentTime * 0.001);
       else controls.update();
-      updateBuildings?.(flight.isActive() ? camera.position : controls.target);
+      updateBuildings?.(flight.isActive() ? camera.position : controls.target,camera.position);
       if (searchRef.current && currentTime - lastSearchTime > 150) {
         lastSearchTime = currentTime;
         const p = flight.isActive() ? flight.getPosition() : controls.target;

@@ -13,7 +13,7 @@ export interface SceneBuildResult {
     texture?: THREE.Texture;
   }[];
   ready: Promise<void>;
-  updateBuildings?: (position: THREE.Vector3) => void;
+  updateBuildings?: (position: THREE.Vector3, viewer?:THREE.Vector3) => void;
   updateWater?: (delta: number) => void;
   groundReady?: () => Promise<void>;
   isWaterAt: (x:number,z:number)=>boolean;
@@ -239,5 +239,5 @@ export function buildNumazuPortScene(
     });
   };
 
-  return { disposables, ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}), updateWater: water.update, updateBuildings: position => { station.update(position); aerial?.update(position); }, groundReady: async () => { await aerial?.settled(); }, isWaterAt:(x,z)=>aerial?.isWaterAt(x,z)??true, dispose };
+  return { disposables, ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}), updateWater: water.update, updateBuildings: (position,viewer) => { station.update(position,viewer); aerial?.update(position); }, groundReady: async () => { await aerial?.settled(); await station.detailReady(); }, isWaterAt:(x,z)=>aerial?.isWaterAt(x,z)??true, dispose };
 }
