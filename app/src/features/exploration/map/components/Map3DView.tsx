@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { createWorldFish } from '../three/worldFish';
+import type { HidingPlace, Position } from '../../domain';
+import type { Locale } from '../../../../config/appConfig';
 import { createPortSky } from '../three/portSky';
 import { setupPortFlight } from '../flight/portFlight';
 import { MapPin, PerformanceStats } from '../types';
@@ -8,9 +11,11 @@ import { buildNumazuPortScene } from '../three/sceneBuilder';
 import { createPinMarkers, updatePinAnimations, Pin3DObject } from '../three/pinMarkers';
 
 export interface Search3DBridge {
-  start: { x: number; z: number };
-  target: { x: number; z: number };
-  onPosition: (p: { x: number; z: number }, visible: boolean) => void;
+  start: Position;
+  target: HidingPlace;
+  fishId?:string;
+  locale?:Locale;
+  onPosition: (p: Position, visible: boolean) => void;
   onCaptureReady: (capture: (() => string) | null) => void;
   autoFly?: boolean;
   discovered?: boolean;
@@ -179,22 +184,15 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         onWebGLError('街のデータを読み込めませんでした。2Dで続けられます。');
       });
 
-    const beacon = new THREE.Mesh(new THREE.IcosahedronGeometry(5, 1), new THREE.MeshBasicMaterial({color:0xffac70}));
-    if (searchRef.current) {
-      const t = searchRef.current.target;
-      beacon.position.set(t.x, 85, t.z);
-      scene.add(beacon);
-    }
+    const fishWorld=searchRef.current?createWorldFish(scene,searchRef.current.fishId,searchRef.current.target,searchRef.current.locale??'ja'):undefined;
+    const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     searchRef.current?.onCaptureReady(() => {
       if (contextIsLost || !dataReady || loadingArea) throw new Error('Scenery is still loading');
-      const wasVisible = beacon.visible;
-      beacon.visible = false;
       scene.userData.forceReflectionUpdate=true;
       const rendered=renderFrame();
       scene.userData.forceReflectionUpdate=false;
       if (!rendered) throw new Error('3D render interrupted');
       const url = renderer.domElement.toDataURL('image/png');
-      beacon.visible = wasVisible;
       return url;
     });
     const contextLost = (e: Event) => { contextIsLost = true; e.preventDefault(); onWebGLError('3Dの描画が中断されました。2Dで続けられます。'); };
@@ -343,24 +341,27 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       if (searchRef.current && currentTime - lastSearchTime > 150) {
         lastSearchTime = currentTime;
         const p = flight.isActive() ? flight.getPosition() : controls.target;
-        const dist = Math.hypot(p.x - beacon.position.x, p.z - beacon.position.z);
-        beacon.visible = !searchRef.current.discovered && dist < 100;
-        let visible = dataReady;
-        if (flight.isActive()) {
-          const direction = beacon.position.clone().sub(camera.position);
-          const length = direction.length();
-          raycaster.set(camera.position, direction.normalize());
-          const hits = raycaster.intersectObjects(scene.children, true);
-          visible = visible && !loadingArea && (flight.getStatus().state==='ground'||Math.abs(p.y - beacon.position.y) < 30) && !hits.some(h => h.object !== beacon && h.distance < length - 7 && h.object instanceof THREE.Mesh && h.object.material instanceof THREE.MeshStandardMaterial);
+        const target=fishWorld?.targetPosition;
+        let visible = dataReady && !loadingArea;
+        if(target){
+          const underwater=(searchRef.current.target.medium??'air')!=='air';
+          visible=visible&&(!underwater||flight.isActive()&&flight.getStatus().state==='water');
+          if(flight.isActive())visible=visible&&(underwater?Math.abs(p.y-target.y)<5:flight.getStatus().state==='ground'||Math.abs(p.y-target.y)<30);
+          if(visible&&Math.hypot(p.x-target.x,p.z-target.z)<=25){
+            const direction=target.clone().sub(camera.position),length=direction.length();
+            raycaster.set(camera.position,direction.normalize());
+            const hits=raycaster.intersectObjects(scene.children.filter(o=>o!==fishWorld?.root&&!o.userData.virtualWaterBed&&!o.userData.regionalLandscape&&!(underwater&&o.userData.waterTerrain)),true);
+            visible=!hits.some(h=>h.distance<length-4&&h.object instanceof THREE.Mesh&&h.object.material instanceof THREE.MeshStandardMaterial&&!h.object.userData.worldFish);
+          }
         }
-        searchRef.current.onPosition({ x:p.x, z:p.z }, visible);
+        searchRef.current.onPosition({ x:p.x, z:p.z,...(flight.isActive()?{y:p.y}:{}) }, visible);
       }
-      beacon.rotation.y += delta;
+      fishWorld?.update(currentTime*.001,flight.isActive()?flight.getPosition():camera.position,!!searchRef.current?.discovered,reducedMotion);
       if (!renderFrame()) cancelAnimationFrame(animationFrameId);
       else if(dataReady&&!entered){
         entered=true;
         if(searchRef.current?.autoFly){
-          flight.setMode(true,new THREE.Vector3(searchRef.current.start.x,90,searchRef.current.start.z));
+          flight.setMode(true,new THREE.Vector3(searchRef.current.start.x,searchRef.current.start.y??90,searchRef.current.start.z));
           setFlying(true);
         }
         searchRef.current?.onReady?.();
@@ -383,7 +384,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
       searchRef.current?.onCaptureReady(null);
       renderer.domElement.removeEventListener('webglcontextlost', contextLost);
-      beacon.geometry.dispose(); (beacon.material as THREE.Material).dispose();
+      fishWorld?.dispose();
       flightRef.current = null;
       flight.dispose();
       scenery.dispose();

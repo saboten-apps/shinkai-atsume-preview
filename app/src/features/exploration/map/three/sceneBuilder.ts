@@ -65,6 +65,10 @@ export function buildNumazuPortScene(
 
   const water = createWaterSurface(scene);
 
+  // A shallow virtual floor, independent of real bathymetry. Hidden from aerial views.
+  const virtualBed=new THREE.Mesh(new THREE.PlaneGeometry(2400,4200),new THREE.MeshStandardMaterial({color:0x426b69,roughness:1}));
+  virtualBed.rotation.x=-Math.PI/2;virtualBed.position.set(100,27,-1100);virtualBed.userData.virtualWaterBed=true;virtualBed.visible=false;scene.add(track(virtualBed));
+
   // --- 2. 周囲の敷き分け（南と東の地続き表現、y=41.55） ---
   // 生成り色の平面を y=41.55 に、z > +720 の南側一帯と x > +590 の東側一帯だけに敷く（地形範囲の外側）。
   const landExtensionMat = new THREE.MeshStandardMaterial({
@@ -195,6 +199,8 @@ export function buildNumazuPortScene(
           child.receiveShadow = false;
         }
       });
+      terrainScene.userData.waterTerrain=true;
+      terrainScene.traverse(child=>{child.userData.waterTerrain=true;});
       scene.add(track(terrainScene));
       onCollisionGeometry?.(terrainScene);
 

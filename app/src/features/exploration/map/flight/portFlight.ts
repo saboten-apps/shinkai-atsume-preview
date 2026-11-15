@@ -14,17 +14,20 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   character.group.visible = false;
   scene.add(character.group);
   const trees: Octree[] = [];
-  const cells = new Set<{ center: THREE.Vector3; radius: number; geometry: THREE.BufferGeometry; tree?: Octree }>();
+  let isWaterAt:(x:number,z:number)=>boolean=()=>false;
+  const cells = new Set<{ center: THREE.Vector3; radius: number; geometry: THREE.BufferGeometry; waterTerrain:boolean; tree?: Octree }>();
   const colliderMaterial = new THREE.MeshBasicMaterial();
   function refreshColliders() {
     trees.length = 0;
     for (const cell of cells) {
+      if(cell.waterTerrain&&isWaterAt(controller.position.x,controller.position.z))continue;
       const distance = Math.hypot(cell.center.x - controller.position.x, cell.center.z - controller.position.z);
       if (distance > cell.radius + 300) { cell.tree = undefined; continue; }
       if (!cell.tree) {
         const mesh = new THREE.Mesh(cell.geometry, colliderMaterial);
         mesh.updateWorldMatrix(true, true);
         cell.tree = new ExpandedOctree().fromGraphNode(mesh);
+        (cell.tree as Octree & {waterTerrain?:boolean}).waterTerrain=cell.waterTerrain;
       }
       trees.push(cell.tree);
     }
@@ -81,7 +84,10 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
     controller.setVertical(1);
   };
   rise.onpointerup = rise.onpointercancel = rise.onlostpointercapture = () => controller.setVertical(0);
+  drop.onpointerdown=e=>{if(controller.state!=='water')return;cancelTravel();drop.setPointerCapture(e.pointerId);controller.setVertical(-1);};
+  drop.onpointerup=drop.onpointercancel=drop.onlostpointercapture=()=>controller.setVertical(0);
   drop.onclick = () => {
+    if(controller.state==='water')return;
     const start = !falling && controller.state === 'air';
     cancelTravel();
     falling = start;
@@ -122,6 +128,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
         const mesh = new THREE.Mesh(cell.geometry, colliderMaterial);
         mesh.updateWorldMatrix(true, true);
         cell.tree = new ExpandedOctree().fromGraphNode(mesh);
+        (cell.tree as Octree & {waterTerrain?:boolean}).waterTerrain=cell.waterTerrain;
       }
       const hit = cell.tree.rayIntersect(ray);
       if (hit && hit.distance < distance) {
@@ -164,14 +171,14 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
         const bounds = geometry.boundingBox!;
         const center = bounds.getCenter(new THREE.Vector3());
         const radius = Math.hypot(bounds.max.x-center.x, bounds.max.z-center.z);
-        const cell = { center, radius, geometry };
+        const cell = { center, radius, geometry,waterTerrain:!!group.userData.waterTerrain };
         cells.add(cell); return cell;
       });
       return () => { trees.length = 0; for (const cell of added) { cells.delete(cell); cell.geometry.dispose(); } };
     },
     update(dt: number, time: number) { if (!controller.active) return; refreshColliders(); controller.update(dt, trees, character, camera, time, destination, falling);
       if (falling && controller.state !== 'air') falling = false;
-      drop.textContent = falling ? '落下停止' : '落下';
+      drop.textContent = controller.state==='water'?'潜る':falling ? '落下停止' : '落下';
       if (destination) {
         const gap = controller.state==='ground' ? Math.hypot(controller.position.x-destination.x,controller.position.z-destination.z) : controller.position.distanceTo(destination);
         if (gap < bestDistance - .2) {
@@ -186,7 +193,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
        const data=controller.getHookData(); rise.textContent=data.state==='ground'?'飛び立つ':'上がる';drop.disabled=data.state==='ground'; depth.textContent = data.state==='ground'?'徒歩':data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; setUnderwater(data.state === 'water'); },
     getPosition() { return controller.position; },
     getStatus() { return controller.getHookData(); },
-    setWaterQuery(query:(x:number,z:number)=>boolean){controller.setWaterQuery(query);},
+    setWaterQuery(query:(x:number,z:number)=>boolean){isWaterAt=query;controller.setWaterQuery(query);},
     isActive() { return controller.active; },
     dispose() { canvas.removeEventListener('pointerdown',lookDown); canvas.removeEventListener('pointermove',lookMove); canvas.removeEventListener('pointerup',lookUp); canvas.removeEventListener('pointercancel',lookUp); ui.remove(); cells.forEach(cell => cell.geometry.dispose()); cells.clear(); trees.length = 0; colliderMaterial.dispose(); scene.remove(character.group); character.group.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.geometry.dispose(); const mats = Array.isArray(obj.material) ? obj.material : [obj.material]; mats.forEach(m => m.dispose()); } }); }
   };

@@ -1,0 +1,198 @@
+{
+  "generatedAt": "2026-11-15T03:14:09.116Z",
+  "note": "Actual scenery at fish-world-v1 anchors. Water depths are virtual; terrain remains a separate collision layer.",
+  "places": [
+    {
+      "id": "fish-world-f01",
+      "x": -50,
+      "z": 180,
+      "surfaceY": 39.657066547999996,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f02",
+      "x": 75,
+      "z": 80,
+      "surfaceY": 39.657066547999996,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f03",
+      "x": 325,
+      "z": -700,
+      "surfaceY": 39.8333294038501,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f04",
+      "x": -10,
+      "z": -270,
+      "surfaceY": 42.27539794368897,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f05",
+      "x": 75,
+      "z": -1300,
+      "surfaceY": 40.35298646797141,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f06",
+      "x": 450,
+      "z": -140,
+      "surfaceY": 39.94107350115431,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f07",
+      "x": 180,
+      "z": -180,
+      "surfaceY": 41.338925683999996,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f08",
+      "x": 175,
+      "z": -1000,
+      "surfaceY": 40.45272062472621,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f09",
+      "x": 0,
+      "z": -450,
+      "surfaceY": 50.9897756048962,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f10",
+      "x": 25,
+      "z": 180,
+      "surfaceY": 39.657066547999996,
+      "photoTiles": 42,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f11",
+      "x": 425,
+      "z": -280,
+      "surfaceY": 40.2481813622214,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f12",
+      "x": 100,
+      "z": -1150,
+      "surfaceY": 40.89510020067783,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f13",
+      "x": 100,
+      "z": 180,
+      "surfaceY": 39.657066547999946,
+      "photoTiles": 42,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f14",
+      "x": -100,
+      "z": -140,
+      "surfaceY": 40.44905777490332,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f15",
+      "x": 375,
+      "z": -480,
+      "surfaceY": 40.22629921833807,
+      "photoTiles": 42,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f16",
+      "x": -230,
+      "z": -170,
+      "surfaceY": 43.6012054973653,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f17",
+      "x": 180,
+      "z": -1985,
+      "surfaceY": 46.8950021286667,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f18",
+      "x": 125,
+      "z": -1600,
+      "surfaceY": 40.66175869557333,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f19",
+      "x": -100,
+      "z": 80,
+      "surfaceY": 41.486580277837454,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f20",
+      "x": -180,
+      "z": 30,
+      "surfaceY": 51.52626851882134,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f21",
+      "x": 525,
+      "z": -1900,
+      "surfaceY": 40.35270889760776,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f22",
+      "x": 210,
+      "z": -2395,
+      "surfaceY": 47.53683960016254,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f23",
+      "x": -100,
+      "z": -20,
+      "surfaceY": 40.2521202605877,
+      "photoTiles": 44,
+      "status": ""
+    },
+    {
+      "id": "fish-world-f24",
+      "x": 240,
+      "z": -2395,
+      "surfaceY": 47.58301652280239,
+      "photoTiles": 44,
+      "status": ""
+    }
+  ]
+}

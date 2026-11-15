@@ -2,9 +2,8 @@ import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const {chromium}=createRequire(import.meta.url)('playwright');
-const places=JSON.parse(await readFile(new URL('../src/features/exploration/hidingPlaces.v1.json',import.meta.url)));
-const {createHash}=await import('node:crypto');
-const date='2026-11-14';const index=createHash('sha256').update(`shinkai-exploration:hide-v1:${date}`).digest().readUInt32BE(0)%10;const place=places[index];
+const places=JSON.parse(await readFile(new URL('../src/features/exploration/fishWorld.v1.json',import.meta.url)));
+const date='2026-11-14';let place;
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 try{
  const context=await browser.newContext({viewport:{width:412,height:915},reducedMotion:'reduce'});
@@ -15,6 +14,7 @@ try{
  await page.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).waitFor();
  assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest|seamlessphoto|building-details/.test(u)),'gacha loaded 3D');
  const initial=await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1'));
+ place=places.find(p=>p.fishId===JSON.parse(initial).dailyHistory[date].fishId);
  await page.getByRole('button',{name:'軽い2D地図で探す',exact:true}).click();
  assert(await page.getByRole('button',{name:'探知機を頼りに近づこう'}).isDisabled());
  const svg=page.locator('.search-2d svg');await svg.scrollIntoViewIfNeeded();

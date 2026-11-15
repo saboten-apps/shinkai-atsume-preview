@@ -1,9 +1,9 @@
 import { sha256Bytes } from '../../lib/sha256';
 import placesData from './hidingPlaces.v1.json';
 
-export type Position = { x: number; z: number };
+export type Position = { x: number; z: number; y?:number };
 export type SearchMode = '2d' | '3d';
-export type HidingPlace = typeof placesData[number];
+export type HidingPlace = typeof placesData[number] & {y?:number;medium?:'sea'|'river'|'air'};
 export const PLACES = placesData;
 export const HIDE_VERSION = 'hide-v1';
 export const EXPLORATION_KEY = 'shinkai_exploration_v1';
@@ -27,12 +27,12 @@ export function detector(position: Position, target: Position) {
 export function clampPosition(p: Position): Position {
   return { x: Math.max(BOUNDS.minX, Math.min(BOUNDS.maxX, p.x)), z: Math.max(BOUNDS.minZ, Math.min(BOUNDS.maxZ, p.z)) };
 }
-export function loadDiscovery(date: string, fishId: string, placeId: string): Discovery | null {
+export function loadDiscovery(date: string, fishId: string, placeId: string, version=HIDE_VERSION): Discovery | null {
   try {
     const records: unknown = JSON.parse(localStorage.getItem(EXPLORATION_KEY) || '{}');
     if (!records || typeof records !== 'object' || Array.isArray(records)) return null;
     const r = (records as Record<string, Discovery>)[date];
-    return r?.date === date && r.fishId === fishId && r.placeId === placeId && r.version === HIDE_VERSION &&
+    return r?.date === date && r.fishId === fishId && r.placeId === placeId && r.version === version &&
       (r.mode === '2d' || r.mode === '3d') && typeof r.foundAt === 'string' ? r : null;
   } catch { return null; }
 }

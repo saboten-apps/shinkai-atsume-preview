@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
+import { FISH_SITES, targetGlow } from './fishWorld';
+import catalog from '../../../data/fish.json';
 import { BOUNDS, clampPosition, type Position } from './domain';
 
-export default function Exploration2D({ position, onMove, en }: { position: Position; onMove: (p: Position) => void; en: boolean }) {
+export default function Exploration2D({ position, onMove, en,targetFishId,target,discovered }: { position: Position; onMove: (p: Position) => void; en: boolean;targetFishId:string;target:Position;discovered:boolean }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const select = (event: React.PointerEvent<SVGSVGElement>) => {
     const svg = svgRef.current;
@@ -19,6 +21,17 @@ export default function Exploration2D({ position, onMove, en }: { position: Posi
       <path d="M-500 -40 L-330 -160 -230 -80 -110 -240 0 -70 160 -170 270 50 700 180 V300 H-500Z" fill="#467b91" />
       <g stroke="#f5f0e6" strokeWidth="22" fill="none"><path d="M210 -2450 L100 -1900 100 -1150 -20 -190" /><path d="M-400 -2000 H500 M-400 -1500 H450 M-400 -1000 H400 M-350 -500 H400" /></g>
       <g fill="#23394b" fontSize="55" fontFamily="sans-serif"><text x="-240" y="-2400">{en ? 'Station south' : '沼津駅南側'}</text><text x="-300" y="-1250">{en ? 'Town' : '街なか'}</text><text x="320" y="-700" fontSize="42">{en ? 'River' : '川沿い'}</text><text x="-300" y="-280">{en ? 'Numazu harbor' : '沼津港'}</text></g>
+      <g aria-label={en?'Fish in virtual Numazu':'街にいる魚'}>{FISH_SITES.map(site=>{
+        const p=site.fishId===targetFishId?target:site;
+        const distance=Math.hypot(position.x-p.x,position.z-p.z);
+        const light=site.fishId===targetFishId?targetGlow(distance)*(discovered?.3:1):0;
+        const fish=catalog.fish.find(f=>f.id===site.fishId)!;
+        return <g key={site.fishId} transform={`translate(${p.x} ${p.z})`} data-fish-id={site.fishId}>
+          <title>{en?(fish.name_en??fish.name_ja):fish.name_ja}</title>
+          {light>0&&<circle r={35+light*20} fill="#ffc76b" opacity={light*.7} data-today-glow="true"/>}
+          <path d="M-22 0 Q0 -24 22 0 Q0 24 -22 0 L-38 -16 V16 Z" fill={light>0?'#ffc469':'#30576b'} stroke="#fff5dc" strokeWidth="3"/>
+        </g>;
+      })}</g>
       <circle cx={position.x} cy={position.z} r="38" fill="#ef8857" stroke="white" strokeWidth="12" />
       <circle cx={position.x} cy={position.z} r="65" fill="none" stroke="#b44e33" strokeWidth="3" />
     </svg>
