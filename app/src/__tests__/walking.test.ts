@@ -11,7 +11,7 @@ function setup(meshes:THREE.Mesh[],x=0,y=50,z=0){
  const character=new HumanoidCharacter(),camera=new THREE.PerspectiveCamera(45,1,.1,1000);let time=0;
  const tick=(frames:number,falling=false,colliders=[tree])=>{for(let i=0;i<frames;i++){time+=1/60;controller.update(1/60,colliders,character,camera,time,null,falling);}};
  const land=()=>{for(let i=0;i<240&&controller.state!=='ground';i++)tick(1,true);expect(controller.state).toBe('ground');};
- return{controller,character,camera,tick,land};
+ return{controller,character,camera,tick,land,tree};
 }
 
 describe('walking after landing',()=>{
@@ -56,4 +56,21 @@ describe('walking after landing',()=>{
   expect(controller.state).toBe('ground');expect(controller.position.y).toBeCloseTo(40.001,3);
   controller.setWaterQuery(()=>true);tick(1);expect(controller.state).toBe('water');
  });
+});
+
+
+describe('virtual underwater space',()=>{
+ it('dives through masked water terrain and keeps the camera underwater, while retaining solid structures',()=>{
+  const {controller,camera,tick,tree}=setup([floor(40)],0,45,0);
+  (tree as Octree & {waterTerrain?:boolean}).waterTerrain=true;
+  controller.setWaterQuery(()=>true);controller.setVertical(-1);tick(240);
+  expect(controller.state).toBe('water');expect(controller.position.y).toBeLessThan(35);expect(camera.position.y).toBeLessThan(41.5);
+  const solid=setup([floor(40)],0,45,0);solid.controller.setWaterQuery(()=>true);solid.controller.setVertical(-1);solid.tick(240);
+  expect(solid.controller.position.y).toBeGreaterThanOrEqual(39.9);
+ });
+});
+
+it('stays submerged just after reaching the water surface so the dive control remains usable',()=>{
+ const {controller,tick}=setup([],0,41.4,0);controller.setWaterQuery(()=>true);tick(180);
+ expect(controller.state).toBe('water');expect(controller.position.y).toBeLessThan(41.5);
 });

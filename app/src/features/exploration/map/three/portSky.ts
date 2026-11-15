@@ -44,7 +44,7 @@ export function createPortSky(scene: THREE.Scene) {
   function setUnderwater(underwater: boolean) {
     sky.visible = !underwater;
     scene.userData.underwater=underwater;
-    for(const object of scene.children)if(object.userData.regionalLandscape)object.visible=!underwater;
+    for(const object of scene.children){if(object.userData.regionalLandscape)object.visible=!underwater;if(object.userData.virtualWaterBed)object.visible=underwater;}
     scene.fog = underwater ? waterFog : airFog;
     scene.background = underwater ? waterColor : null;
   }

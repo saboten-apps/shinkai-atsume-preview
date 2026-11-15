@@ -197,7 +197,7 @@ export class FreeFlightController {
     }
 
     // 水中浮力（上向き緩やか）
-    if (inWater && Math.abs(effectiveVert) < 0.02 && Math.abs(effectiveStickY) < 0.02) {
+    if (inWater && this.position.y<SEA-1 && Math.abs(effectiveVert) < 0.02 && Math.abs(effectiveStickY) < 0.02) {
       targetVel.y += FREE_FLIGHT_CONFIG.waterBuoyancy;
     }
 
@@ -313,7 +313,7 @@ export class FreeFlightController {
     // 遮蔽判定（キャラ→希望位置の線分と全コライダーの交差を判定し最適位置へクランプ）
     const dir = desiredCamPos.clone().sub(targetLookAt); const distance = dir.length(); dir.normalize();
     let safe = distance;
-    for (const tree of colliders) { const hit = tree.rayIntersect(new THREE.Ray(targetLookAt, dir)); if (hit && hit.distance < safe) safe = Math.max(0.3, hit.distance - 0.3); }
+    for (const tree of colliders) { if(this.skipWaterTerrain(tree))continue;const hit = tree.rayIntersect(new THREE.Ray(targetLookAt, dir)); if (hit && hit.distance < safe) safe = Math.max(0.3, hit.distance - 0.3); }
     const actualCamPos = targetLookAt.clone().addScaledVector(dir, safe);
 
     // 海底面（Y=-16）より下にカメラが入らないよう微調整
@@ -321,6 +321,7 @@ export class FreeFlightController {
       actualCamPos.y = SEA - 15.2;
     }
 
+    if(this.state==='water')actualCamPos.y=Math.min(actualCamPos.y,SEA-.4);
     camera.position.copy(actualCamPos);
     camera.up.set(0, 1, 0); // Roll=0度完全固定
     camera.lookAt(targetLookAt);
@@ -329,10 +330,14 @@ export class FreeFlightController {
   /**
    * 建物・岸壁コライダーとの衝突解決（AABB押し出し＋着地）
    */
+  private skipWaterTerrain(tree:Octree):boolean {
+    return !!(tree as Octree & {waterTerrain?:boolean}).waterTerrain&&this.position.y<SEA+3&&this.waterQuery(this.position.x,this.position.z);
+  }
   private resolveCollisions(colliders: Octree[]): void {
     const capsule = new Capsule(this.position.clone().add(new THREE.Vector3(0, 0.5, 0)), this.position.clone().add(new THREE.Vector3(0, 1.2, 0)), 0.5);
     let landed = false;
     for (const tree of colliders) {
+      if(this.skipWaterTerrain(tree))continue;
       for (let i = 0; i < 3; i++) {
         const hit = tree.capsuleIntersect(capsule); if (!hit) break;
         const push = hit.normal.clone().multiplyScalar(hit.depth + 0.001);
@@ -349,6 +354,7 @@ export class FreeFlightController {
     const ray=new THREE.Ray(this.position.clone().add(new THREE.Vector3(0,.35,0)),new THREE.Vector3(0,-1,0));
     let nearest=Infinity,groundY:number|undefined;
     for(const tree of colliders){
+      if(this.skipWaterTerrain(tree))continue;
       const hit=tree.rayIntersect(ray);
       if(!hit || hit.distance> .35+reach || hit.distance>=nearest)continue;
       if(hit.triangle.getNormal(new THREE.Vector3()).y<.7)continue;
