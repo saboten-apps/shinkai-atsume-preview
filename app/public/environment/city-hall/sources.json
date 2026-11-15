@@ -1,0 +1,24 @@
+{
+  "credit": "現地写真：ユーザー提供（2026-11-15）",
+  "processing": "Original JPEG scan data; metadata removed. Runtime mesh UV projection and GPU size reduction only.",
+  "files": [
+    {
+      "asset": "facade.jpg",
+      "sourceFilename": "PXL_20261115_061134220.jpg",
+      "sha256": "9ccc37a91af0ff281df63c1d1901aaef4edc6fc841537143a577c58d6825332d",
+      "bytes": 1943971
+    },
+    {
+      "asset": "entrance.jpg",
+      "sourceFilename": "PXL_20261115_061212021.jpg",
+      "sha256": "77a5cc353891ae12635763864a9c27e117a655c27768803c998b96e7c45dcfe2",
+      "bytes": 2966727
+    },
+    {
+      "asset": "concrete.jpg",
+      "sourceFilename": "PXL_20261115_061245300.jpg",
+      "sha256": "8d4161c4c223287447bf006098129df3da73b9a45d3b073d34eee476f0174adc",
+      "bytes": 2639451
+    }
+  ]
+}

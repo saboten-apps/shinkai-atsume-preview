@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { addPhotoSurfaceDetail } from './surfaceDetail';
+import { createCityHallPhotos } from './cityHallPhotos';
 
 /** GSI label 138.86360943317413,35.09555689164136; geometry fitted to PLATEAU.
  * Dimensions below are game-space after the existing 1.3 height emphasis.
@@ -146,6 +147,6 @@ export function createCityHall() {
   collisionParts.forEach(g=>g.dispose());const collisionMaterials=new Set((collider.children as THREE.Mesh[]).map(m=>m.material as THREE.Material));collisionMaterials.forEach(m=>m.dispose());collider.clear();
   const collisionMaterial=new THREE.MeshBasicMaterial({side:THREE.DoubleSide});collider.add(new THREE.Mesh(collisionGeometry,collisionMaterial));
   root.updateMatrixWorld(true);collider.updateMatrixWorld(true);
-  const bounds=new THREE.Box3().setFromObject(root);let disposed=false;
-  return {root,collider,update(viewer:THREE.Vector3){if(!disposed)detail.visible=bounds.distanceToPoint(viewer)<(detail.visible?240:210);},dispose(){if(disposed)return;disposed=true;root.removeFromParent();root.traverse(o=>{if(o instanceof THREE.Mesh)o.geometry.dispose();});Object.values(materials).forEach(m=>m.dispose());collisionGeometry.dispose();collisionMaterial.dispose();}};
+  const bounds=new THREE.Box3().setFromObject(root),photos=createCityHallPhotos(root);let disposed=false;
+  return {root,collider,photoReady:photos.settled,update(viewer:THREE.Vector3){if(!disposed){detail.visible=bounds.distanceToPoint(viewer)<(detail.visible?240:210);photos.update(viewer);}},dispose(){if(disposed)return;disposed=true;photos.dispose();root.removeFromParent();root.traverse(o=>{if(o instanceof THREE.Mesh)o.geometry.dispose();});Object.values(materials).forEach(m=>m.dispose());collisionGeometry.dispose();collisionMaterial.dispose();}};
 }
