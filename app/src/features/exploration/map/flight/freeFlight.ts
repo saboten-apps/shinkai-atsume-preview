@@ -187,10 +187,13 @@ export class FreeFlightController {
     // スティック入力があれば正規化して最高速度スケール
     const inputMag = Math.hypot(effectiveStickX, effectiveStickY, effectiveVert);
     if (inputMag > 0.02) {
-      if (targetVel.length() > 1.0) {
-        targetVel.normalize();
+      if(walking){
+        targetVel.y=0;
+        if(targetVel.lengthSq()>0)targetVel.setLength(Math.min(Math.hypot(effectiveStickX,effectiveStickY),1)*maxSpeed);
+      } else {
+        if (targetVel.length() > 1.0) targetVel.normalize();
+        targetVel.multiplyScalar(Math.min(inputMag, 1.0) * maxSpeed);
       }
-      targetVel.multiplyScalar(Math.min(inputMag, 1.0) * maxSpeed);
     }
 
     // 水中浮力（上向き緩やか）

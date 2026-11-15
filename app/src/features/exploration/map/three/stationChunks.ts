@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createBuildingDetails } from './buildingDetails';
 import { brightenBuildingMaterial } from './buildingAppearance';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -9,9 +10,10 @@ export function streamStationBuildings(
   onStatus?: (text: string) => void,
 ) {
   const abort = new AbortController();
+  const details=createBuildingDetails();
   let chunks: Chunk[] = [], disposed = false, manifestFailed = false, loading = false, nextUpdate = 0;
   const focus = new THREE.Vector3();
-  const loaded = new Map<string, { group: THREE.Group; removeCollider?: () => void }>();
+  const loaded = new Map<string, { group: THREE.Group; removeCollider?: () => void; removeDetail?:()=>void }>();
   const retryAt = new Map<string, number>();
   function release(group: THREE.Group) {
     scene.remove(group);
@@ -41,14 +43,15 @@ export function streamStationBuildings(
     }).catch(error => {
       if (!disposed) { manifestFailed = true; console.error('Station manifest:', error); onStatus?.('駅方面のデータを読み込めませんでした'); }
     });
-  function update(position: THREE.Vector3) {
+  function update(position: THREE.Vector3, viewer:THREE.Vector3=position) {
+    details.update(viewer);
     focus.copy(position);
     if (disposed || manifestFailed || performance.now() < nextUpdate) return;
     nextUpdate = performance.now() + 400;
     for (const chunk of chunks) {
       const entry = loaded.get(chunk.id);
       if (entry && distance(chunk) > 900) {
-        entry.removeCollider?.(); release(entry.group); loaded.delete(chunk.id);
+        entry.removeDetail?.();entry.removeCollider?.(); release(entry.group); loaded.delete(chunk.id);
       }
     }
     if (loading) return;
@@ -71,15 +74,17 @@ export function streamStationBuildings(
       });
       scene.add(gltf.scene);
       const removeCollider = addCollider(gltf.scene) || undefined;
-      loaded.set(chunk.id, { group: gltf.scene, removeCollider });
+      const removeDetail=details.register(gltf.scene);
+      loaded.set(chunk.id, { group: gltf.scene, removeCollider,removeDetail });
       retryAt.delete(chunk.id);
     }).catch(error => {
       if (!disposed) { console.error(`Station chunk ${chunk.id}:`, error); retryAt.set(chunk.id, performance.now() + 10000); onStatus?.('街並みの読み込みを再試行しています…'); }
     }).finally(() => { loading = false; nextUpdate = 0; });
   }
-  return { ready, update, dispose() {
+  return { ready, update, detailReady:()=>details.settled(), dispose() {
     disposed = true; abort.abort();
-    for (const entry of loaded.values()) { entry.removeCollider?.(); release(entry.group); }
+    details.dispose();
+    for (const entry of loaded.values()) { entry.removeDetail?.();entry.removeCollider?.(); release(entry.group); }
     loaded.clear();
   } };
 }

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { addPhotoSurfaceDetail } from './surfaceDetail';
 import { DETAIL_ZOOM, OVERVIEW_ZOOM, TILE_ORIGIN, worldToPhotoTile } from './groundProjection';
 
 const DETAIL_LIMIT = 32;
@@ -86,8 +87,9 @@ export function createAerialGround(scene: THREE.Scene, terrain: THREE.Group, wat
     material.onBeforeCompile = shader => {
       shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>',
         'if (any(lessThan(vMapUv, vec2(0.0))) || any(greaterThan(vMapUv, vec2(1.0)))) discard;\n#include <map_fragment>');
+      addPhotoSurfaceDetail(shader,'ground');
     };
-    material.customProgramCacheKey = () => 'gsi-ground-clip-v1';
+    material.customProgramCacheKey = () => 'gsi-ground-clip-detail-v2';
     for (const part of tile.parts) {
       if (!part.geometry) {
         const geometry = new THREE.BufferGeometry();

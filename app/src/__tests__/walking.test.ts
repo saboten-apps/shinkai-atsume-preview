@@ -24,6 +24,10 @@ describe('walking after landing',()=>{
   expect(Math.abs(leg.rotation.x)).toBeGreaterThan(.01);expect(leg.rotation.x).toBeCloseTo(-other.rotation.x,5);
   controller.setStick(0,0);tick(180);expect(controller.velocity.length()).toBe(0);expect(controller.state).toBe('ground');expect(leg.rotation.x).toBe(0);
  });
+ it('responds linearly to a half-deflected ground stick',()=>{
+  const {controller,tick,land}=setup([floor()]);land();controller.setStick(0,.5);tick(120);
+  expect(controller.velocity.length()).toBeGreaterThan(2.6);expect(controller.velocity.length()).toBeLessThan(2.8);expect(controller.state).toBe('ground');
+ });
  it('keeps ground contact over a slope',()=>{
   const ramp=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshBasicMaterial());ramp.rotation.set(-Math.PI/2,0,.12,'ZXY');ramp.position.y=45;
   const {controller,tick,land}=setup([ramp],-5,50);land();controller.setLookDegrees(90,40);controller.setStick(0,1);tick(180);

@@ -13,7 +13,7 @@ try{
  await page.goto(process.env.APP_URL||'http://127.0.0.1:5180/');
  await page.getByRole('button',{name:'本日の標本を引き上げる（1日1回）',exact:true}).click();
  await page.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).waitFor();
- assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest|seamlessphoto/.test(u)),'gacha loaded 3D');
+ assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest|seamlessphoto|building-details/.test(u)),'gacha loaded 3D');
  const initial=await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1'));
  await page.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).click();
  await page.getByRole('button',{name:'軽い2D地図で探す',exact:true}).click();
@@ -26,7 +26,7 @@ try{
  await page.locator('.discovery-card-preview').waitFor({timeout:20000});
  const image=await page.locator('.discovery-card-preview').evaluate(async el=>{await el.decode();return {w:el.naturalWidth,h:el.naturalHeight};});assert.deepEqual(image,{w:1200,h:630});
  assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1')),initial,'discovery modified collection');
- assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest|seamlessphoto/.test(u)),'2D loaded 3D');
+ assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest|seamlessphoto|building-details/.test(u)),'2D loaded 3D');
  await page.screenshot({path:'/tmp/shinkai-discovery-mobile.png',fullPage:true});
  await page.reload();await page.getByRole('button',{name:'景色入りカードを作る',exact:true}).waitFor();
  assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1')),initial);
