@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { pilotPosition, NEAR_BUILDING_PILOT } from '../three/nearBuildingPilot';
+import { cityHallPoint } from '../three/cityHall';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { NavigationHud } from './NavigationHud';
@@ -464,6 +465,13 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
             const camera = controls.object as THREE.PerspectiveCamera;
             camera.fov = 45; camera.updateProjectionMatrix();
             controls.minDistance = location === 'pilot' ? 6 : 40;
+            if(location==='cityhall'){
+              const target=cityHallPoint(-7,23,3);
+              camera.fov=camera.aspect<.8?70:45;camera.updateProjectionMatrix();
+              controls.minDistance=8;controls.target.copy(target);
+              controls.object.position.copy(cityHallPoint(85,65,125));
+              controls.update();event.target.value='';return;
+            }
             if (location === 'pilot') {
               const target = pilotPosition().add(new THREE.Vector3(0, 2.9, 0));
               const [nx, nz] = NEAR_BUILDING_PILOT.normal;
@@ -484,6 +492,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           }}>
           <option value="" disabled>{search?.locale === 'en' ? 'Go to…' : '移動先…'}</option>
           <option value="port">沼津港</option><option value="station">沼津駅南口</option>
+          <option value="cityhall">{search?.locale === 'en' ? 'City Hall' : '市役所'}</option>
           <option value="pilot">{search?.locale === 'en' ? 'Building preview' : '建物の試作を見る'}</option>
         </select>
       </div>
