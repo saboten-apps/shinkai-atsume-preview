@@ -13,6 +13,7 @@ export interface Search3DBridge {
   onPosition: (p: { x: number; z: number }, visible: boolean) => void;
   onCaptureReady: (capture: (() => string) | null) => void;
   autoFly?: boolean;
+  discovered?: boolean;
   onReady?: () => void;
 }
 interface Map3DViewProps {
@@ -343,7 +344,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         lastSearchTime = currentTime;
         const p = flight.isActive() ? flight.getPosition() : controls.target;
         const dist = Math.hypot(p.x - beacon.position.x, p.z - beacon.position.z);
-        beacon.visible = dist < 100;
+        beacon.visible = !searchRef.current.discovered && dist < 100;
         let visible = dataReady;
         if (flight.isActive()) {
           const direction = beacon.position.clone().sub(camera.position);

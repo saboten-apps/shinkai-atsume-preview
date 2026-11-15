@@ -58,6 +58,27 @@ try{
  await page.getByRole('button',{name:'景色入りカードを作る',exact:true}).click();
  await page.locator('.discovery-card-preview').waitFor({timeout:20000});
  await page.screenshot({path:'/tmp/shinkai-discovery-3d-mobile.png',fullPage:true});
+ const storedDiscovery=await page.evaluate(()=>localStorage.getItem('shinkai_exploration_v1'));
+ const originalCard=await page.locator('.discovery-card-preview').getAttribute('src');
+ await page.getByRole('button',{name:'3Dの街に戻る',exact:true}).click();
+ await page.locator('.exploration-loading').waitFor({state:'detached',timeout:90000});
+ await page.locator('.flight-pad:not([hidden])').waitFor();
+ await page.getByRole('button',{name:'発見カードを見る',exact:true}).waitFor();
+ assert.equal(await page.getByRole('button',{name:'魚を発見する！',exact:true}).count(),0);
+ await page.getByRole('button',{name:'3D',exact:true}).click();
+ assert.equal(await page.locator('.exploration-loading').count(),0,'active mode reopens loading screen');
+ await page.getByRole('button',{name:'発見カードを見る',exact:true}).click();
+ assert.equal(await page.locator('.discovery-card-preview').getAttribute('src'),originalCard,'card lost after returning');
+ await page.reload();
+ await page.getByRole('button',{name:'3Dの街に戻る',exact:true}).click();
+ await page.locator('.exploration-loading').waitFor({state:'detached',timeout:90000});
+ await page.locator('.flight-pad:not([hidden])').waitFor();
+ await page.getByRole('button',{name:'2D',exact:true}).click();
+ await page.locator('.search-2d svg').waitFor();
+ await page.getByRole('button',{name:'発見カードを見る',exact:true}).click();
+ await page.getByRole('button',{name:'3Dの街に戻る',exact:true}).waitFor();
+ assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_exploration_v1')),storedDiscovery,'free roaming overwrote discovery');
+
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
- console.log(JSON.stringify({result:'pass',errors,failed,checks:['fullscreen canvas without overlapping toolbar','collapsible guide','3D mounts in StrictMode','port model and nearby chunks load','one action from result starts flight automatically','2D releases canvas','context loss falls back to 2D','position survives mode changes','3D discovery and live-scene PNG']},null,2));
+ console.log(JSON.stringify({result:'pass',errors,failed,checks:['fullscreen canvas without overlapping toolbar','collapsible guide','3D mounts in StrictMode','port model and nearby chunks load','one action from result starts flight automatically','2D releases canvas','context loss falls back to 2D','position survives mode changes','3D discovery and live-scene PNG','return to flight after discovery and reload','card preserved across city visits','discovery record stays unchanged']},null,2));
 }finally{await browser.close();}
