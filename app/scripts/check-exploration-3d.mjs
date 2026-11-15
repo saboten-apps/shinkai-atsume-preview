@@ -12,9 +12,8 @@ try{
  await page.goto(process.env.APP_URL||'http://127.0.0.1:5180/');
  await page.getByRole('button',{name:'本日の標本を引き上げる（1日1回）',exact:true}).click();
  await page.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).click();
- await page.getByRole('button',{name:'3Dの街で探す',exact:true}).click();
  await page.locator('.search-map canvas').waitFor();
- await page.waitForFunction(()=>Array.from(document.querySelectorAll('button')).some(b=>b.textContent==='飛んでみる'&&!b.disabled),{},{timeout:90000});
+ await page.locator('.exploration-loading').waitFor({state:'detached',timeout:90000});
  const layout = await page.evaluate(() => {
    const canvas=document.querySelector('.search-map canvas').getBoundingClientRect();
    const full=document.querySelector('.is-immersive').getBoundingClientRect();
@@ -26,18 +25,19 @@ try{
  assert(layout.canvas.height>layout.h*.65,'3D canvas should fill most of the viewport');
  assert(layout.canvas.y>=layout.toolbarBottom,'world toolbar overlaps the canvas');
  assert(await page.locator('#search-options').isHidden());
+ assert(await page.locator('.app-header').evaluate(el=>el.inert),'immersive header is not inert');
+ assert(!await page.locator('.search-map').evaluate(el=>el.inert),'scene remained inert after loading');
  await page.getByRole('button',{name:'案内・設定',exact:true}).click();
  await page.getByRole('region',{name:'操作案内・設定',exact:true}).waitFor();
  await page.getByRole('button',{name:'閉じる',exact:true}).click();
  await page.screenshot({path:'/tmp/shinkai-exploration-3d-mobile.png',fullPage:true});
- await page.getByRole('button',{name:'飛んでみる',exact:true}).click();
  await page.locator('.flight-pad:not([hidden])').waitFor();
  assert.equal(await page.locator('.flight-instructions').innerText().then(t=>t.includes('左スティック')),false,'long instructions cover the scene');
  assert(await page.locator('.search-center').isHidden(),'crosshair obscures the flight character');
  await page.screenshot({path:'/tmp/shinkai-flight-fullscreen-mobile.png',fullPage:true});
  await page.getByRole('button',{name:'マップに戻る',exact:true}).click();
  await page.getByRole('button',{name:'2D',exact:true}).click();
- await page.locator('.search-2d svg').waitFor();assert.equal(await page.locator('.search-map canvas').count(),0);
+ await page.locator('.search-2d svg').waitFor();assert(!await page.locator('.app-header').evaluate(el=>el.inert),'header remained inert after 2D switch');assert.equal(await page.locator('.search-map canvas').count(),0);
  const date=await page.locator('.search-heading p').textContent();
  const day=date.slice(0,10);
  const places=JSON.parse(await readFile(new URL('../src/features/exploration/hidingPlaces.v1.json',import.meta.url)));
@@ -59,5 +59,5 @@ try{
  await page.locator('.discovery-card-preview').waitFor({timeout:20000});
  await page.screenshot({path:'/tmp/shinkai-discovery-3d-mobile.png',fullPage:true});
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
- console.log(JSON.stringify({result:'pass',errors,failed,checks:['fullscreen canvas without overlapping toolbar','collapsible guide','3D mounts in StrictMode','port model and nearby chunks load','flight starts and stops','2D releases canvas','context loss falls back to 2D','position survives mode changes','3D discovery and live-scene PNG']},null,2));
+ console.log(JSON.stringify({result:'pass',errors,failed,checks:['fullscreen canvas without overlapping toolbar','collapsible guide','3D mounts in StrictMode','port model and nearby chunks load','one action from result starts flight automatically','2D releases canvas','context loss falls back to 2D','position survives mode changes','3D discovery and live-scene PNG']},null,2));
 }finally{await browser.close();}

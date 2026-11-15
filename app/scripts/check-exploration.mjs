@@ -15,7 +15,6 @@ try{
  await page.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).waitFor();
  assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest|seamlessphoto|building-details/.test(u)),'gacha loaded 3D');
  const initial=await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1'));
- await page.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).click();
  await page.getByRole('button',{name:'軽い2D地図で探す',exact:true}).click();
  assert(await page.getByRole('button',{name:'探知機を頼りに近づこう'}).isDisabled());
  const svg=page.locator('.search-2d svg');await svg.scrollIntoViewIfNeeded();

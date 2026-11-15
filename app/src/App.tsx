@@ -6,6 +6,7 @@ import { AboutPage } from './pages/AboutPage';
 import { FishDetailPage } from './pages/FishDetailPage';
 import { PokedexPage } from './pages/PokedexPage';
 import { TodayGachaPage } from './pages/TodayGachaPage';
+import { ExplorationLoading } from './components/ExplorationLoading';
 import {
   loadCollectionState,
   loadLocalePreference,
@@ -20,7 +21,7 @@ import type { FishCatalogData } from './types/schema';
 const ExplorationPage = lazy(() => import('./features/exploration/ExplorationPage'));
 
 type RouteState =
-  | { page: 'explore'; date: string }
+  | { page: 'explore'; date: string; mode: '3d'|'2d' }
   | { page: 'today' }
   | { page: 'pokedex' }
   | { page: 'about' }
@@ -31,8 +32,8 @@ function parseHashRoute(hash: string): RouteState {
   if (!cleaned || cleaned === 'today') {
     return { page: 'today' };
   }
-  if (/^explore\/\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
-    return { page: 'explore', date: cleaned.slice(8) };
+  if (/^explore\/\d{4}-\d{2}-\d{2}(?:\/2d)?$/.test(cleaned)) {
+    return { page: 'explore', date: cleaned.slice(8,18), mode:cleaned.endsWith('/2d')?'2d':'3d' };
   }
   if (cleaned === 'pokedex') {
     return { page: 'pokedex' };
@@ -201,13 +202,13 @@ export const App: React.FC = () => {
             onRecordDraw={handleRecordDraw}
             onNavigateToFish={(fishId) => navigateTo(`#/fish/${fishId}`)}
             onNavigateToPokedex={() => navigateTo('#/pokedex')}
-            onExplore={(date) => navigateTo(`#/explore/${date}`)}
+            onExplore={(date,mode) => navigateTo(`#/explore/${date}${mode==='2d'?'/2d':''}`)}
           />
         )}
 
         {route.page === 'explore' && (
-          <Suspense fallback={<p className="page-container">探索を準備しています… / Preparing exploration…</p>}>
-            <ExplorationPage locale={locale} date={route.date}
+          <Suspense fallback={<ExplorationLoading locale={locale} fish={catalogData.fish.find(f=>f.id===collectionState.dailyHistory[route.date]?.fishId)} onBack={()=>navigateTo('#/today')} on2D={()=>navigateTo(`#/explore/${route.date}/2d`)}/> }>
+            <ExplorationPage key={`${route.date}/${route.mode}`} locale={locale} date={route.date} initialMode={route.mode}
               fish={catalogData.fish.find(f => f.id === collectionState.dailyHistory[route.date]?.fishId)}
               onBack={() => navigateTo('#/today')} />
           </Suspense>

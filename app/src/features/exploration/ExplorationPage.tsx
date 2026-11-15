@@ -4,6 +4,7 @@ import type { FishRecord } from '../../types/schema';
 import { getFishDisplayName } from '../../lib/i18n';
 import { dailyPlace, detector, HIDE_VERSION, loadDiscovery, saveDiscovery, START, type Discovery, type Position, type SearchMode } from './domain';
 import Exploration2D from './Exploration2D';
+import { ExplorationLoading } from '../../components/ExplorationLoading';
 import type { Search3DBridge } from './map/components/Map3DView';
 import type { PerformanceStats } from './map/types';
 import { makeDiscoveryCard } from './discoveryCard';
@@ -12,6 +13,7 @@ import './exploration.css';
 class MapBoundary extends Component<{children: import('react').ReactNode; onFallback:()=>void; en:boolean}, {failed:boolean}> {
   state={failed:false};
   static getDerivedStateFromError(){return {failed:true};}
+  componentDidCatch(){this.props.onFallback();}
   render(){return this.state.failed?<div className="search-notice"><p>{this.props.en?'3D could not load.':'3Dを読み込めませんでした。'}</p><button onClick={this.props.onFallback}>{this.props.en?'Continue in 2D':'2Dで続ける'}</button></div>:this.props.children;}
 }
 const Map3D = lazy(() => import('./map/components/Map3DView').then(m => ({default:m.Map3DView})));
@@ -20,13 +22,15 @@ const NO_SELECT = () => {};
 const DIRECTIONS = ['北','北東','東','南東','南','南西','西','北西'];
 const DIRECTIONS_EN = ['N','NE','E','SE','S','SW','W','NW'];
 
-export default function ExplorationPage(props: { locale: Locale; date: string; fish?: FishRecord; onBack: () => void }) {
+export default function ExplorationPage(props: { locale: Locale; date: string; fish?: FishRecord; initialMode?:SearchMode; onBack: () => void }) {
   // Lock the day at entry; a midnight change never moves an ongoing hunt.
   const [session] = useState(() => ({date:props.date,fish:props.fish,place:dailyPlace(props.date)}));
   const {date,fish,place} = session;
   const en = props.locale === 'en';
-  const [mode,setMode] = useState<SearchMode>('2d');
-  const [started,setStarted] = useState(false);
+  const [mode,setMode] = useState<SearchMode>(props.initialMode??'3d');
+  const autoFly=useRef((props.initialMode??'3d')==='3d');
+  const [sceneReady,setSceneReady]=useState(false);
+  const onSceneReady=useCallback(()=>{setSceneReady(true);requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>('.search-flight-button')?.focus({preventScroll:true}));},[]);
   const [optionsOpen,setOptionsOpen] = useState(false);
   const [position,setPosition] = useState<Position>(START);
   const entryRef = useRef<Position>(START);
@@ -51,7 +55,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     if(slowCount.current>=25)setSlow(true);
   },[]);
   const onError = useCallback((reason:string)=>{setNotice(reason);setMode('2d');setVisible(true);},[]);
-  const immersive = started && !found && mode === '3d';
+  const immersive = !!fish && !found && mode === '3d';
   useEffect(() => {
     if (!immersive) return;
     document.body.classList.add('exploration-immersive');
@@ -64,7 +68,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
       window.scrollTo(0, 0);
     };
   }, [immersive]);
-  const bridge:Search3DBridge = {start:entryRef.current,target:place,onPosition,onCaptureReady};
+  const bridge:Search3DBridge = {start:entryRef.current,target:place,onPosition,onCaptureReady,onReady:onSceneReady,autoFly:autoFly.current};
   useEffect(()=>()=>{if(card)URL.revokeObjectURL(card.url);},[card]);
   useEffect(()=>{
     if(!sound || found)return;
@@ -80,7 +84,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     };tick();return()=>clearTimeout(timer);
   },[sound,found]);
   useEffect(()=>()=>{void audioRef.current?.close();},[]);
-  const switchMode=(next:SearchMode)=>{entryRef.current=position;setMode(next);setNotice('');setVisible(next==='2d');setSlow(false);slowCount.current=0;};
+  const switchMode=(next:SearchMode)=>{entryRef.current=position;autoFly.current=false;setSceneReady(false);setMode(next);setNotice('');setVisible(next==='2d');setSlow(false);slowCount.current=0;};
   const discover=()=>{
     if(!fish || !hint.near || (mode==='3d'&&!visible))return;
     const record:Discovery={date,fishId:fish.id,placeId:place.id,version:HIDE_VERSION,mode,foundAt:new Date().toISOString()};
@@ -105,8 +109,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
   if(!fish)return <section className="page-container"><h2>{en?'Draw today’s fish first':'まず今日のガチャを引こう'}</h2><button className="primary-action-btn" onClick={props.onBack}>{en?'Back to Today':'今日へ戻る'}</button></section>;
   return <section className={`exploration-page ${immersive?'is-immersive':''}`}>
     <header className="search-heading"><div><p>{date} · {en?'VIRTUAL NUMAZU':'バーチャル沼津'}</p><h2>{en?'Find today’s fish':'今日の魚を探そう'}</h2></div><button onClick={props.onBack}>{en?'Back':'今日へ戻る'}</button></header>
-    {!started&&!found?<div className="search-intro"><h3>{getFishDisplayName(fish,props.locale)}</h3><p>{en?'The same fish, in the same hiding place, for everyone today. Follow the detector through Numazu.':'今日の隠れ場所は、みんな同じ。探知機を頼りに沼津の街を探そう。'}</p><p>{en?place.hintEn:place.hint}</p><div className="search-actions"><button className="primary-action-btn" onClick={()=>{setMode('3d');setStarted(true);}}>{en?'Explore in 3D':'3Dの街で探す'}</button><button onClick={()=>{setMode('2d');setStarted(true);}}>{en?'Lightweight 2D map':'軽い2D地図で探す'}</button></div></div>:null}
-    {started&&!found&&<>
+    {!found&&<>
       <div className="search-toolbar">
         {immersive&&<button onClick={props.onBack}>{en?'Back':'今日へ戻る'}</button>}
         <div><button aria-pressed={mode==='3d'} onClick={()=>switchMode('3d')}>3D</button><button aria-pressed={mode==='2d'} onClick={()=>switchMode('2d')}>2D</button></div>
@@ -125,9 +128,10 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
       }}>{en?'Save performance snapshot':'動作情報を保存'}</button></details>}
         <p className="search-options-credit">{en?'Source: MLIT PLATEAU, Numazu 2021; GSI Maps aerial photographs and elevation tiles. Modified for virtual exploration; not survey-accurate.':'出典：国土交通省 PLATEAU 沼津市（2021年度）、地理院タイル（国土地理院・空中写真・標高）を加工。バーチャル探索用の表現で、正確な測量図ではありません。'} <a href="https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2021" target="_blank" rel="noreferrer">PLATEAU</a> · <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">GSI</a></p>
       </div>
-      <div className="search-map">{mode==='3d'?<MapBoundary en={en} onFallback={()=>switchMode('2d')}><Suspense fallback={<p>{en?'Loading 3D…':'3Dを読み込んでいます…'}</p>}><Map3D pins={EMPTY_PINS} selectedPinId={null} onSelectPin={NO_SELECT} onUpdateStats={onStats} onWebGLError={onError} search={bridge}/></Suspense><span className="search-center" aria-hidden="true">＋</span></MapBoundary>:<Exploration2D en={en} position={position} onMove={setPosition}/>}</div>
+      <div className={`search-map ${sceneReady?'is-ready':''}`}>{mode==='3d'?<MapBoundary en={en} onFallback={()=>switchMode('2d')}><Suspense fallback={null}><Map3D pins={EMPTY_PINS} selectedPinId={null} onSelectPin={NO_SELECT} onUpdateStats={onStats} onWebGLError={onError} search={bridge}/></Suspense><span className="search-center" aria-hidden="true">＋</span></MapBoundary>:<Exploration2D en={en} position={position} onMove={setPosition}/>}</div>
       <div className="search-actions search-discover"><button className="primary-action-btn" disabled={!hint.near||(mode==='3d'&&!visible)} onClick={discover}>{hint.near?(en?'Discover the fish!':'魚を発見する！'):(en?'Follow the detector':'探知機を頼りに近づこう')}</button>{immersive&&(slow?<button className="search-low-fps" onClick={()=>switchMode('2d')}>{en?'Lighter 2D':'軽い2Dへ'}</button>:<small>PLATEAU / GSI</small>)}</div>
     </>}
+    {immersive&&!sceneReady&&<ExplorationLoading locale={props.locale} fish={fish} onBack={props.onBack} on2D={()=>switchMode('2d')}/>}
     {found&&<div className="search-found"><p className="search-found-label">{en?'DISCOVERED':'発見！'}</p><h2>{getFishDisplayName(fish,props.locale)}</h2><p>{en?place.nameEn:place.name} · {date}</p><p>{en?'A discovery in virtual Numazu. Make a postcard with the scenery.':'バーチャルの沼津で出会いました。街の景色と一緒にカードにしよう。'}</p><button className="primary-action-btn" disabled={busy} onClick={generate}>{busy?(en?'Creating…':'カードを作成中…'):en?'Create discovery card':'景色入りカードを作る'}</button>{card&&<><img className="discovery-card-preview" src={card.url} alt={en?'Discovery postcard':'発見カード'}/><div className="search-actions"><a className="primary-action-btn" download={`shinkai-discovery-${date}.png`} href={card.url}>{en?'Save image':'画像を保存'}</a><button onClick={share}>{en?'Share / copy text':'共有・共有文をコピー'}</button></div><textarea readOnly aria-label={en?'Share text':'共有文'} value={text}/></>}</div>}
     {notice&&<p role="status" className="search-notice">{notice}</p>}
     <footer className="search-credit"><p>{en?'Virtual exploration. No real-world visit is recorded.':'バーチャルでの探索です。実際の来店記録は作りません。'}</p><p>{en?'Source: MLIT Project PLATEAU, Numazu 2021; GSI Maps aerial photographs and elevation tiles. Modified for this game; not survey-accurate.':'出典：国土交通省 PLATEAU 沼津市（2021年度）、地理院タイル（国土地理院・空中写真・標高）を加工。形状・位置はゲーム用の表現であり、正確な測量図ではありません。'}</p><a href="https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2021" target="_blank" rel="noreferrer">PLATEAU</a> · <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">GSI</a></footer>
