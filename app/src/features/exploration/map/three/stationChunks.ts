@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { emphasizeBuildingHeights } from './buildingHeight';
 import { createBuildingDetails } from './buildingDetails';
 import { brightenBuildingMaterial } from './buildingAppearance';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -65,6 +66,7 @@ export function streamStationBuildings(
     onStatus?.('周辺の街並みを読み込み中…');
     void loader.loadAsync(baseUrl + chunk.url).then(gltf => {
       if (disposed || distance(chunk) > 900) { release(gltf.scene); return; }
+      emphasizeBuildingHeights(gltf.scene);
       gltf.scene.traverse(object => {
         if (!(object instanceof THREE.Mesh)) return;
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) {

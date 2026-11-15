@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { NavigationHud } from './NavigationHud';
+import { createNavigationHud } from '../three/navigationHud';
 import { createWorldFish } from '../three/worldFish';
 import type { HidingPlace, Position } from '../../domain';
 import type { Locale } from '../../../../config/appConfig';
@@ -56,6 +58,9 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const searchRef = useRef(search);
   searchRef.current = search;
   const mountRef = useRef<HTMLDivElement>(null);
+  const navigationRef=useRef<HTMLDivElement>(null);
+  const [landmarks,setLandmarks]=useState(true);
+  const landmarksRef=useRef(true);landmarksRef.current=landmarks;
   const flightRef = useRef<ReturnType<typeof setupPortFlight> | null>(null);
   const [areaStatus, setAreaStatus] = useState('');
   const locationRef = useRef<'port' | 'station'>('port');
@@ -130,6 +135,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
     // --- 4. Controls ---
     // 指示書: minDistance 40、maxDistance 1400、maxPolarAngle は従来どおり (Math.PI / 2 - 0.05)
+    const navigation=navigationRef.current?createNavigationHud(navigationRef.current,camera,searchRef.current?.locale==='en'):undefined;
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
@@ -354,6 +360,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
             visible=!hits.some(h=>h.distance<length-4&&h.object instanceof THREE.Mesh&&h.object.material instanceof THREE.MeshStandardMaterial&&!h.object.userData.worldFish);
           }
         }
+        navigation?.update(flight.isActive()?p:camera.position,landmarksRef.current);
         searchRef.current.onPosition({ x:p.x, z:p.z,...(flight.isActive()?{y:p.y}:{}) }, visible);
       }
       fishWorld?.update(currentTime*.001,flight.isActive()?flight.getPosition():camera.position,!!searchRef.current?.discovered,reducedMotion);
@@ -435,6 +442,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         }}
         className="search-flight-button"
       >{isLoading || (!flying && !!areaStatus) ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}</button>
+      <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{search?.locale==='en'?'Places':'目印'}</button>
       <div className="search-world-destinations">
         {(['port', 'station'] as const).map(location => <button key={location} type="button" disabled={isLoading}
           onClick={() => {
@@ -450,7 +458,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           }}>{location === 'port' ? '沼津港' : '沼津駅南口'}</button>)}
       </div>
       </div>
-      <div ref={mountRef} className="search-world-canvas" />
+      <div ref={mountRef} className="search-world-canvas"/>
+      <NavigationHud rootRef={navigationRef} en={search?.locale==='en'}/>
       {areaStatus && <div role="status" className="search-world-status">{areaStatus}</div>}
       {/* 読み込み中インジケーター（小さな表示） */}
       {isLoading && (

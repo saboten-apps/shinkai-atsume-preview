@@ -11,7 +11,7 @@
 .search-world-toolbar .search-flight-button {order:2;background:#d66a37;border-color:#f6b48b;}
 .search-world-destinations {display:flex;gap:6px;}
 .search-world-canvas {position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;}
-.search-world-status {position:absolute;top:60px;left:10px;right:10px;pointer-events:none;width:fit-content;padding:5px 10px;border-radius:6px;background:#102b40d9;color:#fff;font-size:11px;}
+.search-world-status {position:absolute;top:102px;left:10px;right:10px;pointer-events:none;width:fit-content;padding:5px 10px;border-radius:6px;background:#102b40d9;color:#fff;font-size:11px;}
 .search-map .flight-instructions {top:12px;left:12px;right:auto;padding:5px 9px;font-size:12px;}
 .search-map .flight-depth {font-variant-numeric:tabular-nums;}
 .search-map .map-loading-indicator {top:60px;bottom:auto;font-size:11px;}
@@ -42,3 +42,13 @@ body.exploration-immersive {overflow:hidden;overscroll-behavior:none;}
 .search-map .search-center {top:calc(50% + 26px);}
 .search-map:has(.flight-pad:not([hidden])) .search-center {display:none;}
 .is-immersive .search-discover .search-low-fps {font-size:12px;color:#ffd09e;background:transparent;border-color:#b68857;}
+
+.world-navigation{position:absolute;inset:54px 0 0;pointer-events:none;z-index:22;overflow:hidden;}
+.world-compass{position:absolute;right:12px;top:12px;width:78px;height:90px;border:1px solid #b6d5dc70;border-radius:12px;background:#0d2e42c9;color:#f5f0e6;display:grid;justify-items:center;align-content:start;padding:5px;}
+.world-compass-rose{position:relative;width:62px;height:62px;border:1px solid #91b8c36b;border-radius:50%;}
+.world-compass-rose>span{position:absolute;display:grid;place-items:center;font:11px system-ui;width:20px;height:18px;}
+.world-compass-rose b{display:block;font-weight:500;}.world-compass-rose .compass-N{top:0;left:20px;color:#ffb587;}.world-compass-rose .compass-S{bottom:0;left:20px;}.world-compass-rose .compass-E{right:-1px;top:21px;}.world-compass-rose .compass-W{left:-1px;top:21px;}
+.world-compass-forward{position:absolute;top:27px;left:29px;color:#fff;font:17px sans-serif;}.world-compass>strong{font:11px system-ui;line-height:16px;}
+.world-landmark-label{position:absolute;transform:translate(-50%,-100%);max-width:142px;min-width:70px;padding:5px 8px;border:1px solid #9dd1d68c;border-radius:7px;background:#10394cc7;color:#effbfc;text-align:center;font:11px/1.35 system-ui;box-shadow:0 2px 6px #0004;}
+.world-landmark-label[hidden]{display:none;}.world-landmark-label>span{display:block;color:#a6e8e9;font-size:14px;line-height:12px;}.world-landmark-label b{display:block;font-weight:500;}.world-landmark-label small{font-size:10px;color:#b5d6db;}
+@media(max-width:360px){.world-compass{right:7px;top:8px;transform:scale(.9);transform-origin:top right;}.search-world-toolbar{gap:4px;}.search-world-toolbar>button{padding:8px;font-size:12px;}}

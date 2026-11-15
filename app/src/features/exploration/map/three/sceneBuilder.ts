@@ -1,3 +1,4 @@
+import { createCityStructures } from './cityStructures';
 import { styleRegionalLandscape } from './regionalLandscape';
 import { createWaterSurface } from './waterSurface';
 import { createAerialGround } from './aerialGround';
@@ -32,6 +33,7 @@ export function buildNumazuPortScene(
   onAreaStatus?: (text: string) => void
 ): SceneBuildResult {
   let isDisposed = false;
+  let city:ReturnType<typeof createCityStructures>|undefined;
   let aerial: ReturnType<typeof createAerialGround> | undefined;
   const disposables: {
     geometry?: THREE.BufferGeometry;
@@ -184,6 +186,8 @@ export function buildNumazuPortScene(
           child.receiveShadow = false;
         }
       });
+      roadScene.userData.waterTerrain=true;
+      roadScene.traverse(child=>{child.userData.waterTerrain=true;});
       scene.add(track(roadScene));
       onCollisionGeometry?.(roadScene);
 
@@ -224,7 +228,9 @@ export function buildNumazuPortScene(
       water.attach(waterSeaScene);
       water.attach(waterRiverScene);
       scene.add(waterSeaScene,waterRiverScene);
+      city=createCityStructures(scene,terrainScene,roadScene,onCollisionGeometry);
       aerial = createAerialGround(scene, terrainScene, [waterSeaScene, waterRiverScene]);
+      aerial.maskRoads(roadScene);
       water.setShoreMask(aerial.waterMask,aerial.maskBounds);
       void aerial.ready.catch(error => { if(!isDisposed) console.warn('Ground photos unavailable:', error); });
     })
@@ -236,6 +242,7 @@ export function buildNumazuPortScene(
   const dispose = () => {
     isDisposed = true;
     station.dispose();
+    city?.dispose();
     aerial?.dispose();
     water.dispose();
     disposables.forEach((item) => {

@@ -27,6 +27,6 @@ export async function makeDiscoveryCard(fish: FishRecord, date: string, place: H
   ctx.font='bold 38px serif';ctx.fillText('うみまちラボ',830,532);
   ctx.font='16px sans-serif';ctx.fillText(locale==='ja'?'沼津の街で、今日の一匹に出会う。':'A new fish, a new view of Numazu.',58,520);
   ctx.font='13px sans-serif';ctx.fillText('出典：国土交通省 PLATEAU（沼津市・2021年度）を加工',58,574);
-  ctx.fillText('地理院タイル（国土地理院・空中写真・標高）を加工',58,594);
+  ctx.fillText('地理院タイル（国土地理院・空中写真・標高・地図）を加工',58,594);
   return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('PNG export failed')),'image/png'));
 }

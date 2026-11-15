@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import city from '../../cityStructures.v1.json';
 import { addPhotoSurfaceDetail } from './surfaceDetail';
 import { DETAIL_ZOOM, OVERVIEW_ZOOM, TILE_ORIGIN, worldToPhotoTile } from './groundProjection';
 
@@ -40,6 +41,19 @@ export function createAerialGround(scene: THREE.Scene, terrain: THREE.Group, wat
       }
       ctx.fill();
     });
+  }
+  // Map polygons treat a bridge deck as land. Restore the water passage below it.
+  {
+  const originalMask=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+  const wet=(x:number,z:number)=>{const px=Math.floor((x-bounds.min.x)/span.x*canvas.width),py=Math.floor((z-bounds.min.z)/span.z*canvas.height);return px>=0&&py>=0&&px<canvas.width&&py<canvas.height&&originalMask[(py*canvas.width+px)*4+1]<128;};
+  for(const bridge of [...city.bridges,city.watergate]){
+    const dx=bridge.b.x-bridge.a.x,dz=bridge.b.z-bridge.a.z,length=Math.hypot(dx,dz),ux=dx/length,uz=dz/length;
+    for(let along=0;along<=length;along+=2){
+      const x=bridge.a.x+ux*along,z=bridge.a.z+uz*along;
+      if(!wet(x-uz*26,z+ux*26)||!wet(x+uz*26,z-ux*26))continue;
+      ctx.beginPath();for(const [a,b] of [[-1.5,-24],[1.5,-24],[1.5,24],[-1.5,24]]){const px=(x+ux*a-uz*b-bounds.min.x)/span.x*canvas.width,py=(z+uz*a+ux*b-bounds.min.z)/span.z*canvas.height;if(a===-1.5&&b===-24)ctx.moveTo(px,py);else ctx.lineTo(px,py);}ctx.closePath();ctx.fill();
+    }
+  }
   }
   const waterMask=new THREE.CanvasTexture(canvas);
   waterMask.channel=1;waterMask.generateMipmaps=false;
@@ -185,6 +199,9 @@ export function createAerialGround(scene: THREE.Scene, terrain: THREE.Group, wat
   })();
   return {
     ready,
+    maskRoads(roads:THREE.Group){
+      roads.updateMatrixWorld(true);const point=new THREE.Vector3();roads.traverse(o=>{if(!(o instanceof THREE.Mesh))return;const position=o.geometry.getAttribute('position'),uv=new Float32Array(position.count*2);for(let i=0;i<position.count;i++){point.fromBufferAttribute(position,i).applyMatrix4(o.matrixWorld);uv[i*2]=(point.x-bounds.min.x)/span.x;uv[i*2+1]=1-(point.z-bounds.min.z)/span.z;}o.geometry.setAttribute('uv1',new THREE.BufferAttribute(uv,2));for(const material of Array.isArray(o.material)?o.material:[o.material])if(material instanceof THREE.MeshStandardMaterial){material.alphaMap=waterMask;material.alphaTest=.05;material.needsUpdate=true;}});
+    },
     waterMask,
     isWaterAt(x:number,z:number){
       const px=Math.floor((x-bounds.min.x)/span.x*canvas.width),py=Math.floor((z-bounds.min.z)/span.z*canvas.height);
