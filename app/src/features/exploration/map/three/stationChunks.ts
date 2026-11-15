@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { emphasizeBuildingHeights } from './buildingHeight';
-import { createBuildingDetails } from './buildingDetails';
 import { brightenBuildingMaterial } from './buildingAppearance';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { createNearBuildingPilot, NEAR_BUILDING_PILOT } from './nearBuildingPilot';
@@ -13,7 +12,6 @@ export function streamStationBuildings(
   onStatus?: (text: string) => void,
 ) {
   const abort = new AbortController();
-  const details=createBuildingDetails();
   let pilot: ReturnType<typeof createNearBuildingPilot> | undefined;
   let hall: {model:ReturnType<typeof createCityHall>;removeCollider?:()=>void} | undefined;
   let chunks: Chunk[] = [], disposed = false, manifestFailed = false, loading = false, nextUpdate = 0;
@@ -51,29 +49,28 @@ export function streamStationBuildings(
   function update(position: THREE.Vector3, viewer:THREE.Vector3=position) {
     pilot?.update(viewer, scene.userData.nearBuildingPilot !== false);
     hall?.model.update(viewer);
-    details.update(viewer);
     focus.copy(position);
     if (disposed || manifestFailed || performance.now() < nextUpdate) return;
     nextUpdate = performance.now() + 400;
     for (const chunk of chunks) {
       const entry = loaded.get(chunk.id);
-      if (entry && distance(chunk) > 900) {
+      if (entry && distance(chunk) > 650) {
         if(chunk.id===CITY_HALL.chunk){hall?.removeCollider?.();hall?.model.dispose();hall=undefined;}
         if (chunk.id === NEAR_BUILDING_PILOT.chunk) { pilot?.dispose(); pilot = undefined; }
         entry.removeDetail?.();entry.removeCollider?.(); release(entry.group); loaded.delete(chunk.id);
       }
     }
     if (loading) return;
-    const chunk = chunks.filter(c => !loaded.has(c.id) && distance(c) < 500 && performance.now() >= (retryAt.get(c.id) ?? 0))
+    const chunk = chunks.filter(c => !loaded.has(c.id) && distance(c) < 350 && performance.now() >= (retryAt.get(c.id) ?? 0))
       .sort((a, b) => distance(a) - distance(b))[0];
     if (!chunk) {
-      const waiting = chunks.some(c => distance(c) < 500 && retryAt.has(c.id));
+      const waiting = chunks.some(c => distance(c) < 350 && retryAt.has(c.id));
       onStatus?.(waiting ? '街並みの読み込みを再試行しています…' : ''); return;
     }
     loading = true;
     onStatus?.('周辺の街並みを読み込み中…');
     void loader.loadAsync(baseUrl + chunk.url).then(gltf => {
-      if (disposed || distance(chunk) > 900) { release(gltf.scene); return; }
+      if (disposed || distance(chunk) > 650) { release(gltf.scene); return; }
       emphasizeBuildingHeights(gltf.scene);
       if(chunk.id===CITY_HALL.chunk){
         const removed=removeCityHallSource(gltf.scene);
@@ -92,7 +89,7 @@ export function streamStationBuildings(
       });
       scene.add(gltf.scene);
       const removeCollider = addCollider(gltf.scene) || undefined;
-      const removeDetail=details.register(gltf.scene);
+      const removeDetail=undefined;
       if (chunk.id === NEAR_BUILDING_PILOT.chunk) {
         pilot = createNearBuildingPilot(); scene.add(pilot.root);
         pilot.update(viewer, scene.userData.nearBuildingPilot !== false);
@@ -103,11 +100,10 @@ export function streamStationBuildings(
       if (!disposed) { console.error(`Station chunk ${chunk.id}:`, error); retryAt.set(chunk.id, performance.now() + 10000); onStatus?.('街並みの読み込みを再試行しています…'); }
     }).finally(() => { loading = false; nextUpdate = 0; });
   }
-  return { ready, update, detailReady:async()=>{await details.settled();await hall?.model.photoReady();}, dispose() {
+  return { ready, update, detailReady:async()=>{await hall?.model.photoReady();}, dispose() {
     disposed = true; abort.abort();
     pilot?.dispose(); pilot = undefined;
     hall?.removeCollider?.();hall?.model.dispose();hall=undefined;
-    details.dispose();
     for (const entry of loaded.values()) { entry.removeDetail?.();entry.removeCollider?.(); release(entry.group); }
     loaded.clear();
   } };

@@ -3,6 +3,7 @@ import type { Locale } from '../../config/appConfig';
 import type { FishRecord } from '../../types/schema';
 import { getFishDisplayName } from '../../lib/i18n';
 import { dailyPlace, detector, saveDiscovery, START, type Discovery, type Position, type SearchMode } from './domain';
+import MapDownload from './MapDownload';
 import Exploration2D from './Exploration2D';
 import { fishWorldSession } from './fishWorld';
 import { ExplorationLoading } from '../../components/ExplorationLoading';
@@ -133,7 +134,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
         const blob=new Blob([JSON.stringify({capturedAt:new Date().toISOString(),mode,position,stats,userAgent:navigator.userAgent,viewport:{width:innerWidth,height:innerHeight},visibility:document.visibilityState},null,2)],{type:'application/json'});
         const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='shinkai-performance.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
       }}>{en?'Save performance snapshot':'動作情報を保存'}</button></details>}
-        <p className="search-options-credit">{en?'Source: MLIT PLATEAU, Numazu 2021; GSI Maps aerial photographs, elevation and vector-map tiles. Modified for virtual exploration; not survey-accurate.':'出典：国土交通省 PLATEAU 沼津市（2021年度）、地理院タイル（国土地理院・空中写真・標高・地図）を加工。バーチャル探索用の表現で、正確な測量図ではありません。'} <a href="https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2021" target="_blank" rel="noreferrer">PLATEAU</a> · <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">GSI</a></p>
+        <MapDownload en={en}/><p className="search-options-credit">{en?'Source: MLIT PLATEAU, Numazu 2021; GSI Maps aerial photographs, elevation and vector-map tiles. Modified for virtual exploration; not survey-accurate.':'出典：国土交通省 PLATEAU 沼津市（2021年度）、地理院タイル（国土地理院・空中写真・標高・地図）を加工。バーチャル探索用の表現で、正確な測量図ではありません。'} <a href="https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2021" target="_blank" rel="noreferrer">PLATEAU</a> · <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">GSI</a></p>
       </div>
       <div className={`search-map ${sceneReady?'is-ready':''}`}>{mode==='3d'?<MapBoundary en={en} onFallback={()=>switchMode('2d')}><Suspense fallback={null}><Map3D pins={EMPTY_PINS} selectedPinId={null} onSelectPin={NO_SELECT} onUpdateStats={onStats} onWebGLError={onError} search={bridge}/></Suspense><span className="search-center" aria-hidden="true">＋</span></MapBoundary>:<Exploration2D en={en} position={position} onMove={setPosition} targetFishId={fish.id} target={place} discovered={!!found}/>}</div>
       <div className="search-actions search-discover">{found?<button className="primary-action-btn" onClick={openCard}>{en?'View discovery card':'発見カードを見る'}</button>:<button className="primary-action-btn" disabled={!hint.near||(mode==='3d'&&!visible)} onClick={discover}>{hint.near?(en?'Discover the fish!':'魚を発見する！'):(en?'Follow the detector':'探知機を頼りに近づこう')}</button>}{immersive&&(slow?<button className="search-low-fps" onClick={()=>switchMode('2d')}>{en?'Lighter 2D':'軽い2Dへ'}</button>:<small>PLATEAU / GSI</small>)}</div>

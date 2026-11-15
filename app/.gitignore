@@ -4,3 +4,7 @@ dist/
 .DS_Store
 
 *.tsbuildinfo
+
+# Generated from currently deployed map assets
+/public/map/download-manifest.json
+/public/map-cache-sw.js

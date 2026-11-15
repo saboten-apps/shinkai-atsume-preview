@@ -1,4 +1,4 @@
-import {readFile,mkdir,copyFile,readdir} from 'node:fs/promises';
+import {readFile,mkdir,copyFile,readdir,unlink} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 const app=new URL('../app/',import.meta.url);
 const upstream=JSON.parse(await readFile(new URL('UPSTREAM.json',app)));
@@ -8,6 +8,7 @@ const source=new URL('../spike-3d/public/data/',import.meta.url);
 const dest=new URL('public/map/data/',app);await mkdir(dest,{recursive:true});
 const manifest=JSON.parse(await readFile(new URL('station-manifest.json',source)));
 const names=['station-manifest.json','corridor-road-packed.glb','corridor-terrain-packed.glb','corridor-veg-packed.glb','corridor-water-sea-packed.glb','corridor-water-river-packed.glb',...manifest.chunks.map(c=>c.url.split('/').at(-1))];
+for(const name of await readdir(dest))if(!names.includes(name))await unlink(new URL(name,dest));
 for(const name of new Set(names))await copyFile(new URL(name,source),new URL(name,dest));
 const legacy=JSON.parse(await readFile(new URL('src/features/exploration/hidingPlaces.v1.json',app)));
 const world=JSON.parse(await readFile(new URL('src/features/exploration/fishWorld.v1.json',app))).map(site=>({id:`fish-world-${site.fishId}`}));
