@@ -303,7 +303,7 @@ for (const f of files) {
 
 const binBuf = Buffer.concat(binChunks);
 const gltfJson = {
-  asset: { version: '2.0', generator: `plateau-b3dm-to-glb texture-preserving (${label})`, extras: { source: `PLATEAU 3D Tiles Numazu City 2021, bldg ${label}, textures preserved (WebP via EXT_texture_webp)`, frame: 'local ENU, origin lat 35.0815 lon 138.8576 h 0 (WGS84); x=east, y=up, z=-north; ground level y~=41.7m', geometryBytes, textureBytes } },
+  asset: { version: '2.0', generator: `plateau-b3dm-to-glb texture-preserving (${label})`, extras: { source: `PLATEAU 3D Tiles Numazu City ${label.startsWith('2023-') ? '2023' : '2021'}, bldg ${label}, textures preserved (WebP via EXT_texture_webp)`, frame: 'local ENU, origin lat 35.0815 lon 138.8576 h 0 (WGS84); x=east, y=up, z=-north; ground level y~=41.7m', geometryBytes, textureBytes } },
   extensionsUsed: ['EXT_texture_webp'],
   scene: 0, scenes: [{ nodes: outNodes.map((_, i) => i) }],
   nodes: outNodes, meshes: outMeshes, materials: outMaterials,
