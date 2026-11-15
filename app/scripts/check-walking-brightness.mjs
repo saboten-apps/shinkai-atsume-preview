@@ -63,7 +63,7 @@ try{
   c.scene.userData.forceReflectionUpdate=true;c.renderer.render(c.scene,c.camera);c.scene.userData.forceReflectionUpdate=false;
   return {grounded,distance:Math.hypot(position.x-start.x,position.z-start.z),status:c.flight.getStatus(),leg:avatar.getObjectByName('left-leg').rotation.x,image:c.renderer.domElement.toDataURL('image/png').split(',')[1]};
  });
- await page.mouse.up();assert(walking.grounded>80);assert(walking.distance>1.5&&walking.distance<4);assert(Math.abs(walking.leg)>.01);
+ await page.mouse.up();assert(walking.grounded>80);assert(walking.distance>2.7&&walking.distance<6);assert(Math.abs(walking.leg)>.01);
  await writeFile('/tmp/shinkai-ground-walking.png',Buffer.from(walking.image,'base64'));delete walking.image;
  await page.evaluate(()=>{const c=window.walkingCheck;for(let i=0;i<120;i++){c.time+=1/60;c.flight.update(1/60,c.time);}});
  const rise=page.getByRole('button',{name:'飛び立つ',exact:true});const riseBox=await rise.boundingBox();await page.mouse.move(riseBox.x+riseBox.width/2,riseBox.y+riseBox.height/2);await page.mouse.down();
