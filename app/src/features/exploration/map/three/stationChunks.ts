@@ -3,6 +3,7 @@ import { emphasizeBuildingHeights } from './buildingHeight';
 import { createBuildingDetails } from './buildingDetails';
 import { brightenBuildingMaterial } from './buildingAppearance';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { createNearBuildingPilot, NEAR_BUILDING_PILOT } from './nearBuildingPilot';
 
 type Chunk = { id: string; url: string; min: number[]; max: number[] };
 export function streamStationBuildings(
@@ -12,6 +13,7 @@ export function streamStationBuildings(
 ) {
   const abort = new AbortController();
   const details=createBuildingDetails();
+  let pilot: ReturnType<typeof createNearBuildingPilot> | undefined;
   let chunks: Chunk[] = [], disposed = false, manifestFailed = false, loading = false, nextUpdate = 0;
   const focus = new THREE.Vector3();
   const loaded = new Map<string, { group: THREE.Group; removeCollider?: () => void; removeDetail?:()=>void }>();
@@ -45,6 +47,7 @@ export function streamStationBuildings(
       if (!disposed) { manifestFailed = true; console.error('Station manifest:', error); onStatus?.('駅方面のデータを読み込めませんでした'); }
     });
   function update(position: THREE.Vector3, viewer:THREE.Vector3=position) {
+    pilot?.update(viewer, scene.userData.nearBuildingPilot !== false);
     details.update(viewer);
     focus.copy(position);
     if (disposed || manifestFailed || performance.now() < nextUpdate) return;
@@ -52,6 +55,7 @@ export function streamStationBuildings(
     for (const chunk of chunks) {
       const entry = loaded.get(chunk.id);
       if (entry && distance(chunk) > 900) {
+        if (chunk.id === NEAR_BUILDING_PILOT.chunk) { pilot?.dispose(); pilot = undefined; }
         entry.removeDetail?.();entry.removeCollider?.(); release(entry.group); loaded.delete(chunk.id);
       }
     }
@@ -77,6 +81,10 @@ export function streamStationBuildings(
       scene.add(gltf.scene);
       const removeCollider = addCollider(gltf.scene) || undefined;
       const removeDetail=details.register(gltf.scene);
+      if (chunk.id === NEAR_BUILDING_PILOT.chunk) {
+        pilot = createNearBuildingPilot(); scene.add(pilot.root);
+        pilot.update(viewer, scene.userData.nearBuildingPilot !== false);
+      }
       loaded.set(chunk.id, { group: gltf.scene, removeCollider,removeDetail });
       retryAt.delete(chunk.id);
     }).catch(error => {
@@ -85,6 +93,7 @@ export function streamStationBuildings(
   }
   return { ready, update, detailReady:()=>details.settled(), dispose() {
     disposed = true; abort.abort();
+    pilot?.dispose(); pilot = undefined;
     details.dispose();
     for (const entry of loaded.values()) { entry.removeDetail?.();entry.removeCollider?.(); release(entry.group); }
     loaded.clear();
