@@ -5,6 +5,7 @@ export function cameraHeading(x:number,z:number,previous=0){return Math.hypot(x,
 export const CITY_LANDMARKS=[
  {id:'station',name:'沼津駅南口',nameEn:'Numazu Station south',x:210,z:-2395,y:85},
  {id:'port',name:'沼津港',nameEn:'Numazu Harbor',x:-130,z:-150,y:70},
+ {id:'cityhall',name:'沼津市役所',nameEn:'Numazu City Hall',x:548.5,z:-1567,y:103},
  {id:'watergate',name:'びゅうお（水門）',nameEn:'View-O Watergate',...city.watergate.center,y:88},
  ...city.bridges.map(b=>({id:b.id,name:b.name,nameEn:b.nameEn,...b.center,y:59})),
  {id:'ashitaka',name:'愛鷹山',nameEn:'Mt. Ashitaka',x:-5800,z:-17350,y:1600,far:true},
