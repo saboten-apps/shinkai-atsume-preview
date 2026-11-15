@@ -237,7 +237,7 @@ export class HumanoidCharacter {
       this.rightLeg.rotation.x = speedRatio * 0.35;
     } else {
       // Distance-driven stride: stop swinging when the player stops.
-      this.walkPhase+=speed*dt*4.8;
+      this.walkPhase+=Math.min(speed,2.8)*dt*4.8;
       const stride=Math.sin(this.walkPhase)*.52*speedRatio;
       this.leftArm.rotation.set(-stride*.75,0,.08);
       this.rightArm.rotation.set(stride*.75,0,-.08);

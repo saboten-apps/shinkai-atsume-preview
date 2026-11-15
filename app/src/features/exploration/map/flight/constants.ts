@@ -47,7 +47,7 @@ export const INITIAL_FREE_LOOK = {
 
 // 自由飛行モード（FREE）の物理・動作パラメータ
 export const FREE_FLIGHT_CONFIG = {
-  maxSpeedGround: 2.6,     // Walking pace after landing (m/s)
+  maxSpeedGround: 5.5,     // Walking pace after landing (m/s)
   maxSpeedAir: 22.0,       // 空中最高速度 (m/s)
   maxSpeedWater: 10.8,     // 水中最高速度 (m/s)
   accelFactor: 8.0,        // スティック入力への追従加速度係数

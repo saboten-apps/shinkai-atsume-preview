@@ -19,7 +19,7 @@ describe('walking after landing',()=>{
   const {controller,character,camera,tick,land}=setup([floor()]);land();controller.setLookDegrees(0,50);controller.setStick(0,1);
   for(let i=0;i<180;i++){tick(1);expect(controller.state).toBe('ground');expect(controller.position.y).toBeCloseTo(45.001,3);}
   expect(camera.position.y).toBeGreaterThan(controller.position.y+1.6);
-  expect(controller.position.z).toBeLessThan(-6);expect(controller.velocity.length()).toBeLessThanOrEqual(2.601);
+  expect(controller.position.z).toBeLessThan(-12);expect(controller.velocity.length()).toBeLessThanOrEqual(5.501);
   const leg=character.group.getObjectByName('left-leg')!,other=character.group.getObjectByName('right-leg')!;
   expect(Math.abs(leg.rotation.x)).toBeGreaterThan(.01);expect(leg.rotation.x).toBeCloseTo(-other.rotation.x,5);
   controller.setStick(0,0);tick(180);expect(controller.velocity.length()).toBe(0);expect(controller.state).toBe('ground');expect(leg.rotation.x).toBe(0);
