@@ -28,6 +28,14 @@ try{
  assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest|seamlessphoto|building-details/.test(u)),'2D loaded 3D');
  await page.screenshot({path:'/tmp/shinkai-discovery-mobile.png',fullPage:true});
  await page.reload();await page.getByRole('button',{name:'景色入りカードを作る',exact:true}).waitFor();
+ const storedDiscovery=await page.evaluate(()=>localStorage.getItem('shinkai_exploration_v1'));
+ await page.getByRole('button',{name:'2Dで街を歩く',exact:true}).click();
+ await page.locator('.search-2d svg').waitFor();
+ await page.getByRole('button',{name:'発見カードを見る',exact:true}).click();
+ await page.getByRole('button',{name:'景色入りカードを作る',exact:true}).waitFor();
+ assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_exploration_v1')),storedDiscovery);
+ assert(!requests.some(u=>/Map3DView|three[._-]|\.glb(?:\?|$)|station-manifest|seamlessphoto|building-details/.test(u)),'2D free roaming loaded 3D');
+
  assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1')),initial);
  assert.deepEqual(errors,[]);
  console.log(JSON.stringify({result:'pass',date,place:place.id,png:image,errors,checks:['no 3D on gacha or 2D','draw→2D→discover→PNG','collection unchanged','discovery survives reload']},null,2));
