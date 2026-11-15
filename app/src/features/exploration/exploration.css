@@ -10,6 +10,9 @@
 .search-world-toolbar button {min-height:40px;padding:8px 12px;font-size:13px;white-space:nowrap;background:#193f55;color:#fff;border-color:#67818c;}
 .search-world-toolbar .search-flight-button {order:2;background:#d66a37;border-color:#f6b48b;}
 .search-world-destinations {display:flex;gap:6px;}
+.search-world-destinations select {min-height:40px;max-width:145px;padding:8px;border:1px solid #67818c;border-radius:6px;background:#193f55;color:#fff;font:inherit;font-size:13px;}
+.building-pilot-controls {position:absolute;bottom:16px;left:10px;right:10px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:8px;background:#102b40ed;border-radius:8px;color:#fff;font-size:11px;}
+.building-pilot-controls button {min-height:40px;padding:8px 12px;font-size:13px;}
 .search-world-canvas {position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;}
 .search-world-status {position:absolute;top:102px;left:10px;right:10px;pointer-events:none;width:fit-content;padding:5px 10px;border-radius:6px;background:#102b40d9;color:#fff;font-size:11px;}
 .search-map .flight-instructions {top:12px;left:12px;right:auto;padding:5px 9px;font-size:12px;}

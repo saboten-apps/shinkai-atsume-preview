@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { pilotPosition, NEAR_BUILDING_PILOT } from '../three/nearBuildingPilot';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { NavigationHud } from './NavigationHud';
@@ -60,6 +61,9 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const mountRef = useRef<HTMLDivElement>(null);
   const navigationRef=useRef<HTMLDivElement>(null);
   const [landmarks,setLandmarks]=useState(true);
+  const [pilotView, setPilotView] = useState(false);
+  const [pilotEnabled, setPilotEnabled] = useState(true);
+  const pilotEnabledRef = useRef(true); pilotEnabledRef.current = pilotEnabled;
   const landmarksRef=useRef(true);landmarksRef.current=landmarks;
   const flightRef = useRef<ReturnType<typeof setupPortFlight> | null>(null);
   const [areaStatus, setAreaStatus] = useState('');
@@ -343,6 +347,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
       if (flight.isActive()) flight.update(delta, currentTime * 0.001);
       else controls.update();
+      scene.userData.nearBuildingPilot = pilotEnabledRef.current;
       updateBuildings?.(flight.isActive() ? camera.position : controls.target,camera.position);
       if (searchRef.current && currentTime - lastSearchTime > 150) {
         lastSearchTime = currentTime;
@@ -436,6 +441,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         onClick={() => {
           const flight = flightRef.current;
           if (!flight) return;
+          const camera = controlsRef.current?.object as THREE.PerspectiveCamera | undefined;
+          if (camera) { camera.fov = 45; camera.updateProjectionMatrix(); }
           const active = !flight.isActive();
           flight.setMode(active, searchRef.current ? new THREE.Vector3(controlsRef.current!.target.x, 90, controlsRef.current!.target.z) : locationRef.current === 'station' ? new THREE.Vector3(210, 80, -2395) : undefined);
           setFlying(active);
@@ -444,22 +451,51 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       >{isLoading || (!flying && !!areaStatus) ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}</button>
       <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{search?.locale==='en'?'Places':'目印'}</button>
       <div className="search-world-destinations">
-        {(['port', 'station'] as const).map(location => <button key={location} type="button" disabled={isLoading}
-          onClick={() => {
+        <select aria-label={search?.locale === 'en' ? 'Go to' : '移動先'} disabled={isLoading} defaultValue=""
+          onChange={event => {
+            const location = event.target.value;
+            if (!location) return;
             flightRef.current?.setMode(false); setFlying(false);
-            locationRef.current = location;
+            locationRef.current = location === 'station' ? 'station' : 'port';
+            setPilotView(location === 'pilot');
             targetCamFocusRef.current = null;
             const controls = controlsRef.current;
             if (!controls) return;
+            const camera = controls.object as THREE.PerspectiveCamera;
+            camera.fov = 45; camera.updateProjectionMatrix();
+            controls.minDistance = location === 'pilot' ? 6 : 40;
+            if (location === 'pilot') {
+              const target = pilotPosition().add(new THREE.Vector3(0, 2.9, 0));
+              const [nx, nz] = NEAR_BUILDING_PILOT.normal;
+              // Keep the camera in the gap in front of the facade. Moving it
+              // backwards for a portrait screen puts it behind another roof.
+              const distance = 16.5;
+              camera.fov = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(NEAR_BUILDING_PILOT.width * .65 / (distance * camera.aspect))), 45, 100);
+              camera.updateProjectionMatrix();
+              controls.target.copy(target);
+              controls.object.position.copy(target).add(new THREE.Vector3(nx * distance, 1, nz * distance));
+              controls.update(); event.target.value = ''; return;
+            }
             const target = location === 'station' ? new THREE.Vector3(210, 48, -2395) : new THREE.Vector3(-20, 43, -190);
             controls.target.copy(target);
             controls.object.position.copy(target).add(new THREE.Vector3(300, 310, 400));
             controls.update();
-          }}>{location === 'port' ? '沼津港' : '沼津駅南口'}</button>)}
+            event.target.value = '';
+          }}>
+          <option value="" disabled>{search?.locale === 'en' ? 'Go to…' : '移動先…'}</option>
+          <option value="port">沼津港</option><option value="station">沼津駅南口</option>
+          <option value="pilot">{search?.locale === 'en' ? 'Building preview' : '建物の試作を見る'}</option>
+        </select>
       </div>
       </div>
       <div ref={mountRef} className="search-world-canvas"/>
       <NavigationHud rootRef={navigationRef} en={search?.locale==='en'}/>
+      {pilotView && !flying && <div className="building-pilot-controls">
+        <span>{search?.locale === 'en' ? 'Illustrative facade, not a faithful reconstruction' : '外観の試作（実物の再現ではありません）'}</span>
+        <button type="button" aria-pressed={pilotEnabled} onClick={() => setPilotEnabled(!pilotEnabled)}>
+          {search?.locale === 'en' ? 'Facade details' : '立体の細部'} {pilotEnabled ? 'ON' : 'OFF'}
+        </button>
+      </div>}
       {areaStatus && <div role="status" className="search-world-status">{areaStatus}</div>}
       {/* 読み込み中インジケーター（小さな表示） */}
       {isLoading && (
