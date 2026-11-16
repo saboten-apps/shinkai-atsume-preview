@@ -195,6 +195,10 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
     getStatus() { return controller.getHookData(); },
     setWaterQuery(query:(x:number,z:number)=>boolean){isWaterAt=query;controller.setWaterQuery(query);},
     isActive() { return controller.active; },
+    withoutCharacter<T>(capture:()=>T):T {
+      const visible=character.group.visible;character.group.visible=false;
+      try{return capture();}finally{character.group.visible=visible;}
+    },
     dispose() { canvas.removeEventListener('pointerdown',lookDown); canvas.removeEventListener('pointermove',lookMove); canvas.removeEventListener('pointerup',lookUp); canvas.removeEventListener('pointercancel',lookUp); ui.remove(); cells.forEach(cell => cell.geometry.dispose()); cells.clear(); trees.length = 0; colliderMaterial.dispose(); scene.remove(character.group); character.group.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.geometry.dispose(); const mats = Array.isArray(obj.material) ? obj.material : [obj.material]; mats.forEach(m => m.dispose()); } }); }
   };
 }

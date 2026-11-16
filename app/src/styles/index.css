@@ -1318,3 +1318,5 @@ em {
 @media(max-width:600px){.gacha-explore-launch{flex-direction:column;align-items:stretch;padding:20px;gap:16px;}.gacha-explore-launch h2{font-size:24px;}.gacha-explore-actions{width:100%;}}
 @media(prefers-reduced-motion:reduce){.exploration-loading *,.is-immersive .search-world{animation:none!important;}}
 .gacha-explore-summary{display:flex;align-items:center;gap:16px;min-width:0;}.gacha-explore-summary>.fish-illust-container{width:104px;height:104px;flex-shrink:0;margin:0;}.gacha-explore-summary>div:last-child{min-width:0;}
+
+.scenery-entry{text-align:center;font-size:14px;margin:16px 0}.scenery-entry a{color:inherit;text-underline-offset:4px}

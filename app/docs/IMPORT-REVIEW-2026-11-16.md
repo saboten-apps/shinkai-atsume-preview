@@ -54,3 +54,14 @@
 - 古いremoveBuildingGeometryはテスト用に残るが、任意建物の公開更新には使わない。`regenerate-chunk-override.mjs` は原本ID除外方式に変更済み。新たな対象も近隣差分を確認してから公開する。
 - 地域紹介・写真受付フォーム・外部への連絡は未実装／未実施。
 - 次のAIは本書を先に読み、旧引継書の「未実装」記述をそのまま現在状態として使わない。
+
+## テスト公開完了
+
+- 正本アプリコード: `98d283ec1f58be8674c9e61761cabedb2cda5962`（codex/daily-explorationへpush済み）。
+- preview PR #24: https://github.com/saboten-apps/shinkai-atsume-preview/pull/24 （マージ済み）。
+- preview main: `5de93b9fff985ffdddfdc826f0c3b47c95b2ebd4`。
+- Actions: https://github.com/saboten-apps/shinkai-atsume-preview/actions/runs/43800680673 （build/deploy成功）。
+- 公開URL: https://saboten-apps.github.io/shinkai-atsume-preview/
+- 公開ファイルのモデル・写真SHA-256、代表3区画のsidecar、index/Map3DView JS、releaseId、保存版をローカル検証済み成果物と照合してPASS。
+- 最終データの事前保存も、新しい置換GLB・写真・manifestのオフライン取得と保存削除まで成功。
+- この公開完了追記は文書のみ。previewのUPSTREAMはアプリコード98d283eを参照したままでよい。

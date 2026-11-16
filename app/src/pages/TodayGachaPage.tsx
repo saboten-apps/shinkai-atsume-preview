@@ -128,6 +128,7 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
           </div>
         )}
       </section>
+      <p className="scenery-entry"><a href="#/view">{locale==='ja'?'沼津の景色を眺める・写真を撮る':'Explore and photograph Numazu'} <span aria-hidden="true">→</span></a></p>
 
       {/* ガチャ結果表示後 */}
       {activeDrawResult && (
