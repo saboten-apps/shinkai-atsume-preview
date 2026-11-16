@@ -19,6 +19,8 @@ const require = createRequire(import.meta.url);
 const draco3d = require('draco3d');
 
 const [, , subdir, outFile, statsFile, label] = process.argv;
+const excludedIds = new Set((process.env.EXCLUDE_GML_IDS || '').split(',').filter(Boolean));
+const excludedTriangles = new Map();
 
 // ---------- WGS84 ECEF -> ENU (same as other converters) ----------
 const A = 6378137.0, F = 1 / 298.257223563, E2 = F * (2 - F);
@@ -187,6 +189,9 @@ for (const f of files) {
   rawBytes += buf.length;
   try {
     const { gltf } = parseB3dm(buf);
+    const batchStart = 28 + buf.readUInt32LE(12) + buf.readUInt32LE(16);
+    const batchLength = buf.readUInt32LE(20);
+    const batchTable = batchLength ? JSON.parse(buf.toString('utf8', batchStart, batchStart + batchLength).replace(/\0+$/, '').trim()) : {};
     const { json, bin } = parseGlb(gltf);
     const center = json.extensions?.CESIUM_RTC?.center;
     if (!center) throw new Error('no CESIUM_RTC center');
@@ -237,6 +242,20 @@ for (const f of files) {
       for (const prim of mesh.primitives) {
         if ((prim.mode ?? 4) !== 4) continue;
         const dec = decodePrimitive(json, bin, prim);
+        if (excludedIds.size) {
+          if (!dec._BATCHID || !Array.isArray(batchTable.gml_id)) throw Error('Cannot filter buildings without source batch IDs');
+          const kept = [];
+          for (let i = 0; i < dec.indices.length; i += 3) {
+            const face = Array.from(dec.indices.slice(i, i + 3));
+            const ids = face.map(index => batchTable.gml_id[Math.round(dec._BATCHID.values[index])]);
+            if (ids.some(id => excludedIds.has(id))) {
+              if (!ids.every(id => id === ids[0])) throw Error('Triangle crosses source building IDs');
+              excludedTriangles.set(ids[0], (excludedTriangles.get(ids[0]) || 0) + 1);
+            } else kept.push(...face);
+          }
+          dec.indices = Uint32Array.from(kept);
+          if (!dec.indices.length) continue;
+        }
         const sourceMaterial = json.materials?.[prim.material];
         const hasPhoto = !!sourceMaterial?.pbrMetallicRoughness?.baseColorTexture;
         for (const index of dec.indices) {
@@ -292,8 +311,10 @@ for (const f of files) {
         totVerts += n;
       }
     }
-    outMeshes.push({ name: `bldg_${label}_${f.replace('.b3dm', '')}`, primitives: outPrims });
-    outNodes.push({ mesh: outMeshes.length - 1, name: f.replace('.b3dm', '') });
+    if (outPrims.length) {
+      outMeshes.push({ name: `bldg_${label}_${f.replace('.b3dm', '')}`, primitives: outPrims });
+      outNodes.push({ mesh: outMeshes.length - 1, name: f.replace('.b3dm', '') });
+    }
     console.log(`${label} ${f}: ok (${outPrims.length} prims)`);
   } catch (e) {
     failed.push({ file: f, error: String(e.message || e) });
@@ -301,6 +322,7 @@ for (const f of files) {
   }
 }
 
+if (excludedIds.size && (failed.length || [...excludedIds].some(id => !excludedTriangles.has(id)))) throw Error('Source ID filtering failed or requested building not found');
 const binBuf = Buffer.concat(binChunks);
 const gltfJson = {
   asset: { version: '2.0', generator: `plateau-b3dm-to-glb texture-preserving (${label})`, extras: { source: `PLATEAU 3D Tiles Numazu City ${label.startsWith('2023-') ? '2023' : '2021'}, bldg ${label}, textures preserved (WebP via EXT_texture_webp)`, frame: 'local ENU, origin lat 35.0815 lon 138.8576 h 0 (WGS84); x=east, y=up, z=-north; ground level y~=41.7m', geometryBytes, textureBytes } },
@@ -320,6 +342,7 @@ const bh = Buffer.alloc(8); bh.writeUInt32LE(binBuf.length, 0); bh.write('BIN\0'
 const glb = Buffer.concat([head, jh, jsonBuf, Buffer.alloc(jsonPad, 0x20), bh, binBuf]);
 writeFileSync(new URL(`./${outFile}`, import.meta.url), glb);
 const stats = {
+  excludedTriangles: Object.fromEntries(excludedTriangles),
   buildingCoverage: {
     total: buildingCoverage.size,
     withPhotos: [...buildingCoverage.values()].filter(b => b.hasPhoto).length,

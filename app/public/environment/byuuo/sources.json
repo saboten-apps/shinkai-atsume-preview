@@ -1,0 +1,29 @@
+{
+  "landmark": "byuuo",
+  "created": "2026-11-16",
+  "license": "Provided by user for Numazu Shinkai Atsume project",
+  "files": [
+    {
+      "filename": "byuuo-closeup.jpg",
+      "originalSource": "byuuo-02-east-closeup.jpg",
+      "sha256": "c47f870c83bbc089ca9a3bdd57f3b0916dfa4acc596cef6dc3baf676fd366eaa",
+      "sizeBytes": 270119,
+      "dimensions": [
+        1725,
+        1080
+      ],
+      "usage": "East closeup for watergate rivets and concrete texture"
+    },
+    {
+      "filename": "byuuo-front.webp",
+      "originalSource": "byuuo-03-front-harbor.webp",
+      "sha256": "6ce6bd35e9dcd9bfe536f861ddb736c27715482af13daa6422fc1396a0579d2d",
+      "sizeBytes": 75340,
+      "dimensions": [
+        660,
+        440
+      ],
+      "usage": "Front harbor view for observatory glass, walkway truss, and pediments"
+    }
+  ]
+}

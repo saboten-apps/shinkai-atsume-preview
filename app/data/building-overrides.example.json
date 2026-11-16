@@ -1,0 +1,14 @@
+[
+  {
+    "overrideId": "ovr_port_bldg_7380cb7d",
+    "buildingKey": "bldg_7380cb7d-8b33-48d5-b9d1-6324ae3d6526",
+    "chunkId": "port",
+    "sourceVersion": "plateau-2023-lod3",
+    "operation": "replace",
+    "assetRef": "procedural:byuuo",
+    "reason": "ユーザー提供写真素材（2026-11-16）に基づく沼津港大型展望水門（びゅうお）の近景改善・水門扉および詳細立体化",
+    "verifiedAt": "2026-11-16",
+    "revision": 1,
+    "status": "published"
+  }
+]

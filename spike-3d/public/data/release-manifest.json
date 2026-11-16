@@ -1,0 +1,29 @@
+{
+  "releaseId": "release-2026-11-v3-reviewed",
+  "sourceVersion": "plateau-2023-lod3",
+  "updatedAt": "2026-11-16",
+  "description": "深海あつめ 段階3「びゅうお近景改善」配信版",
+  "overrides": [
+    {
+      "overrideId": "ovr_port_bldg_7380cb7d",
+      "buildingKey": "bldg_7380cb7d-8b33-48d5-b9d1-6324ae3d6526",
+      "chunkId": "port",
+      "sourceVersion": "plateau-2023-lod3",
+      "operation": "replace",
+      "assetRef": "procedural:byuuo",
+      "reason": "ユーザー提供写真素材（2026-11-16）に基づく沼津港大型展望水門（びゅうお）の近景改善・水門扉および詳細立体化",
+      "verifiedAt": "2026-11-16",
+      "revision": 1,
+      "status": "published"
+    }
+  ],
+  "chunkOverrides": {
+    "port": {
+      "chunkId": "port",
+      "regeneratedUrl": "data/2023-lod3-port-ovr1-packed.glb",
+      "overrideIds": [
+        "ovr_port_bldg_7380cb7d"
+      ]
+    }
+  }
+}

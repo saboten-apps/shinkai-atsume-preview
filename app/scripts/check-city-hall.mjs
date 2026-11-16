@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 const { chromium } = createRequire(import.meta.url)('playwright');
 const proxy = process.env.BROWSER_PROXY ? new URL(process.env.BROWSER_PROXY) : null;
-const browser = await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,
+const browser = await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',headless:true,
   proxy:proxy?{server:proxy.origin,username:decodeURIComponent(proxy.username),password:decodeURIComponent(proxy.password),bypass:'127.0.0.1,localhost'}:undefined,
   args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 try {

@@ -8,3 +8,6 @@ dist/
 # Generated from currently deployed map assets
 /public/map/download-manifest.json
 /public/map-cache-sw.js
+
+# Internal reviews are never synced to the public preview repository
+/data/building-overrides-internal.json

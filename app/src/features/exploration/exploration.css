@@ -55,3 +55,145 @@ body.exploration-immersive {overflow:hidden;overscroll-behavior:none;}
 .world-landmark-label{position:absolute;transform:translate(-50%,-100%);max-width:142px;min-width:70px;padding:5px 8px;border:1px solid #9dd1d68c;border-radius:7px;background:#10394cc7;color:#effbfc;text-align:center;font:11px/1.35 system-ui;box-shadow:0 2px 6px #0004;}
 .world-landmark-label[hidden]{display:none;}.world-landmark-label>span{display:block;color:#a6e8e9;font-size:14px;line-height:12px;}.world-landmark-label b{display:block;font-weight:500;}.world-landmark-label small{font-size:10px;color:#b5d6db;}
 @media(max-width:360px){.world-compass{right:7px;top:8px;transform:scale(.9);transform-origin:top right;}.search-world-toolbar{gap:4px;}.search-world-toolbar>button{padding:8px;font-size:12px;}}
+
+/* 管理用建物選択モードのUI */
+.admin-select-toggle-float {
+  position: absolute;
+  top: 54px;
+  right: 12px;
+  z-index: 20;
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 11px;
+  background: #102b40cc;
+  backdrop-filter: blur(4px);
+  color: #a6bcc4;
+  border: 1px solid #67818c;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.admin-select-toggle-float[aria-pressed=true] {
+  background: #0d4a68;
+  border-color: #00f0ff;
+  color: #00f0ff;
+  font-weight: bold;
+}
+.admin-selection-banner {
+  position: absolute;
+  top: 92px;
+  left: 12px;
+  right: 12px;
+  background: #143852f2;
+  border: 1px solid #00f0ff88;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #c7f8ff;
+  font-size: 12px;
+  z-index: 25;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+.building-selection-card {
+  position: absolute;
+  bottom: 20px;
+  left: 12px;
+  right: 12px;
+  max-width: 480px;
+  margin: 0 auto;
+  background: #0f273def;
+  border: 1px solid #3882a8;
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: #f5f0e6;
+  z-index: 30;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+.building-selection-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ffffff22;
+  padding-bottom: 6px;
+}
+.building-selection-card-header h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #00f0ff;
+}
+.building-selection-card-header .close-button {
+  background: transparent;
+  border: none;
+  color: #9ab4c2;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 4px;
+  min-height: auto;
+  cursor: pointer;
+}
+.building-selection-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+.building-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.building-info-label {
+  color: #8da4b3;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.building-info-value {
+  color: #ffffff;
+  word-break: break-all;
+}
+.building-info-value.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: #091826;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #1e4563;
+  color: #aaeaff;
+}
+.building-override-row {
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px dashed #1e4563;
+}
+.override-badge {
+  color: #ffd54f;
+  font-weight: bold;
+}
+.building-selection-card-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.building-selection-card-actions .copy-info-button {
+  min-height: 36px;
+  padding: 6px 14px;
+  font-size: 12px;
+  background: #174e6d;
+  color: #ffffff;
+  border: 1px solid #3ca5cf;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.building-selection-card-actions .copy-info-button:hover {
+  background: #1e6790;
+}
+.building-selection-card-actions .copy-info-button.copied {
+  background: #256a47;
+  border-color: #55c88b;
+  color: #e5ffef;
+}
