@@ -242,3 +242,8 @@ body.exploration-immersive {overflow:hidden;overscroll-behavior:none;}
 .scenery-landing .places-credit, .scenery-landing .place-introduction small { color: #536975; }
 .scenery-landing .place-actions a { color: #193f55; }
 .scenery-landing > a { color: #193f55; }
+.performance-panel { padding: 8px 12px; color: #e5eef2; background: #112e40; font-size: 12px; }
+.performance-panel summary { cursor: pointer; }
+.performance-panel p { margin: 8px 0; }
+.performance-panel button { margin: 4px 8px 4px 0; }
+.scenery-page > .performance-panel { flex-shrink: 0; max-height: 35dvh; overflow-y: auto; }
