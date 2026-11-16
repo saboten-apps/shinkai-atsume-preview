@@ -8,6 +8,13 @@ const source=new URL('../spike-3d/public/data/',import.meta.url);
 const dest=new URL('public/map/data/',app);await mkdir(dest,{recursive:true});
 const manifest=JSON.parse(await readFile(new URL('station-manifest.json',source)));
 const names=['station-manifest.json','corridor-road-packed.glb','corridor-terrain-packed.glb','corridor-veg-packed.glb','corridor-water-sea-packed.glb','corridor-water-river-packed.glb',...manifest.chunks.map(c=>c.url.split('/').at(-1))];
+// Selection metadata and replacement assets are published with the base chunks.
+const release=JSON.parse(await readFile(new URL('release-manifest.json',source)));
+names.push('release-manifest.json','building-overrides.json', ...manifest.chunks.map(c=>`buildings-${c.id}.json`));
+for(const chunk of Object.values(release.chunkOverrides??{})){
+  if(!/^data\/[a-zA-Z0-9_-]+\.glb$/.test(chunk.regeneratedUrl))throw new Error('Invalid replacement path');
+  names.push(chunk.regeneratedUrl.slice(5));
+}
 for(const name of await readdir(dest))if(!names.includes(name))await unlink(new URL(name,dest));
 for(const name of new Set(names))await copyFile(new URL(name,source),new URL(name,dest));
 const legacy=JSON.parse(await readFile(new URL('src/features/exploration/hidingPlaces.v1.json',app)));

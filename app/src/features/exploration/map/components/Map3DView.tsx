@@ -11,8 +11,9 @@ import type { Locale } from '../../../../config/appConfig';
 import { createPortSky } from '../three/portSky';
 import { setupPortFlight } from '../flight/portFlight';
 import { MapPin, PerformanceStats } from '../types';
-import { buildNumazuPortScene } from '../three/sceneBuilder';
+import { buildNumazuPortScene, SceneBuildResult } from '../three/sceneBuilder';
 import { createPinMarkers, updatePinAnimations, Pin3DObject } from '../three/pinMarkers';
+import type { BuildingRecord } from '../three/buildingSelection';
 
 export interface Search3DBridge {
   start: Position;
@@ -75,6 +76,14 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const targetCamFocusRef = useRef<THREE.Vector3 | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadText, setLoadText] = useState<string>('PLATEAU実データを読み込み中…');
+  const [adminMode, setAdminMode] = useState<boolean>(false);
+  const adminModeRef = useRef<boolean>(false);
+  adminModeRef.current = adminMode;
+  const [selectedBuilding, setSelectedBuilding] = useState<BuildingRecord | null>(null);
+  const [copied, setCopied] = useState<boolean>(false);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const sceneResultRef = useRef<SceneBuildResult | null>(null);
+  const highlightGroupRef = useRef<THREE.Object3D | null>(null);
 
   useEffect(() => {
     if (!isWebGLAvailable()) {
@@ -96,6 +105,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     // --- 1. Scene & Fog ---
     // 指示書: FogExp2 の濃度は 0.0008 程度に下げる
     const scene = new THREE.Scene();
+    sceneRef.current = scene;
     const scenery = createPortSky(scene);
 
     // --- 2. Camera ---
@@ -177,9 +187,26 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     scene.add(fillLight);
 
     // --- 6. Build Port Geometry with PLATEAU Real Data ---
-    const { disposables, ready, updateWater, updateBuildings, isWaterAt, dispose: disposeScene } = buildNumazuPortScene(scene, (loaded, total) => {
+    // Release version management (?release=v1 for base/rollback, ?release=v2 for active override)
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const releaseQuery = urlParams?.get('release');
+    if (releaseQuery === 'v1' || releaseQuery === 'base') {
+      scene.userData.releaseId = 'release-2026-11-v1';
+    } else if (releaseQuery === 'v2') {
+      scene.userData.releaseId = 'release-2026-11-v2';
+    } else if (releaseQuery) {
+      scene.userData.releaseId = releaseQuery;
+    }
+    scene.userData.adminMode = adminModeRef.current;
+
+    const sceneResult = buildNumazuPortScene(scene, (loaded, total) => {
       if (alive) setLoadText(`PLATEAU実データを読み込み中 (${loaded}/${total})…`);
     }, (group) => flight.addGeometry(group), text => { loadingArea = !!text; if (alive) setAreaStatus(text); });
+    sceneResultRef.current = sceneResult;
+    if (typeof window !== 'undefined') {
+      (window as any).__buildingOverrideManager = sceneResult.overrideManager;
+    }
+    const { disposables, ready, updateWater, updateBuildings, isWaterAt, dispose: disposeScene } = sceneResult;
 
     flight.setWaterQuery(isWaterAt);
 
@@ -261,6 +288,27 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       if (intersects.length > 0) {
         const hitPinId = intersects[0].object.userData.pinId;
         onSelectPin(hitPinId);
+        return;
+      }
+
+      // 管理用選択モード時の建物選択レイキャスト
+      if (adminModeRef.current) {
+        const sm = sceneResultRef.current?.selectionManager;
+        const targets = sceneResultRef.current?.getBuildingTargets?.() || [];
+        if (sm && targets.length > 0) {
+          const buildingHits = raycaster.intersectObjects(targets, true);
+          if (buildingHits.length > 0) {
+            const hit = buildingHits[0];
+            const record = sm.findBuilding(hit.point);
+            if (record) {
+              setSelectedBuilding(record);
+              setCopied(false);
+              return;
+            }
+          }
+        }
+        // 空振り（地面など）時は選択解除
+        setSelectedBuilding(null);
       }
     };
 
@@ -433,6 +481,66 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     }
   }, [selectedPinId, pins]);
 
+  // 選択された建物のハイライト更新
+  useEffect(() => {
+    const scene = sceneRef.current;
+    const sm = sceneResultRef.current?.selectionManager;
+    if (!scene) return;
+
+    if (highlightGroupRef.current) {
+      scene.remove(highlightGroupRef.current);
+      highlightGroupRef.current.traverse(o => {
+        if (o instanceof THREE.Mesh || o instanceof THREE.LineSegments) {
+          o.geometry.dispose();
+          if (Array.isArray(o.material)) o.material.forEach(m => m.dispose());
+          else o.material.dispose();
+        }
+      });
+      highlightGroupRef.current = null;
+    }
+
+    if (selectedBuilding && sm) {
+      const h = sm.createHighlight(selectedBuilding);
+      if (h) {
+        scene.add(h);
+        highlightGroupRef.current = h;
+      }
+    }
+  }, [selectedBuilding]);
+
+  const handleCopyBuildingInfo = async (b: BuildingRecord) => {
+    const ovr = sceneResultRef.current?.overrideManager?.getOverrideForBuilding(b.id);
+    const lines = [
+      `建物ID: ${b.id}`,
+      `緯度経度: ${b.lat.toFixed(6)}, ${b.lon.toFixed(6)}`,
+      `ENU座標: x=${b.center[0]}, y=${b.center[1]}, z=${b.center[2]}`,
+      `データ年度: ${b.year}年度${b.isCityHall ? '（市役所置換）' : ''}`,
+    ];
+    if (ovr) {
+      lines.push(`修正台帳: ${ovr.operation} (rev.${ovr.revision}, ${ovr.verifiedAt})`);
+    }
+    const text = lines.join('\n');
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      console.warn('Clipboard copy failed:', e);
+    }
+  };
+
   return (
     <div className="search-world">
       <div className="search-world-toolbar">
@@ -500,6 +608,20 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       </div>
       <div ref={mountRef} className="search-world-canvas"/>
       <NavigationHud rootRef={navigationRef} en={search?.locale==='en'}/>
+      <button
+        type="button"
+        className="admin-select-toggle-float"
+        aria-pressed={adminMode}
+        onClick={() => {
+          const next = !adminMode;
+          setAdminMode(next);
+          sceneResultRef.current?.setAdminMode?.(next);
+          if (!next) setSelectedBuilding(null);
+        }}
+        title="管理用モード: タップした建物の原本IDと座標を確認"
+      >
+        {search?.locale === 'en' ? 'Building Selection' : '建物選択'} {adminMode ? 'ON' : 'OFF'}
+      </button>
       {pilotView && !flying && <div className="building-pilot-controls">
         <span>{search?.locale === 'en' ? 'Illustrative facade, not a faithful reconstruction' : '外観の試作（実物の再現ではありません）'}</span>
         <button type="button" aria-pressed={pilotEnabled} onClick={() => setPilotEnabled(!pilotEnabled)}>
@@ -507,6 +629,70 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         </button>
       </div>}
       {areaStatus && <div role="status" className="search-world-status">{areaStatus}</div>}
+      {adminMode && (
+        <div className="admin-selection-banner" role="status">
+          <span>{search?.locale === 'en' ? 'Building Selection Mode: Tap any building to inspect gml_id' : '【管理用モード】建物をタップすると原本ID（gml_id）と緯度経度を確認・コピーできます'}</span>
+        </div>
+      )}
+      {selectedBuilding && (
+        <div
+          className="building-selection-card"
+          role="dialog"
+          aria-label="建物情報"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <div className="building-selection-card-header">
+            <h4>{search?.locale === 'en' ? 'Building Details (Admin)' : '建物情報（管理用）'}</h4>
+            <button
+              type="button"
+              className="close-button"
+              onClick={() => setSelectedBuilding(null)}
+              aria-label="閉じる"
+            >×</button>
+          </div>
+          <div className="building-selection-card-body">
+            <div className="building-info-row">
+              <span className="building-info-label">原本ID (gml_id)</span>
+              <span className="building-info-value mono">{selectedBuilding.id}</span>
+            </div>
+            <div className="building-info-row">
+              <span className="building-info-label">緯度・経度 (WGS84)</span>
+              <span className="building-info-value">{selectedBuilding.lat.toFixed(6)}, {selectedBuilding.lon.toFixed(6)}</span>
+            </div>
+            <div className="building-info-row">
+              <span className="building-info-label">ENU世界座標</span>
+              <span className="building-info-value">x: {selectedBuilding.center[0]}, y: {selectedBuilding.center[1]}, z: {selectedBuilding.center[2]}</span>
+            </div>
+            <div className="building-info-row">
+              <span className="building-info-label">データ年度</span>
+              <span className="building-info-value">{selectedBuilding.year}年度（PLATEAU 3D都市モデル）{selectedBuilding.isCityHall ? ' 【市役所置換モデル】' : ''}</span>
+            </div>
+            {(() => {
+              const ovr = sceneResultRef.current?.overrideManager?.getOverrideForBuilding(selectedBuilding.id);
+              if (!ovr) return null;
+              return (
+                <div className="building-info-row building-override-row">
+                  <span className="building-info-label">修正台帳</span>
+                  <span className="building-info-value override-badge">
+                    {ovr.operation === 'hide' ? '除去 (hide)' : ovr.operation === 'replace' ? '置換 (replace)' : ovr.operation}
+                    {' '}(rev.{ovr.revision}, {ovr.verifiedAt})
+                  </span>
+                </div>
+              );
+            })()}
+          </div>
+          <div className="building-selection-card-actions">
+            <button
+              type="button"
+              className={`copy-info-button ${copied ? 'copied' : ''}`}
+              onClick={() => handleCopyBuildingInfo(selectedBuilding)}
+            >
+              {copied ? (search?.locale === 'en' ? '✓ Copied!' : '✓ コピーしました！') : (search?.locale === 'en' ? 'Copy Info' : '情報をコピー')}
+            </button>
+          </div>
+        </div>
+      )}
       {/* 読み込み中インジケーター（小さな表示） */}
       {isLoading && (
         <div className="map-loading-indicator">

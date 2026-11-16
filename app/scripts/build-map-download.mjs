@@ -1,7 +1,7 @@
 import {readdir,readFile,writeFile,stat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 const root=new URL('../public/',import.meta.url),files=[];
-async function walk(path){for(const e of await readdir(new URL(path,root),{withFileTypes:true})){const p=path+e.name;if(e.isDirectory())await walk(p+'/');else if(!p.startsWith('map/comparison/')&& !p.endsWith('download-manifest.json'))files.push(p);}}
+async function walk(path){for(const e of await readdir(new URL(path,root),{withFileTypes:true})){const p=path+e.name;if(e.isDirectory())await walk(p+'/');else if(!p.startsWith('map/comparison/')&& !p.endsWith('download-manifest.json')&& !p.endsWith('-internal.json')&& !p.startsWith('map/data/buildings-'))files.push(p);}}
 await walk('map/data/');await walk('environment/');
 const assets=[];for(const url of files.sort()){const b=await readFile(new URL(url,root));assets.push({url,bytes:b.length,sha256:createHash('sha256').update(b).digest('hex')});}
 const version=createHash('sha256').update(JSON.stringify(assets)).digest('hex').slice(0,16);

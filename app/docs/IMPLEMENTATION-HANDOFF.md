@@ -1,3 +1,5 @@
+> 現在の再開手順は [AI-HANDOFF.md](./AI-HANDOFF.md)、今後の設計は [NEXT-DEVELOPMENT-DESIGN.md](./NEXT-DEVELOPMENT-DESIGN.md)、既存実装の詳細は [ASTRA-HANDOFF.md](./ASTRA-HANDOFF.md) を参照。以下には過去の実装履歴を含みます。
+
 # 深海あつめ：探索統合の引き継ぎ（2026-11-14）
 
 ## 決定済み

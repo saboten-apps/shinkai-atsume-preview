@@ -1,0 +1,569 @@
+{
+  "totalChunks": 56,
+  "totalManifestBuildings": 20522,
+  "totalGeneratedBuildings": 20522,
+  "totalRawBytes": 13780294,
+  "totalGzipBytes": 2627708,
+  "summary": [
+    {
+      "chunkId": "station-8-3",
+      "manifestBuildings": 461,
+      "generatedBuildings": 461,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 308447,
+      "gzipBytes": 58337,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-7-3",
+      "manifestBuildings": 796,
+      "generatedBuildings": 796,
+      "match": true,
+      "tilesCount": 10,
+      "rawBytes": 525081,
+      "gzipBytes": 99641,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-8-2",
+      "manifestBuildings": 161,
+      "generatedBuildings": 161,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 112766,
+      "gzipBytes": 21819,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-7-2",
+      "manifestBuildings": 601,
+      "generatedBuildings": 601,
+      "match": true,
+      "tilesCount": 8,
+      "rawBytes": 412829,
+      "gzipBytes": 78654,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-8-1",
+      "manifestBuildings": 431,
+      "generatedBuildings": 431,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 296132,
+      "gzipBytes": 56346,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-7-1",
+      "manifestBuildings": 406,
+      "generatedBuildings": 406,
+      "match": true,
+      "tilesCount": 10,
+      "rawBytes": 287088,
+      "gzipBytes": 55211,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-8-0",
+      "manifestBuildings": 291,
+      "generatedBuildings": 291,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 205629,
+      "gzipBytes": 38535,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-7-0",
+      "manifestBuildings": 644,
+      "generatedBuildings": 644,
+      "match": true,
+      "tilesCount": 9,
+      "rawBytes": 444979,
+      "gzipBytes": 83373,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-8--1",
+      "manifestBuildings": 141,
+      "generatedBuildings": 141,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 89970,
+      "gzipBytes": 17414,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-7--1",
+      "manifestBuildings": 520,
+      "generatedBuildings": 520,
+      "match": true,
+      "tilesCount": 9,
+      "rawBytes": 339453,
+      "gzipBytes": 64305,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-8--2",
+      "manifestBuildings": 475,
+      "generatedBuildings": 475,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 318415,
+      "gzipBytes": 59164,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-7--2",
+      "manifestBuildings": 696,
+      "generatedBuildings": 696,
+      "match": true,
+      "tilesCount": 8,
+      "rawBytes": 462561,
+      "gzipBytes": 86529,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-6-3",
+      "manifestBuildings": 142,
+      "generatedBuildings": 142,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 94720,
+      "gzipBytes": 18345,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-5-3",
+      "manifestBuildings": 709,
+      "generatedBuildings": 709,
+      "match": true,
+      "tilesCount": 10,
+      "rawBytes": 473967,
+      "gzipBytes": 89344,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-4-3",
+      "manifestBuildings": 252,
+      "generatedBuildings": 252,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 169072,
+      "gzipBytes": 31957,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-3-3",
+      "manifestBuildings": 571,
+      "generatedBuildings": 571,
+      "match": true,
+      "tilesCount": 9,
+      "rawBytes": 373538,
+      "gzipBytes": 70899,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-2-3",
+      "manifestBuildings": 399,
+      "generatedBuildings": 399,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 264995,
+      "gzipBytes": 50434,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-6-2",
+      "manifestBuildings": 134,
+      "generatedBuildings": 134,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 92913,
+      "gzipBytes": 17886,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-5-2",
+      "manifestBuildings": 393,
+      "generatedBuildings": 393,
+      "match": true,
+      "tilesCount": 8,
+      "rawBytes": 264934,
+      "gzipBytes": 50682,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-6-1",
+      "manifestBuildings": 275,
+      "generatedBuildings": 275,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 197761,
+      "gzipBytes": 37934,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-5-1",
+      "manifestBuildings": 660,
+      "generatedBuildings": 660,
+      "match": true,
+      "tilesCount": 10,
+      "rawBytes": 480410,
+      "gzipBytes": 91239,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-4-2",
+      "manifestBuildings": 414,
+      "generatedBuildings": 414,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 287152,
+      "gzipBytes": 54499,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-3-2",
+      "manifestBuildings": 587,
+      "generatedBuildings": 587,
+      "match": true,
+      "tilesCount": 8,
+      "rawBytes": 413657,
+      "gzipBytes": 79672,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-2-2",
+      "manifestBuildings": 261,
+      "generatedBuildings": 261,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 184345,
+      "gzipBytes": 35910,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-4-1",
+      "manifestBuildings": 391,
+      "generatedBuildings": 391,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 279392,
+      "gzipBytes": 52977,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-3-1",
+      "manifestBuildings": 627,
+      "generatedBuildings": 627,
+      "match": true,
+      "tilesCount": 10,
+      "rawBytes": 446503,
+      "gzipBytes": 85350,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-2-1",
+      "manifestBuildings": 242,
+      "generatedBuildings": 242,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 169967,
+      "gzipBytes": 33009,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-1-3",
+      "manifestBuildings": 832,
+      "generatedBuildings": 832,
+      "match": true,
+      "tilesCount": 10,
+      "rawBytes": 546986,
+      "gzipBytes": 102851,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-0-3",
+      "manifestBuildings": 380,
+      "generatedBuildings": 380,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 240591,
+      "gzipBytes": 45664,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--1-3",
+      "manifestBuildings": 668,
+      "generatedBuildings": 668,
+      "match": true,
+      "tilesCount": 10,
+      "rawBytes": 417552,
+      "gzipBytes": 79695,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--2-3",
+      "manifestBuildings": 293,
+      "generatedBuildings": 293,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 185295,
+      "gzipBytes": 35724,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--3-3",
+      "manifestBuildings": 130,
+      "generatedBuildings": 130,
+      "match": true,
+      "tilesCount": 7,
+      "rawBytes": 82078,
+      "gzipBytes": 16111,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-1-2",
+      "manifestBuildings": 323,
+      "generatedBuildings": 323,
+      "match": true,
+      "tilesCount": 6,
+      "rawBytes": 207253,
+      "gzipBytes": 40158,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "port",
+      "manifestBuildings": 528,
+      "generatedBuildings": 528,
+      "match": true,
+      "tilesCount": 16,
+      "rawBytes": 352876,
+      "gzipBytes": 68001,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-0-2",
+      "manifestBuildings": 195,
+      "generatedBuildings": 195,
+      "match": true,
+      "tilesCount": 2,
+      "rawBytes": 122759,
+      "gzipBytes": 23821,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--1-2",
+      "manifestBuildings": 830,
+      "generatedBuildings": 830,
+      "match": true,
+      "tilesCount": 8,
+      "rawBytes": 511598,
+      "gzipBytes": 97956,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-1-1",
+      "manifestBuildings": 194,
+      "generatedBuildings": 194,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 134247,
+      "gzipBytes": 26154,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--1-1",
+      "manifestBuildings": 663,
+      "generatedBuildings": 663,
+      "match": true,
+      "tilesCount": 7,
+      "rawBytes": 401646,
+      "gzipBytes": 78516,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--2-2",
+      "manifestBuildings": 251,
+      "generatedBuildings": 251,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 155147,
+      "gzipBytes": 30351,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--3-2",
+      "manifestBuildings": 16,
+      "generatedBuildings": 16,
+      "match": true,
+      "tilesCount": 3,
+      "rawBytes": 11001,
+      "gzipBytes": 2379,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--2-1",
+      "manifestBuildings": 66,
+      "generatedBuildings": 66,
+      "match": true,
+      "tilesCount": 2,
+      "rawBytes": 40557,
+      "gzipBytes": 8337,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-6-0",
+      "manifestBuildings": 329,
+      "generatedBuildings": 329,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 232616,
+      "gzipBytes": 44089,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-5-0",
+      "manifestBuildings": 888,
+      "generatedBuildings": 888,
+      "match": true,
+      "tilesCount": 9,
+      "rawBytes": 614097,
+      "gzipBytes": 115608,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-6--1",
+      "manifestBuildings": 512,
+      "generatedBuildings": 512,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 337773,
+      "gzipBytes": 64049,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-5--1",
+      "manifestBuildings": 307,
+      "generatedBuildings": 307,
+      "match": true,
+      "tilesCount": 7,
+      "rawBytes": 201909,
+      "gzipBytes": 38581,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-4-0",
+      "manifestBuildings": 358,
+      "generatedBuildings": 358,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 258296,
+      "gzipBytes": 48788,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-3-0",
+      "manifestBuildings": 553,
+      "generatedBuildings": 553,
+      "match": true,
+      "tilesCount": 8,
+      "rawBytes": 377008,
+      "gzipBytes": 71827,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-2-0",
+      "manifestBuildings": 192,
+      "generatedBuildings": 192,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 129339,
+      "gzipBytes": 24960,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-4--1",
+      "manifestBuildings": 63,
+      "generatedBuildings": 63,
+      "match": true,
+      "tilesCount": 2,
+      "rawBytes": 42535,
+      "gzipBytes": 8326,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-3--1",
+      "manifestBuildings": 66,
+      "generatedBuildings": 66,
+      "match": true,
+      "tilesCount": 4,
+      "rawBytes": 43646,
+      "gzipBytes": 8656,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-6--2",
+      "manifestBuildings": 80,
+      "generatedBuildings": 80,
+      "match": true,
+      "tilesCount": 3,
+      "rawBytes": 53256,
+      "gzipBytes": 10435,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-1-0",
+      "manifestBuildings": 111,
+      "generatedBuildings": 111,
+      "match": true,
+      "tilesCount": 5,
+      "rawBytes": 74685,
+      "gzipBytes": 14686,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-1--1",
+      "manifestBuildings": 3,
+      "generatedBuildings": 3,
+      "match": true,
+      "tilesCount": 1,
+      "rawBytes": 1953,
+      "gzipBytes": 573,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station-0-0",
+      "manifestBuildings": 4,
+      "generatedBuildings": 4,
+      "match": true,
+      "tilesCount": 1,
+      "rawBytes": 2684,
+      "gzipBytes": 712,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--2-0",
+      "manifestBuildings": 6,
+      "generatedBuildings": 6,
+      "match": true,
+      "tilesCount": 1,
+      "rawBytes": 3576,
+      "gzipBytes": 935,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    },
+    {
+      "chunkId": "station--5-3",
+      "manifestBuildings": 1,
+      "generatedBuildings": 1,
+      "match": true,
+      "tilesCount": 1,
+      "rawBytes": 659,
+      "gzipBytes": 300,
+      "source": "ローカル原本（公式取得キャッシュ）"
+    }
+  ]
+}

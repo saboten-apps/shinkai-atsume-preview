@@ -3,6 +3,8 @@ import { styleRegionalLandscape } from './regionalLandscape';
 import { createWaterSurface } from './waterSurface';
 import { createAerialGround } from './aerialGround';
 import { streamStationBuildings } from './stationChunks';
+import type { BuildingSelectionManager } from './buildingSelection';
+import type { BuildingOverrideManager } from './buildingOverride';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
@@ -18,6 +20,10 @@ export interface SceneBuildResult {
   updateWater?: (delta: number) => void;
   groundReady?: () => Promise<void>;
   isWaterAt: (x:number,z:number)=>boolean;
+  selectionManager?: BuildingSelectionManager;
+  overrideManager?: BuildingOverrideManager;
+  setAdminMode?: (enabled: boolean) => void;
+  getBuildingTargets?: () => THREE.Object3D[];
   dispose?: () => void;
 }
 
@@ -236,5 +242,17 @@ export function buildNumazuPortScene(
     });
   };
 
-  return { disposables, ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}), updateWater: water.update, updateBuildings: (position,viewer) => { station.update(position,viewer); aerial?.update(position); }, groundReady: async () => { await aerial?.settled(); await station.detailReady(); }, isWaterAt:(x,z)=>aerial?.isWaterAt(x,z)??true, dispose };
+  return {
+    disposables,
+    ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}),
+    updateWater: water.update,
+    updateBuildings: (position,viewer) => { station.update(position,viewer); aerial?.update(position); },
+    groundReady: async () => { await aerial?.settled(); await station.detailReady(); },
+    isWaterAt:(x,z)=>aerial?.isWaterAt(x,z)??true,
+    selectionManager: station.selectionManager,
+    overrideManager: station.overrideManager,
+    setAdminMode: station.setAdminMode,
+    getBuildingTargets: station.getBuildingTargets,
+    dispose
+  };
 }
