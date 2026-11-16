@@ -1,3 +1,4 @@
+import {PerformancePanel} from './map/components/PerformancePanel';
 import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { Locale } from '../../config/appConfig';
 import type { FishRecord } from '../../types/schema';
@@ -55,7 +56,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
   const onCaptureReady = useCallback((capture:(()=>string)|null)=>{captureRef.current=capture;},[]);
   const onStats = useCallback((value:PerformanceStats)=>{
     setStats(value);slowCount.current=value.fps<20?slowCount.current+1:0;
-    if(slowCount.current>=25)setSlow(true);
+    if(slowCount.current>=5)setSlow(true);
   },[]);
   const onError = useCallback((reason:string)=>{setNotice(reason);setMode('2d');setVisible(true);},[]);
   const immersive = !!fish && !showingCard && mode === '3d';
@@ -130,10 +131,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
         <p>{en?place.hintEn:place.hint}</p>
         <button aria-pressed={sound} onClick={async()=>{if(!sound){try{audioRef.current??=new AudioContext();await audioRef.current.resume();}catch{setNotice(en?'Sound unavailable':'音を使えませんでした');return;}}setSound(!sound);}}>{en?'Sound':'探知音'} {sound?'ON':'OFF'}</button>
       {slow&&mode==='3d'&&<div role="status">{en?'3D is running slowly. Your search can continue in 2D.':'3Dの動作が重いようです。同じ場所から2Dで続けられます。'} <button onClick={()=>switchMode('2d')}>{en?'Continue in 2D':'2Dで続ける'}</button></div>}
-      {stats&&mode==='3d'&&<details><summary>{en?'Performance':'動作情報'} · {stats.fps} FPS</summary><p>DPR {stats.dpr} · {stats.drawCalls} draws · {stats.geometries} geometries · {stats.textures} textures</p><p>Frame p50 {stats.frameP50Ms?.toFixed(1)} ms · p95 {stats.frameP95Ms?.toFixed(1)} ms ({en?'recent 300 frames':'直近300フレーム'})</p><button onClick={()=>{
-        const blob=new Blob([JSON.stringify({capturedAt:new Date().toISOString(),mode,position,stats,userAgent:navigator.userAgent,viewport:{width:innerWidth,height:innerHeight},visibility:document.visibilityState},null,2)],{type:'application/json'});
-        const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='shinkai-performance.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-      }}>{en?'Save performance snapshot':'動作情報を保存'}</button></details>}
+      {mode==='3d'&&<PerformancePanel stats={stats} en={en} context={`exploration:${date}:${position.x},${position.z}`}/>}
         <MapDownload en={en}/><p className="search-options-credit">{en?'Source: MLIT PLATEAU, Numazu buildings, roads and vegetation 2023, terrain and water 2021; GSI Maps aerial photographs, elevation and vector-map tiles. Modified for virtual exploration; not survey-accurate.':'出典：国土交通省 PLATEAU 沼津市（建物・道路・植生2023年度／地形・水面2021年度）、地理院タイル（国土地理院・空中写真・標高・地図）を加工。バーチャル探索用の表現で、正確な測量図ではありません。'} <a href="https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2023" target="_blank" rel="noreferrer">PLATEAU</a> · <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">GSI</a></p>
       </div>
       <div className={`search-map ${sceneReady?'is-ready':''}`}>{mode==='3d'?<MapBoundary en={en} onFallback={()=>switchMode('2d')}><Suspense fallback={null}><Map3D pins={EMPTY_PINS} selectedPinId={null} onSelectPin={NO_SELECT} onUpdateStats={onStats} onWebGLError={onError} search={bridge}/></Suspense><span className="search-center" aria-hidden="true">＋</span></MapBoundary>:<Exploration2D en={en} position={position} onMove={setPosition} targetFishId={fish.id} target={place} discovered={!!found}/>}</div>

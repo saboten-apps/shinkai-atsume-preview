@@ -1,3 +1,5 @@
+> 2026-11-16追加: 3Dの描画上限・解像度調整・30秒測定。[3D-PERFORMANCE.md](./3D-PERFORMANCE.md) を参照。Pixel実機性能は未確認。
+
 > 2026-11-16追加: 長押し選択に場所の紹介カードを追加。[PLACE-INTRODUCTIONS.md](./PLACE-INTRODUCTIONS.md) を参照。
 
 > 次段階の更新: 自由な景色撮影とガチャ不要の共有リンクを追加。仕様・検証・制限は [SCENERY-PHOTOS.md](./SCENERY-PHOTOS.md) を参照。

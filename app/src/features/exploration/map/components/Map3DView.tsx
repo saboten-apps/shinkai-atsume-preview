@@ -1,3 +1,4 @@
+import {RenderBudget} from '../renderBudget';
 import {PlaceIntroduction} from '../../../scenery/PlaceIntroduction';
 import React, { useEffect, useRef, useState } from 'react';
 import { pilotPosition, NEAR_BUILDING_PILOT } from '../three/nearBuildingPilot';
@@ -156,8 +157,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       return;
     }
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    renderer.setPixelRatio(dpr);
+    const renderBudget = new RenderBudget(window.devicePixelRatio || 1);
+    renderer.setPixelRatio(renderBudget.dpr);
     renderer.setSize(width, height);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
@@ -370,11 +371,27 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     let lastSearchTime = 0;
     const frameTimes: number[] = [];
     const sessionStart = performance.now();
+    renderBudget.reset(sessionStart);
+    const sharedFocus = new THREE.Vector3();
+    const previousCamera = camera.position.clone(), previousRotation = camera.quaternion.clone();
+    let lastCameraMotion = sessionStart;
+    let lastNavigationTime = -Infinity;
+    let renderTarget: 30|60 = 60;
+    const resumeRendering = () => {
+      const now = performance.now();
+      prevFrameTime = now; lastTime = now; frameCount = 0; frameTimes.length = 0;
+      renderBudget.reset(now); lastCameraMotion = now;
+    };
+    document.addEventListener('visibilitychange', resumeRendering);
 
     const animate = (currentTime: number) => {
       if (!alive || contextIsLost) return;
       animationFrameId = requestAnimationFrame(animate);
-      if(photoOpenRef.current){prevFrameTime=currentTime;return;}
+      if(photoOpenRef.current || document.visibilityState === 'hidden'){
+        prevFrameTime=currentTime;renderBudget.reset(currentTime);return;
+      }
+      renderTarget = !flight.isActive() && currentTime-lastCameraMotion>750 ? 30 : 60;
+      if(!renderBudget.shouldRender(currentTime,renderTarget))return;
 
       if (document.visibilityState === 'visible') { frameTimes.push(currentTime - prevFrameTime); if(frameTimes.length>300)frameTimes.shift(); }
       const delta = Math.min((currentTime - prevFrameTime) * 0.001, 0.1);
@@ -393,8 +410,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         lastTime = currentTime;
       }
 
-      // 定期的な性能統計の通知 (200msごと)
-      if (currentTime - lastStatsTime >= 200) {
+      // 定期的な性能統計の通知 (1秒ごと)
+      if (currentTime - lastStatsTime >= 1000) {
         lastStatsTime = currentTime;
         const sorted = [...frameTimes].sort((a,b)=>a-b);
         onUpdateStats({
@@ -404,7 +421,10 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           fps,
           drawCalls: renderer.info.render.calls,
           triangles: renderer.info.render.triangles,
-          dpr,
+          dpr: renderBudget.dpr,
+          renderTargetFps: renderTarget,
+          cameraPosition: camera.position.toArray() as [number,number,number],
+          flightActive: flight.isActive(),
           geometries: renderer.info.memory.geometries,
           textures: renderer.info.memory.textures,
         });
@@ -424,11 +444,16 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       if (flight.isActive()) flight.update(delta, currentTime * 0.001);
       else controls.update();
       if(!searchRef.current){
-        navigation?.update(camera.position,landmarksRef.current);
+        if(currentTime-lastNavigationTime>=100){
+          navigation?.update(camera.position,landmarksRef.current);lastNavigationTime=currentTime;
+        }
         if(!flight.isActive())scenery.setUnderwater(camera.position.y<41.5&&isWaterAt(camera.position.x,camera.position.z));
       }
+      if(previousCamera.distanceToSquared(camera.position)>.000001 || previousRotation.angleTo(camera.quaternion)>.00001){
+        lastCameraMotion=currentTime;previousCamera.copy(camera.position);previousRotation.copy(camera.quaternion);
+      }
       scene.userData.nearBuildingPilot = pilotEnabledRef.current;
-      updateBuildings?.(flight.isActive() ? camera.position : sharedFocusRef.current ? new THREE.Vector3(sharedFocusRef.current[0],0,sharedFocusRef.current[1]) : controls.target,camera.position);
+      updateBuildings?.(flight.isActive() ? camera.position : sharedFocusRef.current ? sharedFocus.set(sharedFocusRef.current[0],0,sharedFocusRef.current[1]) : controls.target,camera.position);
       if (searchRef.current && currentTime - lastSearchTime > 150) {
         lastSearchTime = currentTime;
         const p = flight.isActive() ? flight.getPosition() : controls.target;
@@ -449,6 +474,9 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         searchRef.current.onPosition({ x:p.x, z:p.z,...(flight.isActive()?{y:p.y}:{}) }, visible);
       }
       fishWorld?.update(currentTime*.001,flight.isActive()?flight.getPosition():camera.position,!!searchRef.current?.discovered,reducedMotion);
+      if(renderBudget.sample(currentTime,dataReady&&!loadingArea&&currentTime-sessionStart>5000)){
+        renderer.setPixelRatio(renderBudget.dpr);
+      }
       if (!renderFrame()) cancelAnimationFrame(animationFrameId);
       else if(dataReady&&!entered){
         entered=true;
@@ -469,6 +497,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       capturePhotoRef.current=null;
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange',resumeRendering);
       resizeObserver.disconnect();
 
       dom.removeEventListener('pointerdown',handlePointerDown);

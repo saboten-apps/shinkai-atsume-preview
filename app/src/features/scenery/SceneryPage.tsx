@@ -1,3 +1,5 @@
+import {PerformancePanel} from '../exploration/map/components/PerformancePanel';
+import type {PerformanceStats} from '../exploration/map/types';
 import {Component,lazy,Suspense,useCallback,useEffect,useState} from 'react';
 import type {Locale} from '../../config/appConfig';
 import {PLACES} from './places';
@@ -13,6 +15,7 @@ class ViewBoundary extends Component<{children:import('react').ReactNode;onError
   componentDidCatch(){this.props.onError();}render(){return this.state.failed?null:this.props.children;}
 }
 export default function SceneryPage({hash,locale,onBack}:{hash:string;locale:Locale;onBack:()=>void}){
+  const [stats,setStats]=useState<PerformanceStats|null>(null);
   const en=locale==='en',resolved=parseViewHash(hash);
   const [open,setOpen]=useState(false),[ready,setReady]=useState(false),[failed,setFailed]=useState(false),[map,setMap]=useState(false);
   const handleError=useCallback(()=>{setFailed(true);setOpen(false);setMap(true);},[]);
@@ -29,7 +32,8 @@ export default function SceneryPage({hash,locale,onBack}:{hash:string;locale:Loc
   const {view,preset}=resolved,title=preset?(en?VIEWS[preset].en:VIEWS[preset].ja):(en?'A shared view of Numazu':'届いた沼津の景色');
   if(open)return <section className="exploration-page is-immersive scenery-page">
     <div className="search-toolbar"><button onClick={()=>setOpen(false)}>{en?'Back':'案内へ戻る'}</button><strong>{title}</strong><button onClick={()=>{setOpen(false);setMap(true);}}>{en?'2D location':'2Dで場所を見る'}</button></div>
-    <div className="search-map is-ready"><ViewBoundary onError={handleError}><Suspense fallback={<p>{en?'Loading the city…':'街を読み込み中…'}</p>}><Map3D initialView={view} locale={locale} onReady={handleReady} pins={PINS} selectedPinId={null} onSelectPin={noop} onUpdateStats={noop} onWebGLError={handleError}/></Suspense></ViewBoundary></div>
+    <div className="search-map is-ready"><ViewBoundary onError={handleError}><Suspense fallback={<p>{en?'Loading the city…':'街を読み込み中…'}</p>}><Map3D initialView={view} locale={locale} onReady={handleReady} pins={PINS} selectedPinId={null} onSelectPin={noop} onUpdateStats={setStats} onWebGLError={handleError}/></Suspense></ViewBoundary></div>
+    <PerformancePanel stats={stats} en={en} context={hash}/>
     <div className="search-discover scenery-footer"><span>{ready?(en?'Drag to look around. Press and hold a building for details.':'ドラッグで見回し、建物の長押しで情報を確認できます。'):(en?'Loading scenery…':'景色を読み込み中…')}</span><small>PLATEAU / GSI</small></div>
   </section>;
   return <section className="exploration-page scenery-landing">

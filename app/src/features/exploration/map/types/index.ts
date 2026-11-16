@@ -29,6 +29,9 @@ export interface MapPin {
 }
 
 export interface PerformanceStats {
+  renderTargetFps?: number;
+  cameraPosition?: [number,number,number];
+  flightActive?: boolean;
   frameP50Ms?: number;
   frameP95Ms?: number;
   elapsedMs?: number;
