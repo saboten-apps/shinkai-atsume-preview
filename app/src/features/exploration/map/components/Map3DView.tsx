@@ -14,6 +14,9 @@ import { MapPin, PerformanceStats } from '../types';
 import { buildNumazuPortScene, SceneBuildResult } from '../three/sceneBuilder';
 import { createPinMarkers, updatePinAnimations, Pin3DObject } from '../three/pinMarkers';
 import type { BuildingRecord } from '../three/buildingSelection';
+import { makeSceneryPhoto } from '../../../scenery/photoCard';
+import { PhotoPreview, type SceneryPhoto } from '../../../scenery/PhotoPreview';
+import { viewUrl, type Viewpoint, type Vec3 } from '../../../scenery/viewpoint';
 
 export interface Search3DBridge {
   start: Position;
@@ -27,6 +30,9 @@ export interface Search3DBridge {
   onReady?: () => void;
 }
 interface Map3DViewProps {
+  initialView?: Viewpoint;
+  locale?: Locale;
+  onReady?: () => void;
   search?: Search3DBridge;
   pins: MapPin[];
   selectedPinId: string | null;
@@ -51,6 +57,7 @@ function isWebGLAvailable(): boolean {
 }
 
 export const Map3DView: React.FC<Map3DViewProps> = ({
+  initialView, locale, onReady,
   search,
   pins,
   selectedPinId,
@@ -58,6 +65,31 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   onUpdateStats,
   onWebGLError,
 }) => {
+  const en=(locale??search?.locale)==='en';
+  const readyRef=useRef(onReady);readyRef.current=onReady;
+  const initialViewRef=useRef(initialView);
+  const sharedFocusRef=useRef(initialView?.focus);
+  const capturePhotoRef=useRef<(()=>{image:string;view:Viewpoint})|null>(null);
+  const [photo,setPhoto]=useState<SceneryPhoto|null>(null);
+  const [photoBusy,setPhotoBusy]=useState(false);
+  const [photoNotice,setPhotoNotice]=useState('');
+  const photoOpenRef=useRef(false);photoOpenRef.current=!!photo||photoBusy;
+  const photoGeneration=useRef(0);
+  useEffect(()=>()=>{photoGeneration.current++;},[]);
+  useEffect(()=>()=>{if(photo)URL.revokeObjectURL(photo.url);},[photo]);
+  const takePhoto=async()=>{
+    if(photoOpenRef.current)return;
+    const generation=++photoGeneration.current;
+    setPhotoNotice('');setPhotoBusy(true);
+    try{
+      const snapshot=capturePhotoRef.current?.();if(!snapshot)throw Error('Not ready');
+      const blob=await makeSceneryPhoto(snapshot.image,en);
+      if(generation!==photoGeneration.current)return;
+      const link=viewUrl(snapshot.view,location.href);
+      setPhoto({blob,url:URL.createObjectURL(blob),link});
+    }catch{if(generation===photoGeneration.current)setPhotoNotice(en?'Wait for the scenery to load and try again.':'景色の読み込みを待って、もう一度撮影してください。');}
+    finally{if(generation===photoGeneration.current)setPhotoBusy(false);}
+  };
   const searchRef = useRef(search);
   searchRef.current = search;
   const mountRef = useRef<HTMLDivElement>(null);
@@ -150,7 +182,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
     // --- 4. Controls ---
     // 指示書: minDistance 40、maxDistance 1400、maxPolarAngle は従来どおり (Math.PI / 2 - 0.05)
-    const navigation=navigationRef.current?createNavigationHud(navigationRef.current,camera,searchRef.current?.locale==='en'):undefined;
+    const navigation=navigationRef.current?createNavigationHud(navigationRef.current,camera,(locale??searchRef.current?.locale)==='en'):undefined;
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
@@ -168,7 +200,14 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       camera.position.set(p.x + 180, 260, p.z + 250);
       controls.update();
     }
+    if(initialViewRef.current){
+      const view=initialViewRef.current;
+      controls.minDistance=1;controls.maxPolarAngle=Math.PI-.001;
+      camera.position.fromArray(view.camera);controls.target.fromArray(view.target);
+      camera.fov=view.fov;camera.updateProjectionMatrix();controls.update();
+    }
     controlsRef.current = controls;
+    controls.addEventListener('start',()=>{sharedFocusRef.current=undefined;});
 
     const flight = setupPortFlight(container, scene, camera, controls, renderer.domElement, scenery.setUnderwater);
     flightRef.current = flight;
@@ -240,6 +279,23 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     const pinObjs = createPinMarkers(pins);
     pinObjs.forEach((po) => scene.add(po.group));
     pinObjectsRef.current = pinObjs;
+    capturePhotoRef.current=()=>{
+      if(contextIsLost||!dataReady||loadingArea)throw Error('Scenery still loading');
+      const direction=camera.getWorldDirection(new THREE.Vector3());
+      const target=flight.isActive()?camera.position.clone().addScaledVector(direction,50):controls.target.clone();
+      const focus=flight.isActive()?flight.getPosition():sharedFocusRef.current?new THREE.Vector3(sharedFocusRef.current[0],0,sharedFocusRef.current[1]):controls.target;
+      const view:Viewpoint={camera:camera.position.toArray() as Vec3,target:target.toArray() as Vec3,
+        focus:[Math.max(-1550,Math.min(1450,focus.x)),Math.max(-2580,Math.min(1800,focus.z))],fov:camera.fov};
+      const hide=[fishWorld?.root,highlightGroupRef.current,...pinObjs.map(p=>p.group)].filter((o):o is NonNullable<typeof o>=>!!o);
+      const visible=hide.map(o=>o.visible);hide.forEach(o=>{o.visible=false;});
+      try{
+        return flight.withoutCharacter(()=>{
+          scene.userData.forceReflectionUpdate=true;
+          if(!renderFrame())throw Error('Render interrupted');
+          return {image:renderer.domElement.toDataURL('image/png'),view};
+        });
+      }finally{scene.userData.forceReflectionUpdate=false;hide.forEach((o,i)=>{o.visible=visible[i];});}
+    };
 
     // --- 8. Raycasting & Tap Detection ---
     const raycaster = new THREE.Raycaster();
@@ -348,6 +404,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     const animate = (currentTime: number) => {
       if (!alive || contextIsLost) return;
       animationFrameId = requestAnimationFrame(animate);
+      if(photoOpenRef.current){prevFrameTime=currentTime;return;}
 
       if (document.visibilityState === 'visible') { frameTimes.push(currentTime - prevFrameTime); if(frameTimes.length>300)frameTimes.shift(); }
       const delta = Math.min((currentTime - prevFrameTime) * 0.001, 0.1);
@@ -396,8 +453,12 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
       if (flight.isActive()) flight.update(delta, currentTime * 0.001);
       else controls.update();
+      if(!searchRef.current){
+        navigation?.update(camera.position,landmarksRef.current);
+        if(!flight.isActive())scenery.setUnderwater(camera.position.y<41.5&&isWaterAt(camera.position.x,camera.position.z));
+      }
       scene.userData.nearBuildingPilot = pilotEnabledRef.current;
-      updateBuildings?.(flight.isActive() ? camera.position : controls.target,camera.position);
+      updateBuildings?.(flight.isActive() ? camera.position : sharedFocusRef.current ? new THREE.Vector3(sharedFocusRef.current[0],0,sharedFocusRef.current[1]) : controls.target,camera.position);
       if (searchRef.current && currentTime - lastSearchTime > 150) {
         lastSearchTime = currentTime;
         const p = flight.isActive() ? flight.getPosition() : controls.target;
@@ -426,6 +487,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           setFlying(true);
         }
         searchRef.current?.onReady?.();
+        readyRef.current?.();
       }
     };
 
@@ -434,6 +496,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     // --- Cleanup ---
     return () => {
       alive = false;
+      capturePhotoRef.current=null;
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
       resizeObserver.disconnect();
@@ -553,17 +616,19 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           const camera = controlsRef.current?.object as THREE.PerspectiveCamera | undefined;
           if (camera) { camera.fov = 45; camera.updateProjectionMatrix(); }
           const active = !flight.isActive();
-          flight.setMode(active, searchRef.current ? new THREE.Vector3(controlsRef.current!.target.x, 90, controlsRef.current!.target.z) : locationRef.current === 'station' ? new THREE.Vector3(210, 80, -2395) : undefined);
+          const target=controlsRef.current!.target;
+          flight.setMode(active, searchRef.current ? new THREE.Vector3(target.x,90,target.z) : initialViewRef.current ? new THREE.Vector3(target.x,Math.max(50,Math.min(400,target.y+12)),target.z) : locationRef.current === 'station' ? new THREE.Vector3(210, 80, -2395) : undefined);
           setFlying(active);
         }}
         className="search-flight-button"
       >{isLoading || (!flying && !!areaStatus) ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}</button>
-      <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{search?.locale==='en'?'Places':'目印'}</button>
+      <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{en?'Places':'目印'}</button>
       <div className="search-world-destinations">
-        <select aria-label={search?.locale === 'en' ? 'Go to' : '移動先'} disabled={isLoading} defaultValue=""
+        <select aria-label={en ? 'Go to' : '移動先'} disabled={isLoading} defaultValue=""
           onChange={event => {
             const location = event.target.value;
             if (!location) return;
+            sharedFocusRef.current=undefined;
             flightRef.current?.setMode(false); setFlying(false);
             locationRef.current = location === 'station' ? 'station' : 'port';
             setPilotView(location === 'pilot');
@@ -598,16 +663,19 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
             controls.update();
             event.target.value = '';
           }}>
-          <option value="" disabled>{search?.locale === 'en' ? 'Go to…' : '移動先…'}</option>
+          <option value="" disabled>{en ? 'Go to…' : '移動先…'}</option>
           <option value="port">沼津港</option><option value="station">沼津駅南口</option>
           <option value="senbon">千本浜公園周辺</option><option value="ganyudo">我入道周辺</option>
-          <option value="cityhall">{search?.locale === 'en' ? 'City Hall' : '市役所'}</option>
-          <option value="pilot">{search?.locale === 'en' ? 'Building preview' : '建物の試作を見る'}</option>
+          <option value="cityhall">{en ? 'City Hall' : '市役所'}</option>
+          <option value="pilot">{en ? 'Building preview' : '建物の試作を見る'}</option>
         </select>
       </div>
       </div>
       <div ref={mountRef} className="search-world-canvas"/>
-      <NavigationHud rootRef={navigationRef} en={search?.locale==='en'}/>
+      <NavigationHud rootRef={navigationRef} en={en}/>
+      <button className="scenery-photo-trigger" disabled={isLoading||!!areaStatus||photoBusy} onClick={takePhoto}>{photoBusy?(en?'Creating…':'作成中…'):(en?'Take photo':'景色を撮る')}</button>
+      {photoNotice&&<p className="scenery-photo-notice" role="status">{photoNotice}</p>}
+      {photo&&<PhotoPreview photo={photo} en={en} onClose={()=>setPhoto(null)}/>}
       <button
         type="button"
         className="admin-select-toggle-float"
@@ -620,18 +688,18 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         }}
         title="管理用モード: タップした建物の原本IDと座標を確認"
       >
-        {search?.locale === 'en' ? 'Building Selection' : '建物選択'} {adminMode ? 'ON' : 'OFF'}
+        {en ? 'Building Selection' : '建物選択'} {adminMode ? 'ON' : 'OFF'}
       </button>
       {pilotView && !flying && <div className="building-pilot-controls">
-        <span>{search?.locale === 'en' ? 'Illustrative facade, not a faithful reconstruction' : '外観の試作（実物の再現ではありません）'}</span>
+        <span>{en ? 'Illustrative facade, not a faithful reconstruction' : '外観の試作（実物の再現ではありません）'}</span>
         <button type="button" aria-pressed={pilotEnabled} onClick={() => setPilotEnabled(!pilotEnabled)}>
-          {search?.locale === 'en' ? 'Facade details' : '立体の細部'} {pilotEnabled ? 'ON' : 'OFF'}
+          {en ? 'Facade details' : '立体の細部'} {pilotEnabled ? 'ON' : 'OFF'}
         </button>
       </div>}
       {areaStatus && <div role="status" className="search-world-status">{areaStatus}</div>}
       {adminMode && (
         <div className="admin-selection-banner" role="status">
-          <span>{search?.locale === 'en' ? 'Building Selection Mode: Tap any building to inspect gml_id' : '【管理用モード】建物をタップすると原本ID（gml_id）と緯度経度を確認・コピーできます'}</span>
+          <span>{en ? 'Building Selection Mode: Tap any building to inspect gml_id' : '【管理用モード】建物をタップすると原本ID（gml_id）と緯度経度を確認・コピーできます'}</span>
         </div>
       )}
       {selectedBuilding && (
@@ -643,7 +711,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           onPointerDown={(e) => e.stopPropagation()}
         >
           <div className="building-selection-card-header">
-            <h4>{search?.locale === 'en' ? 'Building Details (Admin)' : '建物情報（管理用）'}</h4>
+            <h4>{en ? 'Building Details (Admin)' : '建物情報（管理用）'}</h4>
             <button
               type="button"
               className="close-button"
@@ -688,7 +756,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
               className={`copy-info-button ${copied ? 'copied' : ''}`}
               onClick={() => handleCopyBuildingInfo(selectedBuilding)}
             >
-              {copied ? (search?.locale === 'en' ? '✓ Copied!' : '✓ コピーしました！') : (search?.locale === 'en' ? 'Copy Info' : '情報をコピー')}
+              {copied ? (en ? '✓ Copied!' : '✓ コピーしました！') : (en ? 'Copy Info' : '情報をコピー')}
             </button>
           </div>
         </div>
