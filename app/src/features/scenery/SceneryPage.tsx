@@ -27,7 +27,7 @@ export default function SceneryPage({hash,locale,onBack}:{hash:string;locale:Loc
   if(open)return <section className="exploration-page is-immersive scenery-page">
     <div className="search-toolbar"><button onClick={()=>setOpen(false)}>{en?'Back':'案内へ戻る'}</button><strong>{title}</strong><button onClick={()=>{setOpen(false);setMap(true);}}>{en?'2D location':'2Dで場所を見る'}</button></div>
     <div className="search-map is-ready"><ViewBoundary onError={handleError}><Suspense fallback={<p>{en?'Loading the city…':'街を読み込み中…'}</p>}><Map3D initialView={view} locale={locale} onReady={handleReady} pins={PINS} selectedPinId={null} onSelectPin={noop} onUpdateStats={noop} onWebGLError={handleError}/></Suspense></ViewBoundary></div>
-    <div className="search-discover scenery-footer"><span>{ready?(en?'Drag to look around. Capture a view you like.':'ドラッグで見回し、好きな景色を撮影できます。'):(en?'Loading scenery…':'景色を読み込み中…')}</span><small>PLATEAU / GSI</small></div>
+    <div className="search-discover scenery-footer"><span>{ready?(en?'Drag to look around. Press and hold a building for details.':'ドラッグで見回し、建物の長押しで情報を確認できます。'):(en?'Loading scenery…':'景色を読み込み中…')}</span><small>PLATEAU / GSI</small></div>
   </section>;
   return <section className="exploration-page scenery-landing">
     <p className="scenery-eyebrow">NUMAZU · うみまちラボ</p><h2>{title}</h2>

@@ -108,10 +108,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const targetCamFocusRef = useRef<THREE.Vector3 | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadText, setLoadText] = useState<string>('PLATEAU実データを読み込み中…');
-  const [adminMode, setAdminMode] = useState<boolean>(false);
   const [selectionNotice, setSelectionNotice] = useState('');
-  const adminModeRef = useRef<boolean>(false);
-  adminModeRef.current = adminMode;
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingRecord | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -237,7 +234,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     } else if (releaseQuery) {
       scene.userData.releaseId = releaseQuery;
     }
-    scene.userData.adminMode = adminModeRef.current;
+    scene.userData.adminMode = false;
 
     const sceneResult = buildNumazuPortScene(scene, (loaded, total) => {
       if (alive) setLoadText(`PLATEAU実データを読み込み中 (${loaded}/${total})…`);
@@ -301,81 +298,50 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     // --- 8. Raycasting & Tap Detection ---
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    let touchStartTime = 0;
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
-      touchStartTime = performance.now();
-      if ('touches' in e && e.touches.length > 0) {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-      } else if ('clientX' in e) {
-        touchStartX = e.clientX;
-        touchStartY = e.clientY;
-      }
+    let press: {id:number;x:number;y:number;time:number;moved:boolean}|null=null;
+    let selecting=false;
+    const handlePointerDown=(e:PointerEvent)=>{
+      if(!e.isPrimary||e.button!==0){press=null;return;}
+      press={id:e.pointerId,x:e.clientX,y:e.clientY,time:performance.now(),moved:false};
     };
-
-    const handlePointerUp = (e: MouseEvent | TouchEvent) => {
-      if (flight.isActive()) return;
-      const duration = performance.now() - touchStartTime;
-      let clientX = touchStartX;
-      let clientY = touchStartY;
-      if ('changedTouches' in e && e.changedTouches.length > 0) {
-        clientX = e.changedTouches[0].clientX;
-        clientY = e.changedTouches[0].clientY;
-      } else if ('clientX' in e) {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-
-      const dist = Math.hypot(clientX - touchStartX, clientY - touchStartY);
-      // ドラッグ操作ではなくタップ（移動距離 < 12px、時間 < 500ms）のみ判定
-      if (dist > 12 || duration > 500) return;
-
-      const rect = renderer.domElement.getBoundingClientRect();
-      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-
-      const colliders = pinObjs.map((p) => p.collider);
-      const intersects = raycaster.intersectObjects(colliders, false);
-
-      if (intersects.length > 0) {
-        const hitPinId = intersects[0].object.userData.pinId;
-        onSelectPin(hitPinId);
+    const handlePointerMove=(e:PointerEvent)=>{
+      if(press?.id===e.pointerId && Math.hypot(e.clientX-press.x,e.clientY-press.y)>8)press.moved=true;
+    };
+    const handlePointerUp=async(e:PointerEvent)=>{
+      const start=press;press=null;
+      if(!start||start.id!==e.pointerId||start.moved||e.type!=='pointerup'||selecting)return;
+      const duration=performance.now()-start.time;
+      if(duration<500){
+        if(flight.isActive())return;
+        const rect=renderer.domElement.getBoundingClientRect();
+        mouse.set((e.clientX-rect.left)/rect.width*2-1,1-(e.clientY-rect.top)/rect.height*2);
+        raycaster.setFromCamera(mouse,camera);
+        const hit=raycaster.intersectObjects(pinObjs.map(p=>p.collider),false)[0];
+        if(hit)onSelectPin(hit.object.userData.pinId);
         return;
       }
-
-      // 管理用選択モード時の建物選択レイキャスト
-      if (adminModeRef.current) {
-        const sm = sceneResultRef.current?.selectionManager;
-        const targets = sceneResultRef.current?.getBuildingTargets?.() || [];
-        if (sm && targets.length > 0) {
-          const buildingHits = raycaster.intersectObjects(targets, true);
-          if (buildingHits.length > 0) {
-            const hit = buildingHits[0];
-            const record = sm.findBuilding(hit.point);
-            if (record) {
-              setSelectedBuilding(record);
-              setSelectionNotice('');
-              setCopied(false);
-              return;
-            }
-          }
-        }
-        // 空振り（地面など）時は選択解除
-        setSelectedBuilding(null);
-        setSelectionNotice((locale??searchRef.current?.locale)==='en'?'No building identified. Wait for loading or try another building.':'建物を特定できませんでした。読み込みを待つか、別の建物をタップしてください。');
-      }
+      const rect=renderer.domElement.getBoundingClientRect();
+      mouse.set((e.clientX-rect.left)/rect.width*2-1,1-(e.clientY-rect.top)/rect.height*2);
+      raycaster.setFromCamera(mouse,camera);
+      const result=sceneResultRef.current;
+      const hit=raycaster.intersectObjects(result?.getBuildingTargets?.()||[],true)[0];
+      if(!hit){setSelectedBuilding(null);setSelectionNotice((locale??searchRef.current?.locale)==='en'?'No building found.':'建物が見つかりませんでした。建物の上で長押ししてください。');return;}
+      const point=hit.point.clone();selecting=true;
+      setSelectionNotice((locale??searchRef.current?.locale)==='en'?'Loading building information…':'建物情報を読み込み中…');
+      try{
+        await result?.loadSelectionForLoadedChunks?.();
+        if(!alive)return;
+        const record=result?.selectionManager?.findBuilding(point);
+        setSelectedBuilding(record??null);setCopied(false);
+        setSelectionNotice(record?'':((locale??searchRef.current?.locale)==='en'?'Could not identify the building.':'建物を特定できませんでした。もう一度長押ししてください。'));
+      }catch{if(alive)setSelectionNotice('建物情報を読み込めませんでした。通信状態を確認してください。');}
+      finally{selecting=false;}
     };
-
-    const dom = renderer.domElement;
-    dom.addEventListener('mousedown', handlePointerDown);
-    dom.addEventListener('mouseup', handlePointerUp);
-    dom.addEventListener('touchstart', handlePointerDown, { passive: true });
-    dom.addEventListener('touchend', handlePointerUp, { passive: true });
+    const dom=renderer.domElement;
+    dom.addEventListener('pointerdown',handlePointerDown);
+    dom.addEventListener('pointermove',handlePointerMove);
+    dom.addEventListener('pointerup',handlePointerUp);
+    dom.addEventListener('pointercancel',handlePointerUp);
 
     // --- 9. Resize Handling ---
     const handleResize = () => {
@@ -504,10 +470,10 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       window.removeEventListener('resize', handleResize);
       resizeObserver.disconnect();
 
-      dom.removeEventListener('mousedown', handlePointerDown);
-      dom.removeEventListener('mouseup', handlePointerUp);
-      dom.removeEventListener('touchstart', handlePointerDown);
-      dom.removeEventListener('touchend', handlePointerUp);
+      dom.removeEventListener('pointerdown',handlePointerDown);
+      dom.removeEventListener('pointermove',handlePointerMove);
+      dom.removeEventListener('pointerup',handlePointerUp);
+      dom.removeEventListener('pointercancel',handlePointerUp);
 
       searchRef.current?.onCaptureReady(null);
       renderer.domElement.removeEventListener('webglcontextlost', contextLost);
@@ -679,25 +645,6 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       <button className="scenery-photo-trigger" disabled={isLoading||!!areaStatus||photoBusy} onClick={takePhoto}>{photoBusy?(en?'Creating…':'作成中…'):(en?'Take photo':'景色を撮る')}</button>
       {photoNotice&&<p className="scenery-photo-notice" role="status">{photoNotice}</p>}
       {photo&&<PhotoPreview photo={photo} en={en} onClose={()=>setPhoto(null)}/>}
-      <button
-        type="button"
-        className="admin-select-toggle-float"
-        aria-pressed={adminMode}
-        onClick={() => {
-          const next = !adminMode;
-          if(next && flightRef.current?.isActive()){
-            flightRef.current.setMode(false);
-            setFlying(false);
-          }
-          setAdminMode(next);
-          sceneResultRef.current?.setAdminMode?.(next);
-          setSelectionNotice(next?(en?'Loading building information. Tap a building.':'建物情報を読み込みます。建物をタップしてください。'):'');
-          if (!next) setSelectedBuilding(null);
-        }}
-        title="管理用モード: タップした建物の原本IDと座標を確認"
-      >
-        {en ? 'Building Selection' : '建物選択'} {adminMode ? 'ON' : 'OFF'}
-      </button>
       {pilotView && !flying && <div className="building-pilot-controls">
         <span>{en ? 'Illustrative facade, not a faithful reconstruction' : '外観の試作（実物の再現ではありません）'}</span>
         <button type="button" aria-pressed={pilotEnabled} onClick={() => setPilotEnabled(!pilotEnabled)}>
@@ -705,11 +652,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         </button>
       </div>}
       {areaStatus && <div role="status" className="search-world-status">{areaStatus}</div>}
-      {adminMode && (
-        <div className="admin-selection-banner" role="status">
-          <span>{selectionNotice || (en ? 'Tap a building to inspect its ID and coordinates.' : '建物をタップするとIDと座標を確認できます。')}</span>
-        </div>
-      )}
+      {selectionNotice&&<div className="admin-selection-banner" role="status">{selectionNotice}</div>}
       {selectedBuilding && (
         <div
           className="building-selection-card"

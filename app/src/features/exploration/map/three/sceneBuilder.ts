@@ -23,6 +23,7 @@ export interface SceneBuildResult {
   selectionManager?: BuildingSelectionManager;
   overrideManager?: BuildingOverrideManager;
   setAdminMode?: (enabled: boolean) => void;
+  loadSelectionForLoadedChunks?: () => Promise<void>;
   getBuildingTargets?: () => THREE.Object3D[];
   dispose?: () => void;
 }
@@ -252,6 +253,7 @@ export function buildNumazuPortScene(
     selectionManager: station.selectionManager,
     overrideManager: station.overrideManager,
     setAdminMode: station.setAdminMode,
+    loadSelectionForLoadedChunks: station.loadSelectionForLoadedChunks,
     getBuildingTargets: station.getBuildingTargets,
     dispose
   };
