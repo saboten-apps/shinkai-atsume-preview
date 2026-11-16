@@ -19,9 +19,11 @@ import { recordTelemetryEvent } from './services/telemetryService';
 import type { FishCatalogData } from './types/schema';
 
 const ExplorationPage = lazy(() => import('./features/exploration/ExplorationPage'));
+const PlacesPage = lazy(() => import('./features/scenery/PlacesPage'));
 const SceneryPage = lazy(() => import('./features/scenery/SceneryPage'));
 
 type RouteState =
+  | { page: 'places' }
   | { page: 'scenery'; hash: string }
   | { page: 'explore'; date: string; mode: '3d'|'2d' }
   | { page: 'today' }
@@ -31,6 +33,7 @@ type RouteState =
 
 function parseHashRoute(hash: string): RouteState {
   const cleaned = hash.replace(/^#\/?/, '').trim();
+  if(cleaned==='places')return {page:'places'};
   if(cleaned==='view'||cleaned.startsWith('view/'))return {page:'scenery',hash};
   if (!cleaned || cleaned === 'today') {
     return { page: 'today' };
@@ -165,6 +168,9 @@ export const App: React.FC = () => {
               >
                 {t.nav.pokedex}
               </button>
+              <button type="button" className={`nav-tab ${route.page === 'places' || route.page === 'scenery' ? 'is-active' : ''}`} onClick={() => navigateTo('#/places')}>
+                {locale === 'ja' ? 'まちを見る' : 'Explore town'}
+              </button>
               <button
                 type="button"
                 className={`nav-tab ${route.page === 'about' ? 'is-active' : ''}`}
@@ -197,6 +203,7 @@ export const App: React.FC = () => {
 
       {/* メインコンテンツ */}
       <main className="app-main">
+        {route.page === 'places' && <Suspense fallback={<p role="status">{locale==='ja'?'場所の案内を読み込み中…':'Loading places…'}</p>}><PlacesPage locale={locale}/></Suspense>}
         {route.page === 'scenery' && <Suspense fallback={<p role="status">{locale==='ja'?'景色の案内を読み込み中…':'Loading scenery guide…'}</p>}><SceneryPage key={route.hash} hash={route.hash} locale={locale} onBack={()=>navigateTo('#/today')}/></Suspense>}
         {route.page === 'today' && (
           <TodayGachaPage

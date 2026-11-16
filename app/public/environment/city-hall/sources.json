@@ -19,6 +19,13 @@
       "sourceFilename": "PXL_20261115_061245300.jpg",
       "sha256": "8d4161c4c223287447bf006098129df3da73b9a45d3b073d34eee476f0174adc",
       "bytes": 2639451
+    },
+    {
+      "asset": "preview.webp",
+      "derivedFrom": "entrance.jpg",
+      "processing": "Resized to fit 720 x 480, WebP quality 78; no metadata",
+      "sha256": "f631621fb2ea738d6eb670eefa60c340d4b2a29dd62e6ce31c11bd21be5ecada",
+      "bytes": 44428
     }
   ]
 }
