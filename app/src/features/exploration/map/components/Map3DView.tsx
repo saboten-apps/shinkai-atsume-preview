@@ -109,6 +109,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadText, setLoadText] = useState<string>('PLATEAU実データを読み込み中…');
   const [adminMode, setAdminMode] = useState<boolean>(false);
+  const [selectionNotice, setSelectionNotice] = useState('');
   const adminModeRef = useRef<boolean>(false);
   adminModeRef.current = adminMode;
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingRecord | null>(null);
@@ -358,6 +359,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
             const record = sm.findBuilding(hit.point);
             if (record) {
               setSelectedBuilding(record);
+              setSelectionNotice('');
               setCopied(false);
               return;
             }
@@ -365,6 +367,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         }
         // 空振り（地面など）時は選択解除
         setSelectedBuilding(null);
+        setSelectionNotice((locale??searchRef.current?.locale)==='en'?'No building identified. Wait for loading or try another building.':'建物を特定できませんでした。読み込みを待つか、別の建物をタップしてください。');
       }
     };
 
@@ -682,8 +685,13 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         aria-pressed={adminMode}
         onClick={() => {
           const next = !adminMode;
+          if(next && flightRef.current?.isActive()){
+            flightRef.current.setMode(false);
+            setFlying(false);
+          }
           setAdminMode(next);
           sceneResultRef.current?.setAdminMode?.(next);
+          setSelectionNotice(next?(en?'Loading building information. Tap a building.':'建物情報を読み込みます。建物をタップしてください。'):'');
           if (!next) setSelectedBuilding(null);
         }}
         title="管理用モード: タップした建物の原本IDと座標を確認"
@@ -699,7 +707,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       {areaStatus && <div role="status" className="search-world-status">{areaStatus}</div>}
       {adminMode && (
         <div className="admin-selection-banner" role="status">
-          <span>{en ? 'Building Selection Mode: Tap any building to inspect gml_id' : '【管理用モード】建物をタップすると原本ID（gml_id）と緯度経度を確認・コピーできます'}</span>
+          <span>{selectionNotice || (en ? 'Tap a building to inspect its ID and coordinates.' : '建物をタップするとIDと座標を確認できます。')}</span>
         </div>
       )}
       {selectedBuilding && (
