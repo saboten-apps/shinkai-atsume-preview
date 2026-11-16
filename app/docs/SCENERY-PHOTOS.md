@@ -59,3 +59,13 @@ DB、アカウント、投稿受付、画像アップロード、共有回数の
 ## 今回の結果
 
 82件の単体テスト・本番ビルドが成功。ブラウザ確認で上記の案内/2D遅延読み込み、実際のPNG生成・保存・コピー、通常視点と飛行視点の共有URL往復、魚探し中の記録維持、3D解放、WebGL失敗時の2D案内を確認した。ページエラーなし。既存2D探索・発見カードの回帰確認も成功。
+
+## テスト公開完了
+
+- 正本アプリコード `97ca2101b5adc1c644fae6f9ed61e65433c12b77`。
+- preview PR #25: https://github.com/saboten-apps/shinkai-atsume-preview/pull/25 （マージ済み）。
+- preview main `cec663b7c662b182bc891d22d42a161cb54d2556`。
+- Actions https://github.com/saboten-apps/shinkai-atsume-preview/actions/runs/43844389682 成功。
+- 入口 https://saboten-apps.github.io/shinkai-atsume-preview/#/view/byuuo
+- 公開JS（index/SceneryPage/Map3DView/viewpoint）を検証済みビルドと照合。公開URLでも、案内画面で3D要求なし、明示操作後に実撮影プレビュー・共有URL生成、魚記録不変、街キャッシュ版不変を確認。ページエラーなし。
+- 本番mainは未変更。この完了記録は文書のみなので、previewのUPSTREAMは上記アプリコードのままとする。
