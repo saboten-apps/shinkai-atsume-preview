@@ -215,3 +215,13 @@ body.exploration-immersive {overflow:hidden;overscroll-behavior:none;}
 .scenery-page>.search-toolbar strong{color:#f5f0e6;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .scenery-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#e7edea;font-size:12px;padding:10px 12px max(10px,env(safe-area-inset-bottom))!important}
 @media(max-width:380px){.scenery-photo-trigger{bottom:172px;left:12px;transform:none}.scenery-photo-sheet header{align-items:flex-start}.scenery-photo-sheet h2{font-size:17px}.scenery-page>.search-toolbar{flex-wrap:wrap}}
+
+/* Keep the selected place readable without hiding the whole mobile viewport. */
+.building-selection-card { max-height: min(58dvh, 520px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.place-introduction h3 { margin: 8px 0; font-size: 18px; }
+.place-introduction img { display: block; width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
+.place-introduction small { display: block; color: #b6ccd8; font-size: 11px; }
+.place-introduction p { font-size: 14px; line-height: 1.6; }
+.place-actions { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+.place-actions a { color: #b6eaff; font-size: 13px; }
+.building-selection-card summary { padding: 12px 0; cursor: pointer; font-size: 13px; }

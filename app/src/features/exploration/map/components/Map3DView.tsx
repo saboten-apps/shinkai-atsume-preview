@@ -1,3 +1,4 @@
+import {PlaceIntroduction} from '../../../scenery/PlaceIntroduction';
 import React, { useEffect, useRef, useState } from 'react';
 import { pilotPosition, NEAR_BUILDING_PILOT } from '../three/nearBuildingPilot';
 import { cityHallPoint } from '../three/cityHall';
@@ -662,7 +663,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           onPointerDown={(e) => e.stopPropagation()}
         >
           <div className="building-selection-card-header">
-            <h4>{en ? 'Building Details (Admin)' : '建物情報（管理用）'}</h4>
+            <h4>{en ? 'About this place' : 'この場所について'}</h4>
             <button
               type="button"
               className="close-button"
@@ -670,6 +671,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
               aria-label="閉じる"
             >×</button>
           </div>
+          <PlaceIntroduction key={selectedBuilding.id} buildingId={selectedBuilding.id} en={en}/>
+          <details><summary>{en ? 'Building data' : '建物データを見る'}</summary>
           <div className="building-selection-card-body">
             <div className="building-info-row">
               <span className="building-info-label">原本ID (gml_id)</span>
@@ -710,6 +713,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
               {copied ? (en ? '✓ Copied!' : '✓ コピーしました！') : (en ? 'Copy Info' : '情報をコピー')}
             </button>
           </div>
+          </details>
         </div>
       )}
       {/* 読み込み中インジケーター（小さな表示） */}
