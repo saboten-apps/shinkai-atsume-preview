@@ -1,7 +1,7 @@
 // Explicit source IDs keep adjacent buildings from inheriting a landmark's introduction.
 export const PLACES = [
   {id:'city-hall', buildingIds:['bldg_6b50bdd6-c50a-4791-a8a3-2affe32f1c80','bldg_a05aab3b-f633-46a8-973a-be41451c06c1'],
-    ja:'沼津市役所', en:'Numazu City Hall', photo:'environment/city-hall/entrance.jpg',
+    ja:'沼津市役所', en:'Numazu City Hall', photo:'environment/city-hall/preview.webp',
     descriptionJa:'大きな屋根と柱が印象的な入口。写真と見比べながら、屋根の下や窓が並ぶ庁舎を眺めてみよう。',
     descriptionEn:'Look for the broad entrance roof and its columns. Compare the photograph with the virtual facade and rows of windows.'},
   {id:'byuuo', buildingIds:['bldg_7380cb7d-8b33-48d5-b9d1-6324ae3d6526'],

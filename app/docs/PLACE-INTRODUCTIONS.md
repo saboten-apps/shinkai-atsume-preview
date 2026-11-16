@@ -16,3 +16,13 @@ Web Share APIがなければリンクコピー、失敗時は表示したリン�
 検証: Vitest（登録先の写真・URL・ID、隣接建物の非該当）、ビルド。
 ブラウザ検証: `scripts/check-place-introductions.mjs`（Playwright / Chromium）。
 Pixel 10 Proでの操作・共有シート・体感性能は実機確認が必要。
+
+## 写真から選ぶ入口
+
+`#/places`（ナビゲーション「まちを見る」）に写真付き一覧を追加。
+一覧→場所の紹介（既存 `#/view/:id`）→必要に応じて3Dを開く。
+一覧と紹介では3Dコード・モデルを取得しないことをChromiumで検証。
+市役所の写真は `entrance.jpg` から作成した44,428バイトの `preview.webp` を使用。
+元画像は近景モデル用に維持。派生元とハッシュは写真の `sources.json` に記録。
+360px幅の日英表示、ページ往復、写真表示、共有の代替表示を
+`scripts/check-places-gallery.mjs` で確認。実機の性能・共有シートは未確認。

@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {placeForBuilding} from './places';
-export function PlaceIntroduction({buildingId,en}:{buildingId:string;en:boolean}){
+export function PlaceIntroduction({buildingId,en,showLocationLink=true}:{buildingId:string;en:boolean;showLocationLink?:boolean}){
   const place=placeForBuilding(buildingId);
   const [notice,setNotice]=useState(''),[imageFailed,setImageFailed]=useState(false);
   if(!place)return <p>{en?'No introduction yet for this building.':'この建物の紹介はまだありません。'}</p>;
@@ -19,7 +19,7 @@ export function PlaceIntroduction({buildingId,en}:{buildingId:string;en:boolean}
     <small>{en?'Photo provided by the project owner':'現地写真：制作者撮影・提供'}</small>
     <p>{en?place.descriptionEn:place.descriptionJa}</p>
     <small>{en?'Virtual reconstruction based on photographs and city data.':'写真と都市データをもとにしたバーチャル表現です。'}</small>
-    <div className="place-actions"><button type="button" onClick={share}>{en?'Share this place':'この場所を共有'}</button><a href={url}>{en?'Location link':'この場所から開く'}</a></div>
+    <div className="place-actions"><button type="button" onClick={share}>{en?'Share this place':'この場所を共有'}</button>{showLocationLink&&<a href={url}>{en?'Location link':'この場所から開く'}</a>}</div>
     {notice&&<p role="status">{notice}</p>}
   </section>;
 }

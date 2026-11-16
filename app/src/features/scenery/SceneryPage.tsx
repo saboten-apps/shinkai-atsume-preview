@@ -1,5 +1,7 @@
 import {Component,lazy,Suspense,useCallback,useEffect,useState} from 'react';
 import type {Locale} from '../../config/appConfig';
+import {PLACES} from './places';
+import {PlaceIntroduction} from './PlaceIntroduction';
 import {parseViewHash,VIEWS} from './viewpoint';
 import water from '../exploration/waterOutline.v1.json';
 import '../exploration/exploration.css';
@@ -23,6 +25,7 @@ export default function SceneryPage({hash,locale,onBack}:{hash:string;locale:Loc
     return()=>{document.body.classList.remove('exploration-immersive');chrome.forEach((e,i)=>{e.inert=inert[i];});};
   },[open]);
   if(!resolved)return <section className="exploration-page scenery-landing"><h2>{en?'This scenery link is invalid':'この景色のリンクを確認できませんでした'}</h2><p>{en?'Open a complete shared link or choose a view below.':'リンクが途中で切れていないか確認するか、下の景色から開いてください。'}</p><a href="#/view/byuuo">{en?'Around Byuuo':'びゅうお周辺を見る'}</a><button onClick={onBack}>{en?'Today':'今日へ戻る'}</button></section>;
+  const place=PLACES.find(p=>p.id===resolved.preset);
   const {view,preset}=resolved,title=preset?(en?VIEWS[preset].en:VIEWS[preset].ja):(en?'A shared view of Numazu':'届いた沼津の景色');
   if(open)return <section className="exploration-page is-immersive scenery-page">
     <div className="search-toolbar"><button onClick={()=>setOpen(false)}>{en?'Back':'案内へ戻る'}</button><strong>{title}</strong><button onClick={()=>{setOpen(false);setMap(true);}}>{en?'2D location':'2Dで場所を見る'}</button></div>
@@ -30,7 +33,9 @@ export default function SceneryPage({hash,locale,onBack}:{hash:string;locale:Loc
     <div className="search-discover scenery-footer"><span>{ready?(en?'Drag to look around. Press and hold a building for details.':'ドラッグで見回し、建物の長押しで情報を確認できます。'):(en?'Loading scenery…':'景色を読み込み中…')}</span><small>PLATEAU / GSI</small></div>
   </section>;
   return <section className="exploration-page scenery-landing">
+    <a href="#/places">← {en?'All places':'場所の一覧へ'}</a>
     <p className="scenery-eyebrow">NUMAZU · うみまちラボ</p><h2>{title}</h2>
+    {place&&<PlaceIntroduction key={place.id} buildingId={place.buildingIds[0]} en={en} showLocationLink={false}/>}
     <p>{en?'Step into virtual Numazu. Find your own angle and send a scenery photo.':'バーチャルの沼津へ。好きな角度から眺めて、景色を一枚持ち帰ろう。'}</p>
     <p>{en?'No daily draw or account is needed.':'ガチャを引いていなくても、アカウントなしで楽しめます。'}</p>
     {failed&&<p className="search-notice" role="status">{en?'3D could not load. You can still see the location below.':'3Dを表示できませんでした。下の2D図で場所を確認できます。'}</p>}
