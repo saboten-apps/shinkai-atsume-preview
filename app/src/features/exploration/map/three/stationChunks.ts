@@ -169,6 +169,9 @@ export function streamStationBuildings(
         }
       }
     },
+    async loadSelectionForLoadedChunks() {
+      await Promise.all([...loaded.keys()].map(id=>selectionManager.loadChunk(id,baseUrl)));
+    },
     getBuildingTargets(): THREE.Object3D[] {
       const targets: THREE.Object3D[] = [];
       for (const entry of loaded.values()) targets.push(entry.group, ...(entry.replacementTargets ?? []));

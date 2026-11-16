@@ -49,6 +49,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   let bestDistance = Infinity;
   let stalled = 0;
   let startX = 0, startY = 0, dragged = false;
+  let pressStarted = 0;
 
   function cancelTravel() {
     destination = null;
@@ -96,6 +97,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   function lookDown(e: PointerEvent) {
     if (!controller.active || lookId !== null || e.button !== 0) return;
     lookId = e.pointerId;
+    pressStarted = performance.now();
     startX = lastX = e.clientX;
     startY = lastY = e.clientY;
     dragged = false;
@@ -112,7 +114,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   function lookUp(e: PointerEvent) {
     if (e.pointerId !== lookId) return;
     lookId = null;
-    if (e.type !== 'pointerup' || dragged || !controller.active) return;
+    if (e.type !== 'pointerup' || dragged || !controller.active || performance.now()-pressStarted >= 500) return;
     const rect = canvas.getBoundingClientRect();
     raycaster.setFromCamera(new THREE.Vector2(
       (e.clientX - rect.left) / rect.width * 2 - 1,
