@@ -16,8 +16,8 @@ export function createCityHallStreet(scene:THREE.Scene,roads:THREE.Group,ground:
  const center=height(0,0),slopeX=(height(55,0)-height(-55,0))/110,slopeZ=(height(0,45)-height(0,-45))/90;
  const elevation=(x:number,z:number)=>center+slopeX*x+slopeZ*z;
  const materials=[
-  new THREE.MeshStandardMaterial({color:0xf5f1df,roughness:.95}),
-  new THREE.MeshStandardMaterial({color:0xe7a22e,roughness:.9}),
+  new THREE.MeshBasicMaterial({color:0xf5f1df,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}),
+  new THREE.MeshBasicMaterial({color:0xe7a22e,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}),
   new THREE.MeshStandardMaterial({color:0x8b9995,roughness:.7,metalness:.2}),
   new THREE.MeshStandardMaterial({color:0x35484d,roughness:.75}),
   new THREE.MeshBasicMaterial({color:0x44d6ac}),
