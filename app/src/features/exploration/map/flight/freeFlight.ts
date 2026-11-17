@@ -24,6 +24,22 @@ export class FreeFlightController {
   // 入力保持
   private stickInput = new THREE.Vector2(0, 0); // x: 左右 (-1..1), y: 前進(+1)/後退(-1)
   private verticalInput: number = 0;             // 上昇(+1)/下降(-1)
+  // Reused per-frame math objects avoid allocating vectors and collision shapes
+  // during flight, which otherwise adds garbage-collection pauses on mobile.
+  private forwardH = new THREE.Vector3();
+  private rightH = new THREE.Vector3();
+  private targetVel = new THREE.Vector3();
+  private targetLookAt = new THREE.Vector3();
+  private forward3D = new THREE.Vector3();
+  private camOffset = new THREE.Vector3();
+  private desiredCamPos = new THREE.Vector3();
+  private cameraDirection = new THREE.Vector3();
+  private actualCamPos = new THREE.Vector3();
+  private cameraRay = new THREE.Ray();
+  private groundRay = new THREE.Ray(new THREE.Vector3(), new THREE.Vector3(0,-1,0));
+  private groundNormal = new THREE.Vector3();
+  private capsulePush = new THREE.Vector3();
+  private capsule = new Capsule(new THREE.Vector3(), new THREE.Vector3(0,.7,0), .5);
 
   // スクリプト検証フックからの永続入力フラグ
   private scriptStick = new THREE.Vector2(0, 0);
@@ -150,24 +166,19 @@ export class FreeFlightController {
     // 水平前進ベクトル (yaw 基準, +Zが南、-Zが北、+Xが東、-Xが西)
     const sinY = Math.sin(this.yaw);
     const cosY = Math.cos(this.yaw);
-    const sinP = Math.sin(this.pitch);
-    const cosP = Math.cos(this.pitch);
-
-    // 水平前進・右ベクトル
-    const forwardH = new THREE.Vector3(sinY, 0, -cosY);
-    const rightH = new THREE.Vector3(cosY, 0, sinY);
-
-    // ピッチを反映した3D視線方向ベクトル（直感的な急降下・上昇）
-    const forward3D = new THREE.Vector3(sinY * cosP, sinP, -cosY * cosP);
+    // 移動は水平面に固定する。視点を上下に向けても高度は変わらず、
+    // 上昇・下降ボタンを押したときだけ垂直方向へ動く。
+    const forwardH = this.forwardH.set(sinY, 0, -cosY);
+    const rightH = this.rightH.set(cosY, 0, sinY);
 
     // 3. 目標速度ベクトルの生成
-    const targetVel = new THREE.Vector3(0, 0, 0);
+    const targetVel = this.targetVel.set(0, 0, 0);
 
     // スティック前進・後退
     if (Math.abs(effectiveStickY) > 0.02) {
       if (effectiveStickY > 0) {
-        // 前進：カメラ視線方向へ（下を向けば急降下、上を向けば上昇）
-        targetVel.addScaledVector(walking ? forwardH : forward3D, effectiveStickY);
+        // 前進・後退は常に水平。高度の変更は右側の上下ボタンだけで行う。
+        targetVel.addScaledVector(forwardH, effectiveStickY);
       } else {
         // 後退：水平後退
         targetVel.addScaledVector(forwardH, effectiveStickY);
@@ -286,35 +297,32 @@ export class FreeFlightController {
   private updateCamera(camera: THREE.PerspectiveCamera, colliders: Octree[]): void {
     const config = FREE_FLIGHT_CONFIG;
     // 注視点：キャラクターの胸〜頭部付近
-    const targetLookAt = new THREE.Vector3(
-      this.position.x,
-      this.position.y + config.lookAtHeight,
-      this.position.z
-    );
+    const targetLookAt = this.targetLookAt.set(this.position.x,this.position.y+config.lookAtHeight,this.position.z);
 
     // 視線ベクトル（ヨー・ピッチ基準）
     const sinY = Math.sin(this.yaw);
     const cosY = Math.cos(this.yaw);
     const sinP = Math.sin(this.pitch);
     const cosP = Math.cos(this.pitch);
-    const forward3D = new THREE.Vector3(sinY * cosP, sinP, -cosY * cosP);
+    const forward3D = this.forward3D.set(sinY * cosP, sinP, -cosY * cosP);
 
     // 真上・真下照準時に camera.up (0,1,0) と平行になって特異点（NaN）が生じるのを防止
-    const camOffset = forward3D.clone();
+    const camOffset = this.camOffset.copy(forward3D);
     if (Math.abs(camOffset.x) < 0.001 && Math.abs(camOffset.z) < 0.001) {
       camOffset.z = camOffset.y > 0 ? 0.001 : -0.001;
       camOffset.normalize();
     }
 
     // カメラ希望位置：注視点から後方へ距離 9m
-    const desiredCamPos = targetLookAt.clone().addScaledVector(camOffset, -config.cameraDistance);
+    const desiredCamPos = this.desiredCamPos.copy(targetLookAt).addScaledVector(camOffset, -config.cameraDistance);
     if(this.state==='ground')desiredCamPos.y=Math.max(desiredCamPos.y,this.position.y+1.8);
 
     // 遮蔽判定（キャラ→希望位置の線分と全コライダーの交差を判定し最適位置へクランプ）
-    const dir = desiredCamPos.clone().sub(targetLookAt); const distance = dir.length(); dir.normalize();
+    const dir = this.cameraDirection.copy(desiredCamPos).sub(targetLookAt); const distance = dir.length(); dir.normalize();
+    const ray=this.cameraRay.set(targetLookAt,dir);
     let safe = distance;
-    for (const tree of colliders) { if(this.skipWaterTerrain(tree))continue;const hit = tree.rayIntersect(new THREE.Ray(targetLookAt, dir)); if (hit && hit.distance < safe) safe = Math.max(0.3, hit.distance - 0.3); }
-    const actualCamPos = targetLookAt.clone().addScaledVector(dir, safe);
+    for (const tree of colliders) { if(this.skipWaterTerrain(tree))continue;const hit = tree.rayIntersect(ray); if (hit && hit.distance < safe) safe = Math.max(0.3, hit.distance - 0.3); }
+    const actualCamPos = this.actualCamPos.copy(targetLookAt).addScaledVector(dir, safe);
 
     // 海底面（Y=-16）より下にカメラが入らないよう微調整
     if (actualCamPos.y < SEA - 15.2) {
@@ -334,13 +342,15 @@ export class FreeFlightController {
     return !!(tree as Octree & {waterTerrain?:boolean}).waterTerrain&&this.position.y<SEA+3&&this.waterQuery(this.position.x,this.position.z);
   }
   private resolveCollisions(colliders: Octree[]): void {
-    const capsule = new Capsule(this.position.clone().add(new THREE.Vector3(0, 0.5, 0)), this.position.clone().add(new THREE.Vector3(0, 1.2, 0)), 0.5);
+    const capsule = this.capsule;
+    capsule.start.copy(this.position);capsule.start.y+=.5;
+    capsule.end.copy(this.position);capsule.end.y+=1.2;
     let landed = false;
     for (const tree of colliders) {
       if(this.skipWaterTerrain(tree))continue;
       for (let i = 0; i < 3; i++) {
         const hit = tree.capsuleIntersect(capsule); if (!hit) break;
-        const push = hit.normal.clone().multiplyScalar(hit.depth + 0.001);
+        const push = this.capsulePush.copy(hit.normal).multiplyScalar(hit.depth + 0.001);
         capsule.translate(push); this.position.add(push);
         const v = this.velocity.dot(hit.normal); if (v < 0) this.velocity.addScaledVector(hit.normal, -v);
         if (hit.normal.y > 0.7 && !this.isSubmerged()) landed = true;
@@ -351,13 +361,14 @@ export class FreeFlightController {
 
   private snapToGround(colliders:Octree[],reach:number):void {
     if(this.isSubmerged())return;
-    const ray=new THREE.Ray(this.position.clone().add(new THREE.Vector3(0,.35,0)),new THREE.Vector3(0,-1,0));
+    const ray=this.groundRay.set(this.position,this.groundRay.direction);
+    ray.origin.y+=.35;
     let nearest=Infinity,groundY:number|undefined;
     for(const tree of colliders){
       if(this.skipWaterTerrain(tree))continue;
       const hit=tree.rayIntersect(ray);
       if(!hit || hit.distance> .35+reach || hit.distance>=nearest)continue;
-      if(hit.triangle.getNormal(new THREE.Vector3()).y<.7)continue;
+      if(hit.triangle.getNormal(this.groundNormal).y<.7)continue;
       if(hit.position.y<SEA && this.waterQuery(this.position.x,this.position.z))continue;
       nearest=hit.distance;groundY=hit.position.y;
     }

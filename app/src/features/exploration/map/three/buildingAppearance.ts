@@ -2,10 +2,12 @@ import * as THREE from 'three';
 import { addPhotoSurfaceDetail } from './surfaceDetail';
 
 /** Lift photographic shadows without changing the source photographs or the sky. */
-export function brightenBuildingMaterial(material: THREE.MeshStandardMaterial) {
+export function brightenBuildingMaterial(material: THREE.MeshStandardMaterial, maxAnisotropy = 4) {
   material.roughness=.85;material.metalness=.05;
   if(!material.map)return;
-  material.map.anisotropy=4;
+  // Use the device's supported filtering limit so photographed facades stay sharper
+  // when viewed at a shallow angle. This cannot recover detail absent from the source map.
+  material.map.anisotropy=Math.max(1,maxAnisotropy);
   material.color.set(0xffffff);
   material.emissive.set(0xffffff);
   material.emissiveMap=material.map;

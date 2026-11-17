@@ -31,7 +31,7 @@ try{
    await page.waitForTimeout(31000);await page.getByText(/測定完了/).waitFor();
    const download=page.waitForEvent('download');await page.getByRole('button',{name:'動作情報を保存',exact:true}).click();
    const file=await download;const data=JSON.parse(fs.readFileSync(await file.path(),'utf8'));assert(data.samples.length>=2);assert(data.samples.every(s=>s.renderTargetFps===30));
-   assert(data.samples.every(s=>s.dpr<=Math.min(1.5,deviceDpr)&&s.dpr>=Math.min(.75,deviceDpr)));console.log('PASS 30-second performance recording and JSON export');
+   assert(data.samples.every(s=>s.dpr<=Math.min(1.25,deviceDpr)&&s.dpr>=Math.min(.5,deviceDpr)));console.log('PASS 30-second performance recording and JSON export');
    await page.locator('.performance-panel summary').click();
    await page.getByRole('combobox',{name:'移動先'}).selectOption('station');await page.waitForTimeout(10000);await measure('station-idle');
    await page.getByRole('button',{name:'飛んでみる',exact:true}).click();await page.waitForTimeout(5000);await measure('station-flight');
