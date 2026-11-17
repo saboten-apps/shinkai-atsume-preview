@@ -106,18 +106,15 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
   };
 
   const [downloadOpen,setDownloadOpen]=useState(false);
-  return (
-    <div className="page-container today-page">
-      {isDrawing&&<Suspense fallback={<button onClick={finishFishing}>結果を見る / See result</button>}><FishingSequence en={locale==='en'} onFinish={finishFishing}/></Suspense>}
-      {/* ヒーロー＆ガチャ操作枠 */}
-      <section className="gacha-hero-card">
+  const fishingIntro=(
+    <section className={`gacha-hero-card${activeDrawResult?' is-replay':''}`}>
         <div className="gacha-date-pill">
           <span>{t.gacha.todayDatePrefix}: </span>
           <strong>{activeDate}</strong>
         </div>
 
         <h2 className="gacha-hero-title">{locale==='ja'?'今日の深海へ、ひと釣り。':'Cast into the deep.'}</h2>
-        <p className="gacha-hero-subtitle">{locale==='ja'?'沼津の海に糸を垂らして、今日の1匹に出会おう。':'Cast your line and meet today’s fish.'}</p>
+        {!activeDrawResult&&<p className="gacha-hero-subtitle">{locale==='ja'?'沼津の海に糸を垂らして、今日の1匹に出会おう。':'Cast your line and meet today’s fish.'}</p>}
 
         {hasDrawnForActiveDate&&<button type="button" className="secondary-action-btn" disabled={isDrawing} onClick={()=>{finishRef.current=()=>setIsDrawing(false);setIsDrawing(true);}}>{locale==='ja'?'釣り演出をもう一度見る':'Replay fishing'}</button>}
         {!hasDrawnForActiveDate && (
@@ -133,13 +130,18 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
           </div>
         )}
       </section>
-      <p className="scenery-entry"><a href="#/view">{locale==='ja'?'沼津の景色を眺める・写真を撮る':'Explore and photograph Numazu'} <span aria-hidden="true">→</span></a></p>
+  );
+  return (
+    <div className="page-container today-page">
+      {isDrawing&&<Suspense fallback={<button onClick={finishFishing}>結果を見る / See result</button>}><FishingSequence en={locale==='en'} onFinish={finishFishing}/></Suspense>}
+      {!activeDrawResult&&<>{fishingIntro}<p className="scenery-entry"><a href="#/view">{locale==='ja'?'沼津の景色を眺める・写真を撮る':'Explore and photograph Numazu'} <span aria-hidden="true">→</span></a></p></>}
 
       {/* ガチャ結果表示後 */}
       {activeDrawResult && (
         <>
-          <section className="gacha-explore-launch">
-            <div className="gacha-explore-summary"><FishIllustration fishId={activeDrawResult.fish.id} illustration={activeDrawResult.fish.illustration} altText={getFishDisplayName(activeDrawResult.fish,locale)} isObtained size="sm"/><div><p>{locale==='ja'?'今日の魚と、街へ。':'Your fish. Your city.'}</p><h2>{getFishDisplayName(activeDrawResult.fish,locale)}</h2><p>{locale==='ja'?'沼津のどこかに隠れています。探して景色入りカードにしよう。':'It’s hiding somewhere in Numazu. Find it and make a scenery postcard.'}</p></div></div>
+          <section className="gacha-explore-launch" aria-labelledby="today-explore-heading">
+            <h2 id="today-explore-heading" className="gacha-explore-heading">{locale==='ja'?'今日の魚と、街へ。':'Your fish. Your city.'}</h2>
+            <div className="gacha-explore-summary"><FishIllustration fishId={activeDrawResult.fish.id} illustration={activeDrawResult.fish.illustration} altText={getFishDisplayName(activeDrawResult.fish,locale)} isObtained size="md"/><div><h3>{getFishDisplayName(activeDrawResult.fish,locale)}</h3><p>{locale==='ja'?'沼津のどこかに隠れています。探して景色入りカードにしよう。':'It’s hiding somewhere in Numazu. Find it and make a scenery postcard.'}</p></div></div>
             <div className="gacha-explore-actions">
               <button className="primary-action-btn" onClick={()=>onExplore(activeDrawResult.jstDate)}>{locale==='ja'?'今日の魚を探しに行く':'Find today’s fish'} <span aria-hidden="true">→</span></button>
               <button className="secondary-action-btn" onClick={()=>onExplore(activeDrawResult.jstDate,'2d')}>{locale==='ja'?'軽い2D地図で探す':'Lightweight 2D map'}</button>
@@ -147,6 +149,8 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
               {downloadOpen&&<Suspense fallback={null}><MapDownload en={locale==='en'}/></Suspense>}
             </div>
           </section>
+          {fishingIntro}
+          <p className="scenery-entry"><a href="#/view">{locale==='ja'?'沼津の景色を眺める・写真を撮る':'Explore and photograph Numazu'} <span aria-hidden="true">→</span></a></p>
           <article className="fish-result-card" aria-live="polite">
             <div className="specimen-plate-topbar">
               <div className="specimen-plate-no">
