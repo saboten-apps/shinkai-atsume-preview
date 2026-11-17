@@ -119,6 +119,7 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
         <h2 className="gacha-hero-title">{locale==='ja'?'今日の深海へ、ひと釣り。':'Cast into the deep.'}</h2>
         <p className="gacha-hero-subtitle">{locale==='ja'?'沼津の海に糸を垂らして、今日の1匹に出会おう。':'Cast your line and meet today’s fish.'}</p>
 
+        {hasDrawnForActiveDate&&<button type="button" className="secondary-action-btn" disabled={isDrawing} onClick={()=>{finishRef.current=()=>setIsDrawing(false);setIsDrawing(true);}}>{locale==='ja'?'釣り演出をもう一度見る':'Replay fishing'}</button>}
         {!hasDrawnForActiveDate && (
           <div className="gacha-action-area">
             <button
