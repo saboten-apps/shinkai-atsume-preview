@@ -24,9 +24,7 @@ export class RenderBudget {
   /** Resolution changes since creation, for device captures. */
   changes = 0;
   constructor(deviceDpr: number) {
-    // Keep the mobile GPU's pixel workload bounded; full device DPR adds a large
-    // quadratic cost on high-density phone screens without improving source texels.
-    this.maximum = Math.max(.5, Math.min(deviceDpr || 1, 1.25));
+    this.maximum = Math.max(.5, Math.min(deviceDpr || 1, 1.5));
     this.dpr = this.maximum;
     this.ceiling = this.maximum;
   }
@@ -50,7 +48,7 @@ export class RenderBudget {
     const fps = this.samples * 1000 / elapsed;
     this.windowStart = now; this.samples = 0;
     const previous = this.dpr;
-    const minimum = Math.min(this.maximum, .5);
+    const minimum = Math.min(this.maximum, .75);
     if (fps < this.target * .75) {
       this.fastWindows = 0;
       if (this.dpr > minimum) {

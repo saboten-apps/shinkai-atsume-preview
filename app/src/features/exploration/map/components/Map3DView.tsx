@@ -154,9 +154,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        // MSAA is costly on mobile GPUs; texture filtering and device pixel ratio
-        // provide the quality controls for the streamed city instead.
-        antialias: false,
+        antialias: true,
         powerPreference: 'high-performance',
       });
     } catch (err) {
@@ -164,7 +162,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       return;
     }
 
-    scene.userData.maxTextureAnisotropy = renderer.capabilities.getMaxAnisotropy();
+    scene.userData.maxTextureAnisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
 
     const renderBudget = new RenderBudget(window.devicePixelRatio || 1);
     renderer.setPixelRatio(renderBudget.dpr);

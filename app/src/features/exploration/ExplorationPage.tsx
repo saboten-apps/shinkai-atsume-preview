@@ -136,6 +136,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
       </div>}
       <HudMenu open={optionsOpen} onClose={()=>setOptionsOpen(false)} en={en}>
         <div className="hud-view-switch" role="group" aria-label={en?'View mode':'表示モード'}><button aria-pressed={mode==='3d'} onClick={()=>switchMode('3d')}>3D <small>{en?'Explore the city':'街を探索'}</small></button><button aria-pressed={mode==='2d'} onClick={()=>switchMode('2d')}>2D <small>{en?'Lightweight map':'軽い地図'}</small></button></div>
+        {found&&<button onClick={()=>{setOptionsOpen(false);openCard();}}>{en?'View discovery card':'発見カードを見る'}</button>}
         <h3>{en?'Controls':'操作のしかた'}</h3>
         {mode==='3d'?<div className="hud-help-grid"><div><b>{en?'Move':'移動する'}</b><span>{en?'Left stick':'左のスティック'}</span></div><div><b>{en?'Look around':'見回す'}</b><span>{en?'Drag the scenery':'景色をドラッグ'}</span></div><div><b>{en?'Rise / descend':'上がる・降りる'}</b><span>{en?'Buttons on the right':'右の上下ボタン'}</span></div><div><b>{en?'About a place':'場所の紹介を見る'}</b><span>{en?'Hold a building':'建物を長押し'}</span></div></div>:<p>{en?'Tap the map to move.':'地図をタップすると移動できます。'}</p>}
         <p className="hud-search-hint"><small>{en?'Today’s clue':'今日のヒント'}</small>{en?place.hintEn:place.hint}</p>
@@ -148,7 +149,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
       </HudMenu>
       <div className={`search-map ${sceneReady?'is-ready':''}`}>{mode==='3d'?<MapBoundary en={en} onFallback={()=>switchMode('2d')}><Suspense fallback={null}><Map3D pins={EMPTY_PINS} selectedPinId={null} onSelectPin={NO_SELECT} onUpdateStats={onStats} onWebGLError={onError} search={bridge}/></Suspense><span className="search-center" aria-hidden="true">＋</span></MapBoundary>:<Exploration2D en={en} position={position} onMove={setPosition} targetFishId={fish.id} target={place} discovered={!!found}/>}</div>
       <div className="search-actions search-discover">
-        {found?<button className="primary-action-btn" onClick={openCard}>{en?'View discovery card':'発見カードを見る'}</button>:(!immersive||hint.near)&&<button className="primary-action-btn" disabled={!hint.near||(mode==='3d'&&!visible)} onClick={discover}>{hint.near?(en?'Discover the fish!':'魚を発見する！'):(en?'Follow the detector':'探知機を頼りに近づこう')}</button>}
+        {!found&&(!immersive||hint.near)&&<button className="primary-action-btn" disabled={!hint.near||(mode==='3d'&&!visible)} onClick={discover}>{hint.near?(en?'Discover the fish!':'魚を発見する！'):(en?'Follow the detector':'探知機を頼りに近づこう')}</button>}
         {immersive&&<>{slow&&<button className="search-low-fps" onClick={()=>switchMode('2d')}>{en?'Lighter 2D':'軽い2Dへ'}</button>}<small>PLATEAU / GSI</small></>}
       </div>
     </>}

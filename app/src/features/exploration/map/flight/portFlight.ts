@@ -22,7 +22,10 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
     for (const cell of cells) {
       if(cell.waterTerrain&&isWaterAt(controller.position.x,controller.position.z))continue;
       const distance = Math.hypot(cell.center.x - controller.position.x, cell.center.z - controller.position.z);
-      if (distance > cell.radius + 300) { cell.tree = undefined; continue; }
+      // Keep a wider retention ring than the active ring, avoiding repeated
+      // octree construction while crossing a cell boundary.
+      if (distance > cell.radius + 180) { cell.tree = undefined; continue; }
+      if (distance > cell.radius + 60) continue;
       if (!cell.tree) {
         const mesh = new THREE.Mesh(cell.geometry, colliderMaterial);
         mesh.updateWorldMatrix(true, true);
@@ -161,7 +164,9 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
             point.fromBufferAttribute(position, index ? index.getX(i + j) : i + j).applyMatrix4(object.matrixWorld);
             vertices.push(point.x, point.y, point.z);
           }
-          const key = `${Math.floor((vertices[0]+vertices[3]+vertices[6])/750)},${Math.floor((vertices[2]+vertices[5]+vertices[8])/750)}`;
+          // 50 m cells rather than 250 m cells: build only nearby collision
+          // trees instead of blocking flight on a large district's triangles.
+          const key = `${Math.floor((vertices[0]+vertices[3]+vertices[6])/150)},${Math.floor((vertices[2]+vertices[5]+vertices[8])/150)}`;
           let values = buckets.get(key);
           if (!values) { values = []; buckets.set(key, values); }
           values.push(...vertices);
