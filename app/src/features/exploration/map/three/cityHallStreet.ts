@@ -25,6 +25,7 @@ export function createCityHallStreet(scene:THREE.Scene,roads:THREE.Group,ground:
   new THREE.MeshStandardMaterial({color:0x41657b,roughness:.65}),
   new THREE.MeshStandardMaterial({color:0xdedbd0,roughness:.85}),
  ];
+ materials[4].userData.nightLight=true;materials[5].userData.nightLight=true;
  const batches=materials.map(()=>[] as THREE.BufferGeometry[]),solids:THREE.BufferGeometry[]=[];
  function box(slot:number,x:number,y:number,z:number,w:number,h:number,d:number,solid=false){
   const g=new THREE.BoxGeometry(w,h,d);g.translate(x,y+elevation(x,z),z);batches[slot].push(g);if(solid)solids.push(g.clone());

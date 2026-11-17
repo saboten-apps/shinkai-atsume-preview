@@ -1,0 +1,10 @@
+import * as THREE from 'three';
+/** One inexpensive point draw for source street lamps, with no light/shadow passes. */
+export function createNightLights(scene:THREE.Scene,url:string){
+ const abort=new AbortController();let disposed=false,points:THREE.Points|undefined;
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=32;const ctx=canvas.getContext('2d')!,glow=ctx.createRadialGradient(16,16,0,16,16,16);glow.addColorStop(0,'rgba(255,250,220,1)');glow.addColorStop(.15,'rgba(255,224,155,.85)');glow.addColorStop(1,'rgba(255,209,125,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,32,32);
+ const texture=new THREE.CanvasTexture(canvas),material=new THREE.PointsMaterial({map:texture,color:0xffe2ab,size:1.4,sizeAttenuation:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false});material.userData.atmosphereExempt=true;
+ material.onBeforeCompile=shader=>{shader.vertexShader=shader.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\nif(distance((modelMatrix*vec4(transformed,1.0)).xyz,cameraPosition)>180.0)gl_Position=vec4(2.0,2.0,2.0,1.0);');};material.customProgramCacheKey=()=> 'local-night-lights-v1';
+ const ready=fetch(url,{signal:abort.signal}).then(r=>{if(!r.ok)throw Error(`Night lights HTTP ${r.status}`);return r.json();}).then(data=>{if(disposed)return;const positions:number[]=[];for(const p of data.points??[])if([p.x,p.y,p.z].every(Number.isFinite))positions.push(p.x,p.y+.08,p.z);const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));points=new THREE.Points(geometry,material);points.name='night-street-lights';points.visible=false;scene.add(points);}).catch(e=>{if(!disposed)console.warn('Night lights unavailable',e);});
+ return{ready,update(){if(!points)return;const night=scene.userData.atmosphere?.night??0;points.visible=night>.02&&!scene.userData.underwater;material.opacity=night*.85;},dispose(){if(disposed)return;disposed=true;abort.abort();points?.removeFromParent();points?.geometry.dispose();material.dispose();texture.dispose();}};
+}

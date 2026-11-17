@@ -1,3 +1,5 @@
+import {createWorldAtmosphere} from '../three/worldAtmosphere';
+import {loadAtmosphere,ATMOSPHERE_KEY,type AtmosphereChoice,type TimeChoice,type SeasonChoice} from '../atmosphere';
 import {cameraHeading} from '../../navigation';
 import {HudIcon} from '../../HudIcon';
 import {RenderBudget} from '../renderBudget';
@@ -101,6 +103,10 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const mountRef = useRef<HTMLDivElement>(null);
   const navigationRef=useRef<HTMLDivElement>(null);
   const [landmarks,setLandmarks]=useState(true);
+  const [atmosphereChoice,setAtmosphereChoice]=useState<AtmosphereChoice>(loadAtmosphere);
+  const atmosphereChoiceRef=useRef(atmosphereChoice);atmosphereChoiceRef.current=atmosphereChoice;
+  const atmosphereEngineRef=useRef<ReturnType<typeof createWorldAtmosphere>|null>(null);
+  useEffect(()=>{try{localStorage.setItem(ATMOSPHERE_KEY,JSON.stringify(atmosphereChoice));}catch{}atmosphereEngineRef.current?.update(atmosphereChoice,performance.now(),new Date(),true);},[atmosphereChoice]);
   const [pilotView, setPilotView] = useState(false);
   const [pilotEnabled, setPilotEnabled] = useState(true);
   const pilotEnabledRef = useRef(true); pilotEnabledRef.current = pilotEnabled;
@@ -243,6 +249,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     const fillLight = new THREE.DirectionalLight(0x406d8d, 0.6);
     fillLight.position.set(-250, 200, -250);
     scene.add(fillLight);
+    const atmosphere=createWorldAtmosphere(scene,scenery,ambientLight,sunLight,fillLight);atmosphereEngineRef.current=atmosphere;atmosphere.update(atmosphereChoiceRef.current,performance.now(),new Date(),true);
 
     // --- 6. Build Port Geometry with PLATEAU Real Data ---
     // Release version management (?release=v1 for base/rollback, ?release=v2 for active override)
@@ -432,6 +439,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       const delta = Math.min((currentTime - prevFrameTime) * 0.001, 0.1);
       prevFrameTime = currentTime;
 
+      atmosphere.update(atmosphereChoiceRef.current,currentTime);
       // 水面アニメーション（海揺らぎ・川スクロール）
       if (updateWater) {
         updateWater(delta);
@@ -567,6 +575,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       flightRef.current = null;
       sharedDisposed=true;shared?.dispose();together.remove();
       flight.dispose();
+      atmosphere.dispose();atmosphereEngineRef.current=null;
       scenery.dispose();
       controls.dispose();
       renderer.dispose();
@@ -679,7 +688,11 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         className="search-flight-button"
       aria-label={flying?(en?'Switch to overview':'街を見渡す'):(en?'Start flying':'飛んでみる')}
       ><HudIcon name={flying?'map':'fly'}/><span>{isLoading || (!flying && !!areaStatus) ? (en?'Loading':'準備中') : flying ? (en?'Overview':'見渡す') : (en?'Fly':'飛ぶ')}</span></button>
-      <details className="world-travel" onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}}}><summary><HudIcon name="pin"/><span>{en?'Places':'移動先'}</span></summary><div className="world-travel-sheet">
+      <details className="world-travel" onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}}}><summary><HudIcon name="pin"/><span>{en?'Places & sky':'移動・景色'}</span></summary><div className="world-travel-sheet">
+      <fieldset className="world-atmosphere"><legend>{en?'Time and season':'時間と季節'}</legend>
+        <label>{en?'Time':'時間帯'}<select aria-label={en?'Time of day':'時間帯'} value={atmosphereChoice.time} onChange={e=>setAtmosphereChoice(v=>({...v,time:e.target.value as TimeChoice}))}>{(['auto','morning','day','evening','night'] as const).map((v,i)=><option value={v} key={v}>{(en?['Auto (Japan time)','Morning','Day','Evening','Night']:['自動（日本時間）','朝','昼','夕方','夜'])[i]}</option>)}</select></label>
+        <label>{en?'Season':'季節'}<select aria-label={en?'Season':'季節'} value={atmosphereChoice.season} onChange={e=>setAtmosphereChoice(v=>({...v,season:e.target.value as SeasonChoice}))}>{(['auto','spring','summer','autumn','winter'] as const).map((v,i)=><option value={v} key={v}>{(en?['Auto (calendar)','Spring','Summer','Autumn','Winter']:['自動（暦）','春','夏','秋','冬'])[i]}</option>)}</select></label>
+      </fieldset>
       <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{en?'Landmark labels':'目印を表示'} {landmarks?'ON':'OFF'}</button>
       <div className="search-world-destinations">
         <select aria-label={en ? 'Go to' : '移動先'} disabled={isLoading} defaultValue=""

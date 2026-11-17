@@ -14,7 +14,7 @@ export function createWaterSurface(scene: THREE.Scene) {
     name:'NumazuWater',
     uniforms:THREE.UniformsUtils.merge([THREE.UniformsLib.fog,{
       color:{value:new THREE.Color(0x0e4558)},tDiffuse:{value:null},textureMatrix:{value:new THREE.Matrix4()},
-      uTime:time,uEye:eye,uReflectionMatrix:reflectionMatrix,uHasReflection:hasReflection,
+      uSkyTop:{value:new THREE.Color(0x4590d4)},uSkyHorizon:{value:new THREE.Color(0xc2e0f0)},uNight:{value:0},uTime:time,uEye:eye,uReflectionMatrix:reflectionMatrix,uHasReflection:hasReflection,
       uLandMask:shore,uShoreBounds:shoreBounds,uHasShore:hasShore,
       uRiverColor:{value:new THREE.Color(0x345e59)},
       uSun:{value:new THREE.Vector3(300,500,200).normalize()},
@@ -33,7 +33,8 @@ export function createWaterSurface(scene: THREE.Scene) {
         #include <fog_vertex>
       }`,
     fragmentShader:`
-      uniform vec3 color,uEye,uSun,uRiverColor;
+      uniform vec3 color,uEye,uSun,uRiverColor,uSkyTop,uSkyHorizon;
+      uniform float uNight;
       uniform float uTime,uHasReflection,uHasShore;
       uniform sampler2D tDiffuse,uLandMask;
       uniform vec4 uShoreBounds;
@@ -62,7 +63,7 @@ export function createWaterSurface(scene: THREE.Scene) {
         float facing=clamp(abs(dot(viewDir,normal)),0.0,1.0);
         float fresnel=.025+.975*pow(1.0-facing,5.0);
         vec3 reflected=reflect(-viewDir,normal);
-        vec3 sky=mix(vec3(.54,.72,.81),vec3(.18,.40,.61),pow(max(0.0,reflected.y),.6));
+        vec3 sky=mix(uSkyHorizon,uSkyTop,pow(max(0.0,reflected.y),.6));
         vec2 uv=vMirror.xy/max(.0001,vMirror.w)+normal.xz*.012;
         float inView=step(0.0,uv.x)*step(0.0,uv.y)*step(uv.x,1.0)*step(uv.y,1.0)*step(0.0,vMirror.w);
         vec3 mirror=texture2D(tDiffuse,clamp(uv,vec2(.002),vec2(.998))).rgb;
@@ -75,12 +76,12 @@ export function createWaterSurface(scene: THREE.Scene) {
         vec2 radius=uShoreBounds.zw*3.5;
         float nearLand=max(max(texture2D(uLandMask,maskUv+vec2(radius.x,0)).g,texture2D(uLandMask,maskUv-vec2(radius.x,0)).g),max(texture2D(uLandMask,maskUv+vec2(0,radius.y)).g,texture2D(uLandMask,maskUv-vec2(0,radius.y)).g))*uHasShore*within;
         float undulation=.96+.04*sin(a*.47+b*.23);
-        vec3 body=mix(color,uRiverColor,riverAmount)*undulation*(.85+.15*facing);
+        vec3 body=mix(color,uRiverColor,riverAmount)*mix(1.0,.38,uNight)*undulation*(.85+.15*facing);
         body=mix(body,body*1.5,nearLand*.45);
         float glint=pow(max(0.0,dot(normal,normalize(viewDir+uSun))),150.0)*mix(.3,.12,riverAmount);
         vec3 water=mix(body,reflection,clamp(.14+fresnel*.78,0.0,.92));
         float foam=nearLand*(.5+.5*sin(uTime*.85+p.x*.25+p.y*.34))*mix(.09,.025,riverAmount);
-        water+=vec3(.9,.95,.95)*foam+vec3(1.0,.94,.81)*glint;
+        water+=(vec3(.9,.95,.95)*foam+vec3(1.0,.94,.81)*glint)*(1.0-uNight*.9);
         gl_FragColor=vec4(water,1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -122,7 +123,7 @@ export function createWaterSurface(scene: THREE.Scene) {
       group.traverse(object=>{if(object instanceof THREE.Mesh){object.material=material;object.renderOrder=-1;surfaces.push(object);}});
     },
     setShoreMask(texture:THREE.Texture,bounds:THREE.Vector4){shore.value=texture;shoreBounds.value.copy(bounds);hasShore.value=1;},
-    update(delta:number){time.value+=Math.min(delta,.1);},
+    update(delta:number){time.value+=Math.min(delta,.1);const a=scene.userData.atmosphere;if(a){material.uniforms.color.value.copy(a.water);material.uniforms.uRiverColor.value.copy(a.water).multiplyScalar(1.12);material.uniforms.uSkyTop.value.copy(a.top);material.uniforms.uSkyHorizon.value.copy(a.horizon);material.uniforms.uNight.value=a.night;material.uniforms.uSun.value.copy(a.sunPosition).normalize();}},
     dispose(){disposed=true;scene.remove(sea);sea.dispose();geometry.dispose();surfaces.length=0;},
   };
 }

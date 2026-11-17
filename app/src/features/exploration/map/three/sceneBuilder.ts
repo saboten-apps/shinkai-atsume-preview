@@ -1,3 +1,4 @@
+import {createNightLights} from './nightLights';
 import {streamStreetFurniture} from './streetFurniture';
 import {createHarborLife} from './harborLife';
 import {createCityHallStreet} from './cityHallStreet';
@@ -111,6 +112,7 @@ export function buildNumazuPortScene(
 
   const loader = new GLTFLoader();
   loader.setMeshoptDecoder(MeshoptDecoder);
+  const nightLights=createNightLights(scene,`${import.meta.env.BASE_URL}environment/street-furniture/night-lights.json`);
   const furniture=streamStreetFurniture(scene,loader,`${import.meta.env.BASE_URL}environment/street-furniture/`);
   const station = streamStationBuildings(scene, loader, baseUrl, group => onCollisionGeometry?.(group), onAreaStatus);
 
@@ -216,6 +218,7 @@ export function buildNumazuPortScene(
             roughness: 1.0,
             metalness: 0.0,
           });
+          (child.material as THREE.Material).userData.seasonalFoliage=true;
           child.castShadow = false;
           child.receiveShadow = false;
         }
@@ -244,6 +247,7 @@ export function buildNumazuPortScene(
     isDisposed = true;
     station.dispose();
     furniture.dispose();
+    nightLights.dispose();
     city?.dispose();
     street?.dispose();
     harbor?.dispose();
@@ -259,7 +263,7 @@ export function buildNumazuPortScene(
   return {
     disposables,
     ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}),
-    updateWater: water.update,
+    updateWater:(delta)=>{water.update(delta);nightLights.update();},
     updateHarbor:(time,viewer,reducedMotion)=>harbor?.update(time,viewer,reducedMotion),
     updateBuildings: (position,viewer) => { station.update(position,viewer); furniture.update(viewer??position); street?.update(viewer??position); aerial?.update(position); },
     groundReady: async () => { await aerial?.settled(); await station.detailReady(); },
