@@ -12,6 +12,7 @@ try{
  await page.getByRole('button',{name:'今日の魚を探しに行く'}).waitFor();
  const saved=await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1'));assert(saved);
  await page.reload();await page.getByRole('button',{name:'今日の魚を探しに行く'}).waitFor();assert.equal(await page.getByRole('dialog').count(),0);
+ await page.getByRole('button',{name:'釣り演出をもう一度見る'}).click();await page.getByRole('button',{name:'演出をスキップ'}).click();assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1')),saved);
  assert(!requests.some(r=>/Map3DView|sharedExploration/.test(r)),'3D or networking fetched before exploration');assert.deepEqual(errors,[]);
  const second=await browser.newPage();await second.goto(process.env.APP_URL||'http://127.0.0.1:5190/');await second.getByRole('button',{name:'釣り糸を垂らす',exact:true}).click();await second.getByRole('button',{name:'演出をスキップ'}).click();await second.getByRole('button',{name:'今日の魚を探しに行く'}).waitFor();
  const reduced=await browser.newPage({reducedMotion:'reduce'});await reduced.goto(process.env.APP_URL||'http://127.0.0.1:5190/');await reduced.getByRole('button',{name:'釣り糸を垂らす',exact:true}).click();await reduced.getByRole('button',{name:'今日の魚を探しに行く'}).waitFor();assert.equal(await reduced.getByRole('dialog').count(),0);
