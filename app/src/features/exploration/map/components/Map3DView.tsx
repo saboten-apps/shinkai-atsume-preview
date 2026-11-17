@@ -697,6 +697,9 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
             const camera = controls.object as THREE.PerspectiveCamera;
             camera.fov = 45; camera.updateProjectionMatrix();
             controls.minDistance = location === 'pilot' ? 6 : 40;
+            if(location==='streetfurniture'){
+              controls.minDistance=5;controls.target.set(190,49,-2300);camera.position.set(200,58,-2275);controls.update();event.target.value='';return;
+            }
             if(location==='harborlife'){
               controls.minDistance=5;controls.target.set(-153,43.5,-140);camera.position.set(-135,48,-158);controls.update();event.target.value='';return;
             }
@@ -728,6 +731,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           <option value="" disabled>{en ? 'Go to…' : '移動先…'}</option>
           <option value="port">沼津港</option><option value="station">沼津駅南口</option>
           <option value="senbon">千本浜公園周辺</option><option value="ganyudo">我入道周辺</option>
+          <option value="streetfurniture">{en ? 'Station street details' : '駅前通りの街並み'}</option>
           <option value="harborlife">{en ? 'Harbor anglers and boats' : '港の釣り人・船'}</option>
           <option value="cityhall">{en ? 'City Hall' : '市役所'}</option>
           <option value="pilot">{en ? 'Building preview' : '建物の試作を見る'}</option>

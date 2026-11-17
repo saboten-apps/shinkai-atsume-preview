@@ -1,3 +1,4 @@
+import {streamStreetFurniture} from './streetFurniture';
 import {createHarborLife} from './harborLife';
 import {createCityHallStreet} from './cityHallStreet';
 import { createCityStructures } from './cityStructures';
@@ -110,6 +111,7 @@ export function buildNumazuPortScene(
 
   const loader = new GLTFLoader();
   loader.setMeshoptDecoder(MeshoptDecoder);
+  const furniture=streamStreetFurniture(scene,loader,`${import.meta.env.BASE_URL}environment/street-furniture/`);
   const station = streamStationBuildings(scene, loader, baseUrl, group => onCollisionGeometry?.(group), onAreaStatus);
 
   let loadedCount = 0;
@@ -241,6 +243,7 @@ export function buildNumazuPortScene(
   const dispose = () => {
     isDisposed = true;
     station.dispose();
+    furniture.dispose();
     city?.dispose();
     street?.dispose();
     harbor?.dispose();
@@ -258,7 +261,7 @@ export function buildNumazuPortScene(
     ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}),
     updateWater: water.update,
     updateHarbor:(time,viewer,reducedMotion)=>harbor?.update(time,viewer,reducedMotion),
-    updateBuildings: (position,viewer) => { station.update(position,viewer); street?.update(viewer??position); aerial?.update(position); },
+    updateBuildings: (position,viewer) => { station.update(position,viewer); furniture.update(viewer??position); street?.update(viewer??position); aerial?.update(position); },
     groundReady: async () => { await aerial?.settled(); await station.detailReady(); },
     isWaterAt:(x,z)=>aerial?.isWaterAt(x,z)??true,
     selectionManager: station.selectionManager,

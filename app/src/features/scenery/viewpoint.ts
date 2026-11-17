@@ -5,6 +5,7 @@ export interface Viewpoint { camera: Vec3; target: Vec3; focus: [number, number]
 export const VIEWS: Record<string, {ja:string; en:string; view:Viewpoint}> = {
   port:{ja:'沼津港',en:'Numazu harbor',view:{camera:[295,265,345],target:[-20,43,-190],focus:[-20,-190],fov:45}},
   'harbor-life':{ja:'港の釣り人・船',en:'Harbor anglers and boats',view:{camera:[-135,48,-158],target:[-153,43.5,-140],focus:[-153,-140],fov:45}},
+  'street-furniture':{ja:'駅前通りの街並み',en:'Station street details',view:{camera:[200,58,-2275],target:[190,49,-2300],focus:[190,-2300],fov:55}},
   byuuo:{ja:'びゅうお周辺',en:'Around Byuuo',view:{camera:[-120,80,-65],target:[-276,76,22],focus:[-276,22],fov:55}},
   'city-hall':{ja:'市役所周辺',en:'Around City Hall',view:{camera:[671,108,-1478],target:[543,66,-1562],focus:[548,-1567],fov:55}},
 };
