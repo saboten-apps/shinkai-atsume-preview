@@ -22,4 +22,4 @@ export function parseDrafts(text:string):PlaceDraft[]{
  if(new Set(drafts.map(d=>d.id)).size!==drafts.length||new Set(drafts.map(d=>d.buildingId)).size!==drafts.length)throw Error('場所IDまたは建物IDが重複しています');
  return drafts;
 }
-export function serializeDrafts(drafts:PlaceDraft[]):string {return JSON.stringify({version:1,drafts:drafts.map(validateDraft)},null,2);}
+export function serializeDrafts(drafts:PlaceDraft[]):string {const text=JSON.stringify({version:1,drafts:drafts.map(validateDraft)},null,2);parseDrafts(text);return text;}
