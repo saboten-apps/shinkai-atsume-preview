@@ -70,6 +70,17 @@ describe('virtual underwater space',()=>{
  });
 });
 
+describe('horizontal flight controls',()=>{
+ it('keeps forward movement level regardless of look pitch, and changes height only on vertical input',()=>{
+  const {controller,tick}=setup([],0,120,0);
+  controller.setLookDegrees(0,65);controller.setStick(0,1);tick(120, false, []);
+  expect(controller.position.z).toBeLessThan(-1);
+  expect(controller.position.y).toBeCloseTo(120,1);
+  controller.setStick(0,0);controller.setVertical(1);tick(120, false, []);
+  expect(controller.position.y).toBeGreaterThan(120);
+ });
+});
+
 it('stays submerged just after reaching the water surface so the dive control remains usable',()=>{
  const {controller,tick}=setup([],0,41.4,0);controller.setWaterQuery(()=>true);tick(180);
  expect(controller.state).toBe('water');expect(controller.position.y).toBeLessThan(41.5);

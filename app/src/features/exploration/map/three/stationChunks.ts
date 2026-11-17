@@ -125,7 +125,7 @@ export function streamStationBuildings(
         if (!(object instanceof THREE.Mesh)) return;
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
           if (!(material instanceof THREE.MeshStandardMaterial)) continue;
-          brightenBuildingMaterial(material);
+          brightenBuildingMaterial(material, scene.userData.maxTextureAnisotropy ?? 4);
         }
       });
       scene.add(gltf.scene);
