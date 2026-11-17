@@ -27,7 +27,7 @@ export class HumanoidCharacter {
 
     // --- マテリアル（夕景の港・水中で視認性の高い白＋ネオンオレンジ＋シアン発光） ---
     this.suitMat = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
+      color: 0x26b9e0,
       roughness: 0.3,
       metalness: 0.15,
       emissive: 0x4aa3cc,
@@ -51,14 +51,14 @@ export class HumanoidCharacter {
     });
 
     const visorMat = new THREE.MeshStandardMaterial({
-      color: 0x0284c7,
+      color: 0x052640,
       emissive: 0x38bdf8,
-      emissiveIntensity: 1.1,
+      emissiveIntensity: .3,
       roughness: 0.1,
     });
 
     // 1. 胴体（トルソー）
-    const torsoGeom = new THREE.CapsuleGeometry(0.24, 0.44, 8, 16);
+    const torsoGeom = new THREE.CapsuleGeometry(0.29, 0.32, 8, 16);
     this.torso = new THREE.Mesh(torsoGeom, suitMat);
     this.torso.position.y = 0.82;
     this.modelRoot.add(this.torso);
@@ -76,16 +76,29 @@ export class HumanoidCharacter {
     this.head.position.y = 1.25;
 
     const headSphere = new THREE.Mesh(
-      new THREE.SphereGeometry(0.22, 16, 16),
+      new THREE.SphereGeometry(0.34, 16, 12),
       suitMat
     );
     this.head.add(headSphere);
 
     // バイザー（顔の前方：-Z 方向をローカル正面とする）
-    const visorGeom = new THREE.BoxGeometry(0.26, 0.10, 0.12);
+    const visorGeom = new THREE.SphereGeometry(0.27, 16, 12);
     const visorMesh = new THREE.Mesh(visorGeom, visorMat);
-    visorMesh.position.set(0, 0.02, -0.16);
+    visorMesh.scale.set(1, .78, .55);
+    visorMesh.position.set(0, 0.02, -0.20);
     this.head.add(visorMesh);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(.275,.035,6,20), accentMat);
+    rim.position.set(0,.02,-.27); this.head.add(rim);
+    for (const side of [-1,1]) {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(.034,8,6), new THREE.MeshBasicMaterial({color:0xb9ffff}));
+      eye.scale.y=1.5;eye.position.set(side*.09,.035,-.345);this.head.add(eye);
+      const antenna = new THREE.Mesh(new THREE.CapsuleGeometry(.022,.17,4,6),accentMat);
+      antenna.position.set(side*.21,.35,0);antenna.rotation.z=-side*.45;this.head.add(antenna);
+      const tip=new THREE.Mesh(new THREE.SphereGeometry(.045,8,6),accentMat);
+      tip.position.set(side*.26,.45,0);this.head.add(tip);
+    }
+    const wave=new THREE.Mesh(new THREE.TorusGeometry(.10,.02,4,12,Math.PI),new THREE.MeshBasicMaterial({color:0xffffff}));
+    wave.position.set(0,.94,-.3);this.modelRoot.add(wave);
 
     this.modelRoot.add(this.head);
 
@@ -114,7 +127,7 @@ export class HumanoidCharacter {
     this.modelRoot.add(this.chestLight);
 
     // 4. 腕（左腕・右腕：肩関節グループ）
-    const armGeom = new THREE.CapsuleGeometry(0.07, 0.36, 6, 12);
+    const armGeom = new THREE.CapsuleGeometry(0.10, 0.25, 6, 12);
 
     // 左腕
     this.leftArm = new THREE.Group();
@@ -133,7 +146,7 @@ export class HumanoidCharacter {
     this.modelRoot.add(this.rightArm);
 
     // 5. 脚（左脚・右脚：股関節グループ）
-    const legGeom = new THREE.CapsuleGeometry(0.09, 0.44, 6, 12);
+    const legGeom = new THREE.CapsuleGeometry(0.12, 0.32, 6, 12);
 
     // 左脚
     this.leftLeg = new THREE.Group();
@@ -157,6 +170,12 @@ export class HumanoidCharacter {
     this.group.visible = false;
   }
 
+  public getYaw():number { return this.currentYaw; }
+  public dispose():void {
+    const geometries=new Set<THREE.BufferGeometry>(), materials=new Set<THREE.Material>();
+    this.group.traverse(o=>{if(o instanceof THREE.Mesh){geometries.add(o.geometry);(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));}});
+    geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());this.group.removeFromParent();
+  }
   public setVisible(visible: boolean): void {
     this.group.visible = visible;
   }

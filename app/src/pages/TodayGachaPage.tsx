@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState } from 'react';
+import React, { lazy, Suspense, useState, useRef } from 'react';
 import type { Locale } from '../config/appConfig';
 import { AreaGuideSection } from '../components/AreaGuideSection';
 import { DepthScaleBar } from '../components/DepthScaleBar';
@@ -15,6 +15,7 @@ import {
 import { recordTelemetryEvent } from '../services/telemetryService';
 import type { CollectionState, DailyDrawResult, FishRecord } from '../types/schema';
 
+const FishingSequence=lazy(()=>import('../features/fishing/FishingSequence').then(m=>({default:m.FishingSequence})));
 const MapDownload=lazy(()=>import('../features/exploration/MapDownload'));
 
 interface TodayGachaPageProps {
@@ -48,6 +49,8 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
     wasNewDiscovery: boolean;
   } | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const finishRef=useRef<null|(()=>void)>(null);
+  const finishFishing=()=>{const finish=finishRef.current;finishRef.current=null;finish?.();};
 
   // 同日にすでに引いているか確認
   const todayHistory = collectionState.dailyHistory[currentJstDate];
@@ -98,13 +101,14 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
       finalizeDraw();
     } else {
       setIsDrawing(true);
-      window.setTimeout(finalizeDraw, 450);
+      finishRef.current=finalizeDraw;
     }
   };
 
   const [downloadOpen,setDownloadOpen]=useState(false);
   return (
     <div className="page-container today-page">
+      {isDrawing&&<Suspense fallback={<button onClick={finishFishing}>結果を見る / See result</button>}><FishingSequence en={locale==='en'} onFinish={finishFishing}/></Suspense>}
       {/* ヒーロー＆ガチャ操作枠 */}
       <section className="gacha-hero-card">
         <div className="gacha-date-pill">
@@ -112,8 +116,8 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
           <strong>{activeDate}</strong>
         </div>
 
-        <h2 className="gacha-hero-title">{t.gacha.heroTitle}</h2>
-        <p className="gacha-hero-subtitle">{t.gacha.heroSubtitle}</p>
+        <h2 className="gacha-hero-title">{locale==='ja'?'今日の深海へ、ひと釣り。':'Cast into the deep.'}</h2>
+        <p className="gacha-hero-subtitle">{locale==='ja'?'沼津の海に糸を垂らして、今日の1匹に出会おう。':'Cast your line and meet today’s fish.'}</p>
 
         {!hasDrawnForActiveDate && (
           <div className="gacha-action-area">
@@ -123,7 +127,7 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
               disabled={isDrawing}
               onClick={handleDrawClick}
             >
-              {isDrawing ? t.gacha.drawingStatus : t.gacha.drawButton}
+              {isDrawing ? t.gacha.drawingStatus : locale==='ja'?'釣り糸を垂らす':'Cast your line'}
             </button>
           </div>
         )}

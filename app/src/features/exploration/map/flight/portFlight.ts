@@ -193,6 +193,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
         }
       }
        const data=controller.getHookData(); rise.textContent=data.state==='ground'?'飛び立つ':'上がる';drop.disabled=data.state==='ground'; depth.textContent = data.state==='ground'?'徒歩':data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; setUnderwater(data.state === 'water'); },
+    getNetworkPose() { return {x:controller.position.x,y:controller.position.y,z:controller.position.z,yaw:character.getYaw(),speed:Math.min(500,controller.velocity.length()),state:controller.state,active:controller.active}; },
     getPosition() { return controller.position; },
     getStatus() { return controller.getHookData(); },
     setWaterQuery(query:(x:number,z:number)=>boolean){isWaterAt=query;controller.setWaterQuery(query);},

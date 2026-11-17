@@ -131,3 +131,11 @@ previewには以前から以下の診断生成物がある。今回の文書に�
 `/tmp/shinkai-perf-baseline` は `be85eee` の比較用detached worktree。`/tmp/shinkai-render-performance.json`、`/tmp/render-benchmark-small.log`、`/tmp/perf-introductions-built.log` 等は一時記録で、別環境では存在しない。再現を一時ファイルだけに依存させない。
 
 Googleマップ画像を抜き出して素材にしない。公共建築だから無条件に自由と説明しない。写真利用の許可と施設との提携を混同しない。PLATEAU/GSIの出典・概略表現の説明を維持する。「親ガチャ」という表現を使わない。
+
+## 2026-11-17 釣り演出・潜水服・共有探索試作
+
+Canonical d615ceb。未登録建物の募集文と下書きUI撤去、深海釣り演出、新潜水服を反映。
+共有探索はアプリ側試作まで。Supabase接続先は未設定、実サービスでの2端末検証は未実施。
+`app/docs/SHARED-EXPLORATION.md` と `app/supabase/shared-exploration.sql` を参照。
+公開RepoのActions変数 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` をビルドへ渡す設定済み。
+魚の保存データ・当日共通結果は維持。91テスト通過。実機性能検証は引き続き必要。

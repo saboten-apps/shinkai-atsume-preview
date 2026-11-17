@@ -17,28 +17,7 @@ assert((await page.getByRole('link',{name:'この場所から開く'}).getAttrib
 await page.screenshot({path:'/tmp/place-city-hall.png'});
 console.log('PASS city hall photo, collapsed data and share URL');assert(requests.some(u=>/buildings-.*json/.test(u)));console.log('PASS short tap / long press selects building / sidecar lazy loads');
 
-await page.getByText('紹介の下書きを編集（この端末）',{exact:true}).click();
-const editor=page.locator('.place-draft-editor');await editor.getByLabel('建物・場所の名前',{exact:true}).fill('検証用の紹介');
-await editor.getByLabel('紹介文',{exact:true}).fill('<script>実行されない文章</script>');
-await editor.getByLabel('写真の提供者・撮影者',{exact:true}).fill('テスト撮影者');
-await editor.getByLabel('公開・加工の利用許可の記録',{exact:true}).fill('テスト用、公開・加工可');
-await editor.getByLabel('表示するクレジット',{exact:true}).fill('写真：テスト');
-await page.evaluate(()=>localStorage.setItem('shinkai_gacha_collection_v1','preserve-test'));
-await editor.getByRole('button',{name:'下書きを保存',exact:true}).click();
-await editor.getByText('この端末に下書きを保存しました。',{exact:true}).waitFor();
-const before=await page.evaluate(()=>localStorage.getItem('shinkai_place_drafts_v1'));
-assert.equal(JSON.parse(before).drafts[0].name,'検証用の紹介');
-const pending=page.waitForEvent('download');await editor.getByRole('button',{name:'保存して書き出す',exact:true}).click();
-const download=await pending;const fs=await import('node:fs');const data=fs.readFileSync(await download.path(),'utf8');assert.equal(data,before);
-await editor.getByLabel('関連URL',{exact:true}).fill('javascript:alert(1)');await editor.getByRole('button',{name:'下書きを保存',exact:true}).click();
-assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_place_drafts_v1')),before);
-await editor.getByLabel('下書きファイルを復元・追加',{exact:true}).setInputFiles({name:'draft.json',mimeType:'application/json',buffer:Buffer.from(data)});
-assert.equal(await editor.getByLabel('建物・場所の名前',{exact:true}).inputValue(),'検証用の紹介');
-await page.locator('.building-selection-card .close-button').click();
-await page.mouse.move(box.x+box.width*.5,box.y+box.height*.5);await page.mouse.down();await page.waitForTimeout(650);await page.mouse.up();
-await page.getByText('紹介の下書きを編集（この端末）',{exact:true}).click();
-assert.equal(await page.locator('.place-draft-editor').getByLabel('建物・場所の名前',{exact:true}).inputValue(),'検証用の紹介');
-assert.equal(await page.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1')),'preserve-test');
-await page.screenshot({path:'/tmp/place-draft-editor.png'});
-console.log('PASS edit/save/reselect/export/restore, reject unsafe URL, preserve existing collection key');
+assert.equal(await page.locator('.place-draft-editor').count(),0);
+assert.equal(await page.getByText('紹介の下書きを編集（この端末）',{exact:true}).count(),0);
+console.log('PASS public building card has no local draft editor');
 }finally{await browser.close();}

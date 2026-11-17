@@ -3,7 +3,7 @@ import {placeForBuilding} from './places';
 export function PlaceIntroduction({buildingId,en,showLocationLink=true}:{buildingId:string;en:boolean;showLocationLink?:boolean}){
   const place=placeForBuilding(buildingId);
   const [notice,setNotice]=useState(''),[imageFailed,setImageFailed]=useState(false);
-  if(!place)return <p>{en?'No introduction yet for this building.':'この建物の紹介はまだありません。'}</p>;
+  if(!place)return <p>{en?'Information about this place wanted.':'この場所の情報を募集中'}</p>;
   const title=en?place.en:place.ja;
   const url=new URL(`${location.pathname}${location.search}#/view/${place.id}`,location.origin).href;
   async function share(){
