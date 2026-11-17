@@ -7,7 +7,7 @@ dest = root / 'app'
 if subprocess.check_output(['git','status','--porcelain'],cwd=source).strip():
     raise SystemExit('Commit canonical app changes before syncing preview.')
 revision = subprocess.check_output(['git','rev-parse','HEAD'],cwd=source,text=True).strip()
-paths = ['.gitignore','package.json','package-lock.json','index.html','lod-comparison.html','tsconfig.json','tsconfig.node.json','vite.config.ts','vitest.config.ts','src','data','public','scripts','docs']
+paths = ['.env.example','supabase','.gitignore','package.json','package-lock.json','index.html','lod-comparison.html','tsconfig.json','tsconfig.node.json','vite.config.ts','vitest.config.ts','src','data','public','scripts','docs']
 tracked=set(subprocess.check_output(['git','ls-files'],cwd=source,text=True).splitlines())
 paths=[p for p in paths if p in tracked or any(f.startswith(p+'/') for f in tracked)]
 archive=subprocess.check_output(['git','archive','HEAD','--',*paths],cwd=source)

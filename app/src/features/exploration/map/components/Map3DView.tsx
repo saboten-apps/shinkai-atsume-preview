@@ -1,6 +1,6 @@
 import {RenderBudget} from '../renderBudget';
 import {PlaceIntroduction} from '../../../scenery/PlaceIntroduction';
-import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { pilotPosition, NEAR_BUILDING_PILOT } from '../three/nearBuildingPilot';
 import { cityHallPoint } from '../three/cityHall';
 import * as THREE from 'three';
@@ -20,7 +20,7 @@ import { makeSceneryPhoto } from '../../../scenery/photoCard';
 import { PhotoPreview, type SceneryPhoto } from '../../../scenery/PhotoPreview';
 import { viewUrl, type Viewpoint, type Vec3 } from '../../../scenery/viewpoint';
 
-const PlaceDraftEditor=lazy(()=>import('../../../scenery/PlaceDraftEditor'));
+
 
 export interface Search3DBridge {
   start: Position;
@@ -114,7 +114,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const [loadText, setLoadText] = useState<string>('PLATEAU実データを読み込み中…');
   const [selectionNotice, setSelectionNotice] = useState('');
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingRecord | null>(null);
-  const [draftOpen,setDraftOpen]=useState(false);
+
   const [copied, setCopied] = useState<boolean>(false);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const sceneResultRef = useRef<SceneBuildResult | null>(null);
@@ -213,6 +213,18 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     controls.addEventListener('start',()=>{sharedFocusRef.current=undefined;});
 
     const flight = setupPortFlight(container, scene, camera, controls, renderer.domElement, scenery.setUnderwater);
+    let shared:ReturnType<typeof import('../../../multiplayer/sharedExploration').setupSharedExploration>|null=null;
+    let sharedDisposed=false;
+    const together=document.createElement('button');together.className='shared-exploration-launch';together.textContent='一緒に探索';container.append(together);
+    together.onclick=async()=>{
+      together.disabled=true;
+      try {const {setupSharedExploration}=await import('../../../multiplayer/sharedExploration');
+        if(sharedDisposed)return;
+        shared=setupSharedExploration(container,scene,()=>flight.getNetworkPose());together.remove();
+      }catch{together.disabled=false;together.textContent='接続画面を再読込';}
+    };
+    if(new URL(location.href).searchParams.has('room'))together.click();
+
     flightRef.current = flight;
 
     // --- 5. Lights ---
@@ -446,6 +458,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
 
       if (flight.isActive()) flight.update(delta, currentTime * 0.001);
       else controls.update();
+      shared?.update(delta,currentTime*.001);
       if(!searchRef.current){
         if(currentTime-lastNavigationTime>=100){
           navigation?.update(camera.position,landmarksRef.current);lastNavigationTime=currentTime;
@@ -512,6 +525,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       renderer.domElement.removeEventListener('webglcontextlost', contextLost);
       fishWorld?.dispose();
       flightRef.current = null;
+      sharedDisposed=true;shared?.dispose();together.remove();
       flight.dispose();
       scenery.dispose();
       controls.dispose();
@@ -704,7 +718,6 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
             >×</button>
           </div>
           <PlaceIntroduction key={selectedBuilding.id} buildingId={selectedBuilding.id} en={en}/>
-          <details onToggle={e=>setDraftOpen(e.currentTarget.open)}><summary>{en?'Edit local draft':'紹介の下書きを編集（この端末）'}</summary>{draftOpen&&<Suspense fallback={<p>読み込み中…</p>}><PlaceDraftEditor key={selectedBuilding.id} building={selectedBuilding}/></Suspense>}</details>
           <details><summary>{en ? 'Building data'  : '建物データを見る'}</summary>
           <div className="building-selection-card-body">
             <div className="building-info-row">
