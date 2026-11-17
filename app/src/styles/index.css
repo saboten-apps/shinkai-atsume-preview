@@ -1321,3 +1321,28 @@ em {
 .gacha-explore-summary{display:flex;align-items:center;gap:16px;min-width:0;}.gacha-explore-summary>.fish-illust-container{width:104px;height:104px;flex-shrink:0;margin:0;}.gacha-explore-summary>div:last-child{min-width:0;}
 
 .scenery-entry{text-align:center;font-size:14px;margin:16px 0}.scenery-entry a{color:inherit;text-underline-offset:4px}
+
+/* Keep the whole fish visible while the 3D city loads. */
+.exploration-loading .fish-illust-container{width:min(100%,280px,44dvh);height:auto;aspect-ratio:1;margin:0 auto 20px;}
+.exploration-loading .fish-illust-img{width:100%;height:100%;aspect-ratio:auto;object-fit:contain;}
+
+/* Once today's fish is known, exploring is the primary action. */
+.today-page{gap:18px;}
+.today-page .gacha-explore-launch{display:grid;grid-template-columns:minmax(0,1fr) auto;margin:0;gap:18px 24px;}
+.gacha-explore-summary>.fish-illust-container{width:160px;height:160px;}
+.gacha-explore-summary .fish-illust-img{height:100%;object-fit:contain;}
+.gacha-explore-launch .gacha-explore-heading{grid-column:1/-1;color:#f7b184;font-size:24px;font-weight:700;line-height:1.35;margin:0;letter-spacing:.02em;}
+.gacha-explore-summary h3{font-size:30px;margin:0 0 10px;}
+.gacha-hero-card.is-replay{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;padding:14px 18px;text-align:left;}
+.gacha-hero-card.is-replay::before{display:none;}
+.gacha-hero-card.is-replay .gacha-date-pill{font-size:11px;border:0;padding:0;margin:0;}
+.gacha-hero-card.is-replay .gacha-hero-title{font-size:15px;letter-spacing:.02em;margin:0;}
+.gacha-hero-card.is-replay button{font-size:13px;padding:8px 12px;min-height:44px;}
+@media(max-width:600px){
+ .gacha-explore-summary{gap:14px;align-items:flex-start;}
+ .gacha-explore-summary>.fish-illust-container{width:clamp(108px,32vw,160px);height:auto;aspect-ratio:1;}
+ .today-page .gacha-explore-launch{grid-template-columns:minmax(0,1fr);gap:16px;}
+ .gacha-explore-summary h3{font-size:24px;overflow-wrap:anywhere;}
+ .gacha-explore-summary p{margin:8px 0 0;}
+ .gacha-hero-card.is-replay .gacha-date-pill{width:100%;}
+}
