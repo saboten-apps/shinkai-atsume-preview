@@ -11,7 +11,7 @@ export function styleRegionalLandscape(group: THREE.Group) {
     for(const material of materials){
       if(material instanceof THREE.MeshBasicMaterial || material instanceof THREE.MeshStandardMaterial)material.fog=false;
       material.onBeforeCompile=shader=>{
-        shader.uniforms.regionalHazeColor={value:new THREE.Color(0xb8d0d9)};
+        const haze={value:new THREE.Color(0xb8d0d9)};material.userData.regionalHazeUniform=haze;shader.uniforms.regionalHazeColor=haze;
         shader.vertexShader='varying vec3 vRegionalWorld;\n'+shader.vertexShader;
         shader.vertexShader=shader.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\nvRegionalWorld=(modelMatrix*vec4(transformed,1.0)).xyz;');
         shader.fragmentShader='varying vec3 vRegionalWorld;\nuniform vec3 regionalHazeColor;\n'+shader.fragmentShader;

@@ -183,6 +183,7 @@ const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infini
 const failed = [];
 const imageFormats = new Map();
 const buildingCoverage = new Map();
+const nightLightBounds = new Map();
 
 for (const f of files) {
   const buf = readFileSync(`${dir}/${f}`);
@@ -272,6 +273,18 @@ for (const f of files) {
           applyMat(inst.world, dec.POSITION.values, i * 3, tmp);
           const ox = tmp[0], oy = -tmp[2], oz = tmp[1];
           ecefToEnu(center[0] + ox - P0[0], center[1] + oy - P0[1], center[2] + oz - P0[2], pos, i * 3);
+          if(process.env.EXTRACT_NIGHT_LIGHTS){
+            const bid=dec._BATCHID?Math.round(dec._BATCHID.values[i]):0;
+            const attr=batchTable.attributes?.[bid],id=attr?.['gml:id'];
+            if(id&&attr['frn:function']==='照明施設'){
+              const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2];let b=nightLightBounds.get(id);
+              if(!b){b={id,x:0,z:0,count:0,y:-Infinity,minY:y};nightLightBounds.set(id,b);}
+              b.minY=Math.min(b.minY,y);
+              if(y>b.y+.2){b.x=x;b.z=z;b.count=1;b.y=y;}
+              else if(y>=b.y-.2){b.x+=x;b.z+=z;b.count++;b.y=Math.max(b.y,y);}
+            }
+          }
+
           for (let k = 0; k < 3; k++) { const v = pos[i * 3 + k]; if (v < min[k]) min[k] = v; if (v > max[k]) max[k] = v; }
           if (dec.NORMAL) {
             const w = Float64Array.from(inst.world); w[12] = 0; w[13] = 0; w[14] = 0;
@@ -342,6 +355,7 @@ const bh = Buffer.alloc(8); bh.writeUInt32LE(binBuf.length, 0); bh.write('BIN\0'
 const glb = Buffer.concat([head, jh, jsonBuf, Buffer.alloc(jsonPad, 0x20), bh, binBuf]);
 writeFileSync(outFile, glb);
 const stats = {
+  nightLights:[...nightLightBounds.values()].filter(b=>b.count).map(b=>({id:b.id,x:b.x/b.count,y:b.y,z:b.z/b.count})),
   excludedTriangles: Object.fromEntries(excludedTriangles),
   buildingCoverage: {
     total: buildingCoverage.size,
