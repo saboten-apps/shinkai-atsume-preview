@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {summarize} from '../features/exploration/map/components/PerformancePanel';
+import {summarize,captureTiming} from '../features/exploration/map/components/PerformancePanel';
 import type {PerformanceStats} from '../features/exploration/map/types';
 const sample=(over:Partial<PerformanceStats>):PerformanceStats=>({fps:60,drawCalls:1,triangles:1,dpr:1.5,geometries:1,textures:1,...over});
 describe('performance capture summary',()=>{
@@ -19,4 +19,15 @@ describe('performance capture summary',()=>{
  it('falls back to the readings for a single sample or an older capture',()=>{
    expect(summarize([sample({fps:30})])).toMatchObject({averageFps:30,averageFpsSource:'mean of per-second readings'});
  });
+});
+
+it('identifies extended and sparse captures instead of presenting them as an ordinary 30-second run',()=>{
+ const recorded=[sample({frames:133,elapsedMs:13859.2,fps:60}),sample({frames:1546,elapsedMs:116953.2,fps:40})];const timing=captureTiming(recorded,104000);expect(timing.issues).toContain('extended-duration');expect(timing.issues).toContain('few-samples');expect(timing.issues).toContain('long-sample-gap');expect(timing.worstIntervalFps).toBeCloseTo(13.7059,3);expect(timing.maxSampleGapMs).toBeCloseTo(103094);
+});
+it('recognizes well sampled captures and scene resets',()=>{
+ const values=Array.from({length:30},(_,i)=>sample({frames:i*60,elapsedMs:i*1000}));expect(captureTiming(values,30010).issues).toEqual([]);expect(captureTiming([...values,sample({frames:0,elapsedMs:0})],30010).issues).toContain('scene-restarted');
+});
+
+it('does not report a negative average across a scene restart',()=>{
+ const values=[sample({frames:900,elapsedMs:1000,fps:30}),sample({frames:10,elapsedMs:2000,fps:60})];expect(summarize(values).averageFps).toBe(45);expect(summarize(values).averageFpsSource).toBe('mean of per-second readings');
 });
