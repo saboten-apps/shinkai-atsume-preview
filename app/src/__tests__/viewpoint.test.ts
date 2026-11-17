@@ -16,3 +16,9 @@ describe('public scenery links',()=>{
   expect(()=>viewHash({...view, fov:0})).toThrow();
  });
 });
+
+it('preserves time and season in shared views while rejecting arbitrary scenery values',()=>{
+ const view={...VIEWS.port.view,atmosphere:{time:'night',season:'winter'} as const};expect(parseViewHash(viewHash(view))?.view).toEqual(view);
+ for(const value of ['auto,winter','night,auto','night,snow','night,winter,extra'])expect(parseViewHash(viewHash(VIEWS.port.view)+'&a='+value)).toBeNull();
+ expect(parseViewHash(viewHash(view)+'&a=day,summer')).toBeNull();
+});

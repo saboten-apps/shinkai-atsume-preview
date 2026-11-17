@@ -1,6 +1,8 @@
 export type TimeChoice='auto'|'morning'|'day'|'evening'|'night';
 export type SeasonChoice='auto'|'spring'|'summer'|'autumn'|'winter';
 export interface AtmosphereChoice{time:TimeChoice;season:SeasonChoice}
+export interface SceneryMoment{time:Exclude<TimeChoice,'auto'>;season:Exclude<SeasonChoice,'auto'>}
+export function validSceneryMoment(value:unknown):value is SceneryMoment{return validAtmosphere(value)&&(value as AtmosphereChoice).time!=='auto'&&(value as AtmosphereChoice).season!=='auto';}
 export const ATMOSPHERE_KEY='shinkai-scenery-atmosphere-v1';
 export const DEFAULT_ATMOSPHERE:AtmosphereChoice={time:'auto',season:'auto'};
 export function validAtmosphere(value:unknown):value is AtmosphereChoice{const v=value as AtmosphereChoice|null;return !!v&&['auto','morning','day','evening','night'].includes(v.time)&&['auto','spring','summer','autumn','winter'].includes(v.season);}
@@ -20,5 +22,5 @@ export function resolveAtmosphere(choice:AtmosphereChoice,date=new Date()){
  const index=keys.findIndex(([h])=>h>hour),a=keys[Math.max(0,index-1)],b=keys[index<0?keys.length-1:index];
  let mix=b[0]===a[0]?0:(hour-a[0])/(b[0]-a[0]);mix=mix*mix*(3-2*mix);
  const daylight=Math.max(0,Math.min(1,(hour-settings.rise)/(settings.set-settings.rise)));
- return{season,hour,settings,a:PALETTES[a[1]],b:PALETTES[b[1]],mix,sunAngle:Math.PI*daylight};
+ return{period:mix>.5?b[1]:a[1],season,hour,settings,a:PALETTES[a[1]],b:PALETTES[b[1]],mix,sunAngle:Math.PI*daylight};
 }

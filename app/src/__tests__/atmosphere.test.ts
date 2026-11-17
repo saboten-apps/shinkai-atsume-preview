@@ -17,7 +17,7 @@ describe('time and season',()=>{
   const original=new THREE.Color(0xaabbcc),material=new THREE.MeshBasicMaterial({color:original});scene.add(new THREE.Mesh(new THREE.BoxGeometry(),material));const engine=createWorldAtmosphere(scene,sky,ambient,sun,fill);
   engine.update({time:'night',season:'winter'},0);expect(material.color.r).toBeLessThan(original.r);
   engine.update({time:'day',season:'summer'},1000);expect(material.color.equals(original)).toBe(true);
-  engine.update({time:'night',season:'summer'},2000);const next=new THREE.MeshBasicMaterial({color:original});scene.add(new THREE.Mesh(new THREE.BoxGeometry(),next));engine.update({time:'night',season:'summer'},3000);expect(next.color.r).toBeCloseTo(material.color.r);
+  engine.update({time:'night',season:'summer'},2000);const next=new THREE.MeshBasicMaterial({color:original});scene.add(new THREE.Mesh(new THREE.BoxGeometry(),next));expect(next.color.r).toBeCloseTo(material.color.r);engine.update({time:'night',season:'summer'},3000);expect(next.color.r).toBeCloseTo(material.color.r);
   sky.setUnderwater(true);const underwaterFog=scene.fog;engine.update({time:'evening',season:'spring'},4000);expect(scene.fog).toBe(underwaterFog);sky.setUnderwater(false);expect(scene.fog).not.toBe(underwaterFog);engine.dispose();sky.dispose();
  });
 });

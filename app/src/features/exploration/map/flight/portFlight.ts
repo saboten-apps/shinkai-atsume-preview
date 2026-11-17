@@ -17,6 +17,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   let isWaterAt:(x:number,z:number)=>boolean=()=>false;
   const cells = new Set<{ center: THREE.Vector3; radius: number; geometry: THREE.BufferGeometry; waterTerrain:boolean; tree?: Octree }>();
   const colliderMaterial = new THREE.MeshBasicMaterial();
+  const pressed=new Set<string>();
   function refreshColliders() {
     trees.length = 0;
     for (const cell of cells) {
@@ -48,7 +49,6 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   const raycaster = new THREE.Raycaster();
   const seaPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -SEA);
   let destination: THREE.Vector3 | null = null;
-  let falling = false;
   let bestDistance = Infinity;
   let stalled = 0;
   let startX = 0, startY = 0, dragged = false;
@@ -56,13 +56,12 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
 
   function cancelTravel() {
     destination = null;
-    falling = false;
   }
 
   let savedPosition = camera.position.clone();
   let lookId: number | null = null, lastX = 0, lastY = 0;
   function setMode(active: boolean, start?: THREE.Vector3) {
-    cancelTravel();
+    pressed.clear();cancelTravel();
     if (active) savedPosition.copy(camera.position);
     controller.activate(active);
     if (active && start) controller.position.copy(start);
@@ -82,21 +81,34 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   const rise = vertical.querySelector<HTMLButtonElement>('[data-dir="1"]')!;
   const drop = vertical.querySelector<HTMLButtonElement>('[data-dir="-1"]')!;
   const riseLabel=rise.querySelector<HTMLElement>('.flight-control-label')!,dropLabel=drop.querySelector<HTMLElement>('.flight-control-label')!;
+  let verticalPointer:number|null=null;
+  const stopVertical=()=>{verticalPointer=null;controller.setVertical(0);};
+  const verticalReleased=(e:PointerEvent)=>{if(e.pointerId===verticalPointer)stopVertical();};
+  window.addEventListener('pointerup',verticalReleased);window.addEventListener('pointercancel',verticalReleased);
   rise.onpointerdown = e => {
     e.preventDefault();
     cancelTravel();
-    rise.setPointerCapture(e.pointerId);
+    verticalPointer=e.pointerId;rise.setPointerCapture(e.pointerId);
     controller.setVertical(1);
   };
-  rise.onpointerup = rise.onpointercancel = rise.onlostpointercapture = () => controller.setVertical(0);
-  drop.onpointerdown=e=>{if(controller.state!=='water')return;cancelTravel();drop.setPointerCapture(e.pointerId);controller.setVertical(-1);};
-  drop.onpointerup=drop.onpointercancel=drop.onlostpointercapture=()=>controller.setVertical(0);
-  drop.onclick = () => {
-    if(controller.state==='water')return;
-    const start = !falling && controller.state === 'air';
-    cancelTravel();
-    falling = start;
-  };
+  rise.onpointerup = rise.onpointercancel = rise.onlostpointercapture = stopVertical;
+  drop.onpointerdown=e=>{e.preventDefault();if(controller.state==='ground')return;cancelTravel();verticalPointer=e.pointerId;drop.setPointerCapture(e.pointerId);controller.setVertical(-1);};
+  drop.onpointerup=drop.onpointercancel=drop.onlostpointercapture=stopVertical;
+  const stopInputs=()=>{pressed.clear();stopStick();stopVertical();controller.velocity.set(0,0,0);cancelTravel();lookId=null;};
+  const hidden=()=>{if(document.hidden)stopInputs();};
+  const keyboardCodes=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyE','KeyQ']);
+  const syncKeyboard=()=>{controller.setStick(Number(pressed.has('KeyD')||pressed.has('ArrowRight'))-Number(pressed.has('KeyA')||pressed.has('ArrowLeft')),Number(pressed.has('KeyW')||pressed.has('ArrowUp'))-Number(pressed.has('KeyS')||pressed.has('ArrowDown')));controller.setVertical(Number(pressed.has('KeyE'))-Number(pressed.has('KeyQ')));};
+  const editing=(target:EventTarget|null)=>target instanceof HTMLElement&&!!target.closest('input,textarea,select,[contenteditable="true"],dialog,.scenery-photo-overlay');
+  const keyDown=(e:KeyboardEvent)=>{if(!controller.active||!keyboardCodes.has(e.code)||e.ctrlKey||e.metaKey||e.altKey)return;if(editing(e.target)||document.querySelector('dialog[open],.scenery-photo-overlay,.world-travel[open]')){stopInputs();return;}e.preventDefault();if(pressed.has(e.code))return;cancelTravel();pressed.add(e.code);syncKeyboard();};
+  const keyUp=(e:KeyboardEvent)=>{if(pressed.delete(e.code)){e.preventDefault();syncKeyboard();}};
+  const focused=(e:FocusEvent)=>{if(editing(e.target))stopInputs();};
+  const verticalKey=(direction:number)=>(e:KeyboardEvent)=>{if(e.code!=='Space'&&e.code!=='Enter')return;e.preventDefault();if(direction<0&&controller.state==='ground')return;cancelTravel();controller.setVertical(direction);};
+  rise.onkeydown=verticalKey(1);drop.onkeydown=verticalKey(-1);
+  rise.onkeyup=drop.onkeyup=e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();stopVertical();}};
+  rise.onblur=drop.onblur=stopVertical;
+  window.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);document.addEventListener('focusin',focused);
+  window.addEventListener('blur',stopInputs);
+  document.addEventListener('visibilitychange',hidden);
 
   function lookDown(e: PointerEvent) {
     if (!controller.active || lookId !== null || e.button !== 0) return;
@@ -184,9 +196,8 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
       });
       return () => { trees.length = 0; for (const cell of added) { cells.delete(cell); cell.geometry.dispose(); } };
     },
-    update(dt: number, time: number) { if (!controller.active) return; refreshColliders(); controller.update(dt, trees, character, camera, time, destination, falling);
-      if (falling && controller.state !== 'air') falling = false;
-      dropLabel.textContent = controller.state==='water'?'潜る':falling ? '止まる' : '降りる';
+    update(dt: number, time: number) { if (!controller.active) return; refreshColliders(); controller.update(dt, trees, character, camera, time, destination);
+      dropLabel.textContent = controller.state==='water'?'潜る':'降りる';
       if (destination) {
         const gap = controller.state==='ground' ? Math.hypot(controller.position.x-destination.x,controller.position.z-destination.z) : controller.position.distanceTo(destination);
         if (gap < bestDistance - .2) {
@@ -208,6 +219,6 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
       const visible=character.group.visible;character.group.visible=false;
       try{return capture();}finally{character.group.visible=visible;}
     },
-    dispose() { canvas.removeEventListener('pointerdown',lookDown); canvas.removeEventListener('pointermove',lookMove); canvas.removeEventListener('pointerup',lookUp); canvas.removeEventListener('pointercancel',lookUp); ui.remove(); cells.forEach(cell => cell.geometry.dispose()); cells.clear(); trees.length = 0; colliderMaterial.dispose(); scene.remove(character.group); character.group.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.geometry.dispose(); const mats = Array.isArray(obj.material) ? obj.material : [obj.material]; mats.forEach(m => m.dispose()); } }); }
+    dispose() { stopInputs();window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);document.removeEventListener('focusin',focused);window.removeEventListener('pointerup',verticalReleased);window.removeEventListener('pointercancel',verticalReleased);window.removeEventListener('blur',stopInputs);document.removeEventListener('visibilitychange',hidden);canvas.removeEventListener('pointerdown',lookDown); canvas.removeEventListener('pointermove',lookMove); canvas.removeEventListener('pointerup',lookUp); canvas.removeEventListener('pointercancel',lookUp); ui.remove(); cells.forEach(cell => cell.geometry.dispose()); cells.clear(); trees.length = 0; colliderMaterial.dispose(); scene.remove(character.group); character.group.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.geometry.dispose(); const mats = Array.isArray(obj.material) ? obj.material : [obj.material]; mats.forEach(m => m.dispose()); } }); }
   };
 }

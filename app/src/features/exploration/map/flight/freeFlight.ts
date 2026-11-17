@@ -106,6 +106,7 @@ export class FreeFlightController {
 
   public setVertical(v: number): void {
     this.verticalInput = THREE.MathUtils.clamp(v, -1, 1);
+    if(Math.abs(this.verticalInput)<.02)this.velocity.y=0;
   }
 
   public setLookDegrees(yawDeg: number, pitchDeg: number): void {
@@ -207,10 +208,7 @@ export class FreeFlightController {
       }
     }
 
-    // 水中浮力（上向き緩やか）
-    if (inWater && this.position.y<SEA-1 && Math.abs(effectiveVert) < 0.02 && Math.abs(effectiveStickY) < 0.02) {
-      targetVel.y += FREE_FLIGHT_CONFIG.waterBuoyancy;
-    }
+    // Releasing the vertical controls holds depth as well as altitude.
 
     if (destination) {
       targetVel.subVectors(destination, this.position);
@@ -239,7 +237,7 @@ export class FreeFlightController {
 
     // 5. 位置の更新
     // 高速落下時は移動を分割して薄い屋根をすり抜けにくくする。
-    const steps = (falling || walking) ? Math.max(1, Math.ceil(this.velocity.length() * dt / .25)) : 1;
+    const steps = Math.max(1, Math.ceil(this.velocity.length() * dt / ((falling||walking||this.velocity.y<-.5)?.25:.5)));
     for (let step = 0; step < steps; step++) {
       this.position.addScaledVector(this.velocity, dt / steps);
       this.resolveCollisions(colliders);

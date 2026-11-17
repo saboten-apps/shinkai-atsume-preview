@@ -85,3 +85,15 @@ it('stays submerged just after reaching the water surface so the dive control re
  const {controller,tick}=setup([],0,41.4,0);controller.setWaterQuery(()=>true);tick(180);
  expect(controller.state).toBe('water');expect(controller.position.y).toBeLessThan(41.5);
 });
+
+ it('holds altitude immediately after releasing descent, including during forward movement',()=>{
+  const {controller,tick}=setup([],0,120,0);controller.setWaterQuery(()=>false);controller.setVertical(-1);tick(60,false,[]);const altitude=controller.position.y;
+  controller.setVertical(0);controller.setStick(0,1);tick(90,false,[]);expect(controller.position.y).toBeCloseTo(altitude,6);expect(controller.position.z).toBeLessThan(-1);
+ });
+ it('holds its depth when the dive control is released',()=>{
+  const {controller,tick}=setup([],0,40,0);controller.setWaterQuery(()=>true);controller.setVertical(-1);tick(30,false,[]);controller.setVertical(0);const depth=controller.position.y;tick(120,false,[]);expect(controller.position.y).toBeCloseTo(depth,6);
+ });
+ it('cannot tunnel through a thin wall at a delayed flight update',()=>{
+  const wall=new THREE.Mesh(new THREE.BoxGeometry(.2,100,100),new THREE.MeshBasicMaterial());wall.position.set(4,100,0);const {controller,character,camera,tree}=setup([wall],2.8,100,0);controller.setWaterQuery(()=>false);controller.setLookDegrees(90,0);controller.setStick(0,1);controller.velocity.set(22,0,0);controller.update(.1,[tree],character,camera,1);
+  expect(controller.position.x).toBeLessThan(3.5);
+ });

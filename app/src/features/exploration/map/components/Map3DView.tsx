@@ -1,5 +1,5 @@
 import {createWorldAtmosphere} from '../three/worldAtmosphere';
-import {loadAtmosphere,ATMOSPHERE_KEY,type AtmosphereChoice,type TimeChoice,type SeasonChoice} from '../atmosphere';
+import {loadAtmosphere,resolveAtmosphere,ATMOSPHERE_KEY,type AtmosphereChoice,type TimeChoice,type SeasonChoice} from '../atmosphere';
 import {cameraHeading} from '../../navigation';
 import {HudIcon} from '../../HudIcon';
 import {RenderBudget} from '../renderBudget';
@@ -103,10 +103,12 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const mountRef = useRef<HTMLDivElement>(null);
   const navigationRef=useRef<HTMLDivElement>(null);
   const [landmarks,setLandmarks]=useState(true);
-  const [atmosphereChoice,setAtmosphereChoice]=useState<AtmosphereChoice>(loadAtmosphere);
+  const [atmosphereChoice,setAtmosphereChoice]=useState<AtmosphereChoice>(()=>initialView?.atmosphere??loadAtmosphere());
+  const persistAtmosphere=useRef(!initialView?.atmosphere);
+  const chooseAtmosphere=(patch:Partial<AtmosphereChoice>)=>{persistAtmosphere.current=true;setAtmosphereChoice(v=>({...v,...patch}));};
   const atmosphereChoiceRef=useRef(atmosphereChoice);atmosphereChoiceRef.current=atmosphereChoice;
   const atmosphereEngineRef=useRef<ReturnType<typeof createWorldAtmosphere>|null>(null);
-  useEffect(()=>{try{localStorage.setItem(ATMOSPHERE_KEY,JSON.stringify(atmosphereChoice));}catch{}atmosphereEngineRef.current?.update(atmosphereChoice,performance.now(),new Date(),true);},[atmosphereChoice]);
+  useEffect(()=>{try{if(persistAtmosphere.current)localStorage.setItem(ATMOSPHERE_KEY,JSON.stringify(atmosphereChoice));}catch{}atmosphereEngineRef.current?.update(atmosphereChoice,performance.now(),new Date(),true);},[atmosphereChoice]);
   const [pilotView, setPilotView] = useState(false);
   const [pilotEnabled, setPilotEnabled] = useState(true);
   const pilotEnabledRef = useRef(true); pilotEnabledRef.current = pilotEnabled;
@@ -310,7 +312,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       const direction=camera.getWorldDirection(new THREE.Vector3());
       const target=flight.isActive()?camera.position.clone().addScaledVector(direction,50):controls.target.clone();
       const focus=flight.isActive()?flight.getPosition():sharedFocusRef.current?new THREE.Vector3(sharedFocusRef.current[0],0,sharedFocusRef.current[1]):controls.target;
-      const view:Viewpoint={camera:camera.position.toArray() as Vec3,target:target.toArray() as Vec3,
+      const moment=resolveAtmosphere(atmosphereChoiceRef.current);
+      const view:Viewpoint={atmosphere:{time:moment.period,season:moment.season},camera:camera.position.toArray() as Vec3,target:target.toArray() as Vec3,
         focus:[Math.max(-1550,Math.min(1450,focus.x)),Math.max(-2580,Math.min(1800,focus.z))],fov:camera.fov};
       const hide=[fishWorld?.root,highlightGroupRef.current,...pinObjs.map(p=>p.group)].filter((o):o is NonNullable<typeof o>=>!!o);
       const visible=hide.map(o=>o.visible);hide.forEach(o=>{o.visible=false;});
@@ -690,8 +693,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       ><HudIcon name={flying?'map':'fly'}/><span>{isLoading || (!flying && !!areaStatus) ? (en?'Loading':'準備中') : flying ? (en?'Overview':'見渡す') : (en?'Fly':'飛ぶ')}</span></button>
       <details className="world-travel" onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}}}><summary><HudIcon name="pin"/><span>{en?'Places & sky':'移動・景色'}</span></summary><div className="world-travel-sheet">
       <fieldset className="world-atmosphere"><legend>{en?'Time and season':'時間と季節'}</legend>
-        <label>{en?'Time':'時間帯'}<select aria-label={en?'Time of day':'時間帯'} value={atmosphereChoice.time} onChange={e=>setAtmosphereChoice(v=>({...v,time:e.target.value as TimeChoice}))}>{(['auto','morning','day','evening','night'] as const).map((v,i)=><option value={v} key={v}>{(en?['Auto (Japan time)','Morning','Day','Evening','Night']:['自動（日本時間）','朝','昼','夕方','夜'])[i]}</option>)}</select></label>
-        <label>{en?'Season':'季節'}<select aria-label={en?'Season':'季節'} value={atmosphereChoice.season} onChange={e=>setAtmosphereChoice(v=>({...v,season:e.target.value as SeasonChoice}))}>{(['auto','spring','summer','autumn','winter'] as const).map((v,i)=><option value={v} key={v}>{(en?['Auto (calendar)','Spring','Summer','Autumn','Winter']:['自動（暦）','春','夏','秋','冬'])[i]}</option>)}</select></label>
+        <label>{en?'Time':'時間帯'}<select aria-label={en?'Time of day':'時間帯'} value={atmosphereChoice.time} onChange={e=>chooseAtmosphere({time:e.target.value as TimeChoice})}>{(['auto','morning','day','evening','night'] as const).map((v,i)=><option value={v} key={v}>{(en?['Auto (Japan time)','Morning','Day','Evening','Night']:['自動（日本時間）','朝','昼','夕方','夜'])[i]}</option>)}</select></label>
+        <label>{en?'Season':'季節'}<select aria-label={en?'Season':'季節'} value={atmosphereChoice.season} onChange={e=>chooseAtmosphere({season:e.target.value as SeasonChoice})}>{(['auto','spring','summer','autumn','winter'] as const).map((v,i)=><option value={v} key={v}>{(en?['Auto (calendar)','Spring','Summer','Autumn','Winter']:['自動（暦）','春','夏','秋','冬'])[i]}</option>)}</select></label>
       </fieldset>
       <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{en?'Landmark labels':'目印を表示'} {landmarks?'ON':'OFF'}</button>
       <div className="search-world-destinations">
@@ -710,6 +713,9 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
             const camera = controls.object as THREE.PerspectiveCamera;
             camera.fov = 45; camera.updateProjectionMatrix();
             controls.minDistance = location === 'pilot' ? 6 : 40;
+            if(location==='onari'){
+              controls.minDistance=8;controls.target.set(145,55,-1619);camera.position.set(145,62,-1480);controls.update();event.target.value='';return;
+            }
             if(location==='streetfurniture'){
               controls.minDistance=5;controls.target.set(190,49,-2300);camera.position.set(200,58,-2275);controls.update();event.target.value='';return;
             }
@@ -744,6 +750,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           <option value="" disabled>{en ? 'Go to…' : '移動先…'}</option>
           <option value="port">沼津港</option><option value="station">沼津駅南口</option>
           <option value="senbon">千本浜公園周辺</option><option value="ganyudo">我入道周辺</option>
+          <option value="onari">{en ? 'Onari Bridge arch' : '御成橋のアーチ'}</option>
           <option value="streetfurniture">{en ? 'Station street details' : '駅前通りの街並み'}</option>
           <option value="harborlife">{en ? 'Harbor anglers and boats' : '港の釣り人・船'}</option>
           <option value="cityhall">{en ? 'City Hall' : '市役所'}</option>

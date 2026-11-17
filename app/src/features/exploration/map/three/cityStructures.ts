@@ -1,3 +1,4 @@
+import {createOnariArch} from './onariArch';
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import data from '../../cityStructures.v1.json';
@@ -10,6 +11,7 @@ export function createCityStructures(scene:THREE.Scene,ground:THREE.Group,roads:
  const height=(x:number,z:number)=>{ray.set(new THREE.Vector3(x,160,z),down);return ray.intersectObjects([ground,roads],true)[0]?.point.y??42;};
  const materials=[new THREE.MeshStandardMaterial({color:0x484e52,roughness:.96}),new THREE.MeshStandardMaterial({color:0xb1b2ad,roughness:.9}),new THREE.MeshStandardMaterial({color:0x7e9896,roughness:.55,metalness:.35}),new THREE.MeshStandardMaterial({color:0xf0e9c9,roughness:.85})];
  materials[0].onBeforeCompile=shader=>addPhotoSurfaceDetail(shader,'ground');materials[0].customProgramCacheKey=()=> 'bridge-asphalt-detail-v1';
+ const archDisposers:Array<()=>void>=[];
  const colliders:Array<()=>void>=[],deckHeights=new Map<string,number>();
  for(const bridge of data.bridges){
   const dx=bridge.b.x-bridge.a.x,dz=bridge.b.z-bridge.a.z,length=Math.hypot(dx,dz),ux=dx/length,uz=dz/length;
@@ -28,7 +30,7 @@ export function createCityStructures(scene:THREE.Scene,ground:THREE.Group,roads:
    box(3,0,deckY+.06,side*(bridge.width/2-1.9),length,.02,.12);
   }
   for(let x=-length/2+3;x<length/2-3;x+=9)box(3,x,deckY+.065,0,4,.02,.12);
-  for(const t of [-.25,0,.25]){
+  for(const t of bridge.id==='onari'?[-.36,.36]:[-.25,0,.25]){
    box(1,length*t,deckY-1.8,0,2.8,1,bridge.width-2);
    for(const side of [-1,1])box(1,length*t,(deckY-2+28)/2,side*(bridge.width/2-2.5),2.3,deckY-2-28,2.3,true);
   }
@@ -39,9 +41,10 @@ export function createCityStructures(scene:THREE.Scene,ground:THREE.Group,roads:
    const g=new THREE.BoxGeometry(Math.hypot(18,outerY-deckY),.45,bridge.width);g.rotateZ(slope);g.translate(x,(outerY+deckY)/2-.225,0);parts[0].push(g);collision.push(g.clone());
   }
   parts.forEach((list,index)=>{if(!list.length)return;const geometry=mergeGeometries(list);list.forEach(g=>g.dispose());const mesh=new THREE.Mesh(geometry,materials[index]);mesh.userData.cityBridge=true;group.add(mesh);});
+  if(bridge.id==='onari'){const arch=createOnariArch(length,bridge.width,deckY);group.add(arch.root);archDisposers.push(arch.dispose);}
   root.add(group);group.updateMatrixWorld(true);
   const collider=new THREE.Group();collider.position.copy(group.position);collider.rotation.copy(group.rotation);const geometry=mergeGeometries(collision);collision.forEach(g=>g.dispose());const material=new THREE.MeshBasicMaterial();collider.add(new THREE.Mesh(geometry,material));
   const remove=addCollider?.(collider);if(remove)colliders.push(remove);geometry.dispose();material.dispose();
  }
- return {root,deckHeights,dispose(){colliders.forEach(fn=>fn());scene.remove(root);root.traverse(o=>{if(o instanceof THREE.Mesh)o.geometry.dispose();});materials.forEach(m=>m.dispose());}};
+ return {root,deckHeights,dispose(){archDisposers.forEach(fn=>fn());colliders.forEach(fn=>fn());scene.remove(root);root.traverse(o=>{if(o instanceof THREE.Mesh)o.geometry.dispose();});materials.forEach(m=>m.dispose());}};
 }
