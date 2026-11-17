@@ -7,6 +7,8 @@ import {PlaceIntroduction} from './PlaceIntroduction';
 import {parseViewHash,VIEWS} from './viewpoint';
 import water from '../exploration/waterOutline.v1.json';
 import '../exploration/exploration.css';
+import {HudIcon} from '../exploration/HudIcon';
+import {HudMenu} from '../exploration/HudMenu';
 const Map3D=lazy(()=>import('../exploration/map/components/Map3DView').then(m=>({default:m.Map3DView})));
 const PINS:[]=[];
 const noop=()=>{};
@@ -15,8 +17,9 @@ class ViewBoundary extends Component<{children:import('react').ReactNode;onError
   componentDidCatch(){this.props.onError();}render(){return this.state.failed?null:this.props.children;}
 }
 export default function SceneryPage({hash,locale,onBack}:{hash:string;locale:Locale;onBack:()=>void}){
+  const [menu,setMenu]=useState(false);
   const [stats,setStats]=useState<PerformanceStats|null>(null);
-  const en=locale==='en',resolved=parseViewHash(hash);
+  const en=locale==='en',viewHash=hash.startsWith('#/join/')?'#/view/port':hash,resolved=parseViewHash(viewHash);
   const [open,setOpen]=useState(false),[ready,setReady]=useState(false),[failed,setFailed]=useState(false),[map,setMap]=useState(false);
   const handleError=useCallback(()=>{setFailed(true);setOpen(false);setMap(true);},[]);
   const handleReady=useCallback(()=>setReady(true),[]);
@@ -31,13 +34,14 @@ export default function SceneryPage({hash,locale,onBack}:{hash:string;locale:Loc
   const place=PLACES.find(p=>p.id===resolved.preset);
   const {view,preset}=resolved,title=preset?(en?VIEWS[preset].en:VIEWS[preset].ja):(en?'A shared view of Numazu':'届いた沼津の景色');
   if(open)return <section className="exploration-page is-immersive scenery-page">
-    <div className="search-toolbar"><button onClick={()=>setOpen(false)}>{en?'Back':'案内へ戻る'}</button><strong>{title}</strong><button onClick={()=>{setOpen(false);setMap(true);}}>{en?'2D location':'2Dで場所を見る'}</button></div>
+    <div className="search-toolbar"><button className="hud-icon-button" onClick={()=>setOpen(false)} aria-label={en?'Back':'案内へ戻る'}><HudIcon name="back"/></button><div className="search-mission"><span className="search-mission-fish"><HudIcon name="map"/></span><div><small>{en?'FREE EXPLORATION':'沼津を、自由にさんぽ'}</small><strong>{title}</strong></div></div><button className="hud-icon-button search-menu-button" onClick={()=>setMenu(true)} aria-label={en?'Guide and settings':'案内・設定'} aria-expanded={menu}><HudIcon name="menu"/></button></div>
+    <HudMenu open={menu} onClose={()=>setMenu(false)} en={en}><button onClick={()=>{setMenu(false);setOpen(false);setMap(true);}}>{en?'2D location':'2Dで場所を見る'}</button><p>{en?'Drag to look around. Press and hold a building for its story.':'ドラッグで見回す。建物を長押しすると、その場所の紹介を読めます。'}</p><PerformancePanel stats={stats} en={en} context={viewHash}/></HudMenu>
     <div className="search-map is-ready"><ViewBoundary onError={handleError}><Suspense fallback={<p>{en?'Loading the city…':'街を読み込み中…'}</p>}><Map3D initialView={view} locale={locale} onReady={handleReady} pins={PINS} selectedPinId={null} onSelectPin={noop} onUpdateStats={setStats} onWebGLError={handleError}/></Suspense></ViewBoundary></div>
-    <PerformancePanel stats={stats} en={en} context={hash}/>
-    <div className="search-discover scenery-footer"><span>{ready?(en?'Drag to look around. Press and hold a building for details.':'ドラッグで見回し、建物の長押しで情報を確認できます。'):(en?'Loading scenery…':'景色を読み込み中…')}</span><small>PLATEAU / GSI</small></div>
+    <div className="search-discover scenery-footer"><span className="scenery-footer-help">{ready?(en?'Drag to look around. Press and hold a building for details.':'ドラッグで見回し、建物の長押しで情報を確認できます。'):(en?'Loading scenery…':'景色を読み込み中…')}</span><small>PLATEAU / GSI</small></div>
   </section>;
   return <section className="exploration-page scenery-landing">
     <a href="#/places">← {en?'All places':'場所の一覧へ'}</a>
+    {location.hash.startsWith('#/join/')&&<p role="status">{en?'Shared exploration invitation. Open 3D to check and join the room.':'共有探索への招待です。3Dを開いて参加を確認してください。'}</p>}
     <p className="scenery-eyebrow">NUMAZU · うみまちラボ</p><h2>{title}</h2>
     {place&&<PlaceIntroduction key={place.id} buildingId={place.buildingIds[0]} en={en} showLocationLink={false}/>}
     <p>{en?'Step into virtual Numazu. Find your own angle and send a scenery photo.':'バーチャルの沼津へ。好きな角度から眺めて、景色を一枚持ち帰ろう。'}</p>

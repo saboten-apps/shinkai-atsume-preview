@@ -1,0 +1,95 @@
+/* Exploration HUD: the canvas owns the viewport; controls occupy only their hit areas. */
+.hud-icon{display:block;flex:none;pointer-events:none}
+.exploration-page.is-immersive{--hud-inset:12px;--hud-top:calc(env(safe-area-inset-top) + 12px);--hud-tools-top:calc(env(safe-area-inset-top) + 148px);--hud-bottom:calc(env(safe-area-inset-bottom) + 34px);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
+.is-immersive>.search-map{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;flex:none;overflow:hidden;outline:none}
+.is-immersive .search-map:has(.flight-pad:not([hidden])){outline:none}
+.is-immersive>.search-toolbar{position:absolute;top:var(--hud-top);left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));z-index:35;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;max-width:520px;margin:0 auto;padding:0;border:0;background:none;pointer-events:none}
+.is-immersive>.search-toolbar>*{pointer-events:auto}
+.is-immersive .hud-icon-button,.hud-menu .hud-icon-button{display:grid;place-items:center;min-width:44px;min-height:44px;width:44px;height:44px;padding:0;border:1px solid #fff9;border-radius:14px;background:#102b3eea;color:#fff;box-shadow:0 2px 8px #00192822}
+.search-toolbar .search-mission{display:flex;gap:8px;min-width:0;align-items:center;padding:7px 10px;background:#102b3eea;border:1px solid #ffffff40;border-radius:14px;color:#fff}
+.search-mission>div{min-width:0;display:grid;gap:2px}
+.search-mission small{font-size:10px;line-height:1.2;letter-spacing:.03em;color:#c6d6db}
+.search-mission strong{font-size:13px;line-height:1.35;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.search-mission-fish{display:grid;place-items:center;flex:none;width:32px;height:32px;color:#c0eceb}
+.search-mission-fish img{display:block;object-fit:contain;width:100%;height:100%}
+.is-immersive>.search-detector{position:absolute;top:calc(var(--hud-top) + 62px);left:max(12px,env(safe-area-inset-left));right:94px;width:fit-content;max-width:calc(100% - 106px);z-index:32;display:flex;align-items:center;gap:9px;min-height:0;padding:9px 12px 9px 9px;background:#102b3ee8;border:1px solid #ffffff55;border-radius:14px;color:white;pointer-events:none;box-shadow:none}
+.search-detector .detector-arrow{display:grid;place-items:center;flex:none;width:32px;height:32px;border:1px solid #cee6e450;border-radius:50%;font:24px/1 system-ui;color:#b4e9e5}
+.detector-arrow>span{display:block}
+.search-detector>div{display:grid;gap:3px;min-width:0}
+.search-detector>div>small{display:block;color:#cedee1;font-size:11px;line-height:1.4}
+.search-detector>div>strong{font:600 13px/1.1 system-ui;display:flex;align-items:baseline;gap:10px}
+.detector-distance{font-size:21px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.detector-distance small{font-size:11px;margin-left:3px;font-weight:400}
+.is-immersive>.search-detector.is-near{border-color:#f8c783;background:#173e43f2}
+.is-immersive>.search-detector.is-found{background:#163f3ce8}
+.is-immersive>.search-discover{position:absolute;inset:auto 0 0;z-index:32;height:28px;min-height:0;padding:0 12px calc(env(safe-area-inset-bottom) + 8px);margin:0;justify-content:flex-end;background:none;pointer-events:none}
+.is-immersive>.search-discover>small{font:9px/1.4 system-ui;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none}
+.is-immersive>.search-discover>button{position:absolute;bottom:calc(var(--hud-bottom) + 154px);left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);min-height:44px;border-radius:22px;background:#f5ba73;color:#193747;border:1px solid #fff9;font-size:13px;font-weight:650;box-shadow:0 3px 12px #00192833;pointer-events:auto}
+.is-immersive>.search-discover>.search-low-fps{position:fixed;top:calc(var(--hud-top) + 180px);right:max(12px,env(safe-area-inset-right));left:auto;bottom:auto;transform:none;width:76px;min-height:44px;padding:6px;font-size:11px;border-radius:12px;background:#fff9ed;color:#17354a}
+.search-world-toolbar{position:absolute;top:12px;left:12px;z-index:28;padding:0;margin:0;display:flex;gap:8px;align-items:flex-start;justify-content:flex-start;background:none;border:0;pointer-events:none}
+.is-immersive .search-world-toolbar{top:var(--hud-tools-top);left:max(12px,env(safe-area-inset-left))}
+.search-world-toolbar>*{pointer-events:auto}
+.search-world-toolbar .search-flight-button,.world-travel>summary{min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:12px;border:1px solid #ffffff90;background:#f7faf5ed;color:#17354a;font:500 12px/1.3 system-ui;box-shadow:0 2px 8px #00192822;white-space:nowrap;cursor:pointer}
+.search-world-toolbar .search-flight-button{order:0}
+.search-world-toolbar .hud-icon{width:18px;height:18px}
+.world-travel{position:relative}
+.world-travel>summary{list-style:none}
+.world-travel>summary::-webkit-details-marker{display:none}
+.world-travel[open]>summary{background:#173b50;color:white}
+.world-travel-sheet{position:fixed;left:max(12px,env(safe-area-inset-left));top:calc(var(--hud-tools-top,12px) + 52px);width:min(280px,calc(100vw - 24px));min-width:0;box-sizing:border-box;display:grid;gap:10px;padding:12px;background:#f7faf5;border:1px solid #d1dbde;border-radius:14px;box-shadow:0 10px 30px #00192855}
+.world-travel-sheet button{font:13px system-ui;min-height:44px}
+.search-world-destinations select{width:100%;max-width:none;min-height:44px;font:13px system-ui;border-radius:8px}
+.world-navigation{inset:0;z-index:24}
+.world-compass{right:12px;top:12px;width:64px;height:76px;padding:3px;border-radius:14px;background:#102b3ee8;border-color:#ffffff55}
+.is-immersive .world-compass{top:calc(var(--hud-top) + 62px);right:max(12px,env(safe-area-inset-right));transform:none}
+.world-compass-rose{width:54px;height:54px}
+.world-compass-rose>span{font-size:10px;width:16px;height:15px}
+.world-compass-rose .compass-N{left:18px;top:0}.world-compass-rose .compass-S{left:18px;bottom:0}.world-compass-rose .compass-E{right:-1px;top:18px}.world-compass-rose .compass-W{left:-1px;top:18px}
+.world-compass-forward{top:23px;left:24px;font-size:16px}
+.world-compass>strong{font-size:10px;line-height:14px}
+.search-map .flight-instructions{top:92px;right:12px;left:auto;padding:5px 7px;font:10px system-ui;background:#102b3ecf;border-radius:8px}
+.is-immersive .search-map .flight-instructions{top:calc(var(--hud-top) + 146px);right:max(12px,env(safe-area-inset-right))}
+.search-map .flight-pad{width:108px;height:108px;left:18px;bottom:34px;background:#102f4770;border:1.5px solid #ffffffa8;box-shadow:inset 0 0 0 8px #ffffff0a}
+.search-map .flight-knob{width:36px;height:36px;background:#f1f6f1c9;box-shadow:0 2px 8px #00192833}
+.is-immersive .search-map .flight-pad{bottom:var(--hud-bottom);left:max(18px,env(safe-area-inset-left))}
+.search-map .flight-vertical{right:18px;bottom:34px;gap:10px}
+.is-immersive .search-map .flight-vertical{bottom:var(--hud-bottom);right:max(18px,env(safe-area-inset-right))}
+.search-map .flight-vertical button{display:grid;justify-items:center;align-content:center;gap:1px;width:56px;height:56px;min-height:56px;padding:4px;border-radius:18px;border:1px solid #ffffffa8;background:#102f47bb;color:#fff;font-family:system-ui}
+.flight-control-icon{font-size:22px;line-height:22px;font-weight:400}
+.flight-control-label{font-size:10px;line-height:16px;white-space:nowrap}
+.search-map .flight-vertical button:active{background:#27627ddd}
+.search-map .scenery-photo-trigger{bottom:42px;left:50%;transform:translateX(-50%);display:grid;place-items:center;align-content:center;gap:1px;width:58px;height:58px;min-height:58px;padding:5px;border:2px solid #fff;border-radius:50%;background:#f7faf5ed!important;color:#17354a!important;box-shadow:0 2px 12px #00192833}
+.is-immersive .scenery-photo-trigger{bottom:calc(var(--hud-bottom) + 7px)}
+.scenery-photo-trigger .hud-icon{width:23px;height:23px}
+.scenery-photo-trigger>span{font:10px/1.4 system-ui}
+.search-map .scenery-photo-notice{bottom:165px;z-index:36}
+.search-map .search-world-status,.search-map .map-loading-indicator{top:auto;bottom:175px;left:12px;right:12px;width:fit-content;max-width:calc(100% - 24px);font-size:11px}
+.search-map .shared-exploration-launch{left:12px;right:auto;top:210px;min-height:44px;font:11px system-ui;padding:8px 10px;background:#f7faf5ed;color:#17354a;border:1px solid white;border-radius:12px}
+.search-map .shared-exploration-launch[hidden]{display:none}
+.search-map .shared-exploration{left:12px;right:12px;top:210px;max-width:340px;max-height:calc(100% - 245px);overflow:auto;z-index:37}
+.search-map .building-selection-card{bottom:12px;z-index:38;max-height:58%;border-color:#a9c7d2;border-radius:18px;backdrop-filter:none;background:#102b3ef5}
+.building-selection-card-header .close-button{min-width:44px;min-height:44px}
+.exploration-page .hud-menu,.is-immersive .hud-menu{position:fixed;inset:auto 0 0;width:min(100% - 20px,520px);max-width:none;max-height:82dvh;overflow:auto;overscroll-behavior:contain;margin:0 auto 10px;padding:20px max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));border:1px solid #56727f;border-radius:22px;box-sizing:border-box;background:#102b3e;color:#f4f8f5;box-shadow:0 12px 40px #00121f44;font:14px/1.7 system-ui}
+.hud-menu::backdrop{background:#00121f66}
+.hud-menu .search-options-heading{align-items:center;margin-bottom:20px}
+.hud-menu .search-options-heading h2{font-size:21px;margin:2px 0;font-family:inherit}
+.hud-menu .search-options-heading small{font-size:11px;color:#a7c7d1;letter-spacing:.1em}
+.hud-menu h3{font-size:15px;margin:22px 0 8px}
+.hud-menu .hud-view-switch{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hud-view-switch button{display:grid;gap:3px;justify-items:start;padding:12px 16px;font-weight:700;font-size:18px;border-color:#688591;background:#173e50;color:#fff}
+.hud-view-switch small{font-size:11px;font-weight:400}
+.hud-menu .hud-view-switch button[aria-pressed=true]{background:#eff7f3;color:#17354a;border-color:#eff7f3}
+.hud-menu .performance-panel{padding:10px 0;background:none;border-top:1px solid #ffffff26}
+.hud-menu .search-help{line-height:1.9;font-size:13px}
+.hud-menu .search-options-credit{font-size:10px}
+.is-immersive.scenery-page{--hud-tools-top:calc(env(safe-area-inset-top) + 78px)}
+.scenery-page .world-compass{top:calc(var(--hud-top) + 62px)}
+.scenery-footer-help{display:none}
+.is-immersive .search-center{top:50%}
+.is-immersive :is(button,summary,select):focus-visible{outline:3px solid #ffcb89;outline-offset:3px}
+@media(min-width:700px){.is-immersive>.search-toolbar{margin-left:0}.is-immersive>.search-detector{max-width:350px}.world-travel-sheet{width:280px}}
+@media(max-width:380px){.search-toolbar .search-mission{gap:5px;padding:6px 7px}.search-mission strong{font-size:12px}.search-mission-fish{width:28px;height:28px}.search-map .flight-pad{width:96px;height:96px;left:14px}.search-map .flight-vertical{right:14px}.is-immersive>.search-detector{padding-right:9px}.world-travel-sheet{width:min(260px,calc(100vw - 24px))}}
+@media(max-height:500px){.exploration-page.is-immersive{--hud-tools-top:calc(env(safe-area-inset-top) + 136px);--hud-bottom:calc(env(safe-area-inset-bottom) + 22px)}.is-immersive>.search-toolbar{right:100px;max-width:430px;margin-left:0}.is-immersive .world-compass{top:var(--hud-top)}.is-immersive .search-map .flight-instructions{top:calc(var(--hud-top) + 84px)}.search-map .flight-pad{width:88px;height:88px}.search-map .flight-vertical button{width:50px;height:48px;min-height:48px;border-radius:16px}.search-map .flight-vertical{gap:8px}.search-map .scenery-photo-trigger{width:52px;height:52px;min-height:52px}.search-map .shared-exploration-launch{top:118px}.is-immersive>.search-discover>button{bottom:calc(var(--hud-bottom) + 116px)}.hud-menu{max-height:calc(100dvh - 20px)!important}.world-travel-sheet{max-height:150px;overflow:auto}.is-immersive.scenery-page{--hud-tools-top:calc(env(safe-area-inset-top) + 78px)}}
+
+.hud-help-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 18px}.hud-help-grid>div{display:grid;gap:3px;padding:10px 12px;border:1px solid #ffffff26;border-radius:10px}.hud-help-grid b{font-size:13px}.hud-help-grid span{font-size:12px;color:#bfd5de}.hud-world-note{font-size:12px;color:#bfd5de}.hud-world-note summary{min-height:44px;display:flex;align-items:center;cursor:pointer}.hud-world-note summary::before{content:"＋";margin-right:8px}.hud-world-note[open] summary::before{content:"−"}.hud-search-hint{padding:12px;border-left:2px solid #9bd3d3;background:#ffffff08;font-size:13px}.hud-search-hint small{display:block;color:#bedadf;font-size:11px;margin-bottom:4px}
+@media(max-height:500px){.is-immersive>.search-discover>.search-low-fps{top:calc(var(--hud-top) + 116px)}}

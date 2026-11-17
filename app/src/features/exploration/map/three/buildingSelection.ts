@@ -55,6 +55,17 @@ export function distanceToPolygon(x: number, z: number, poly: [number, number][]
   return minD;
 }
 
+const WALL_PROBE_M = 0.75;
+function wallOwner(candidates: BuildingRecord[], x: number, z: number, normal?: THREE.Vector3): BuildingRecord | null {
+  if (!normal || Math.abs(normal.y) > 0.7) return null;
+  const length = Math.hypot(normal.x, normal.z);
+  if (length < 1e-6) return null;
+  const nx = normal.x / length * WALL_PROBE_M, nz = normal.z / length * WALL_PROBE_M;
+  const owners = candidates.filter(c =>
+    isPointInPolygon(x - nx, z - nz, c.footprint) && !isPointInPolygon(x + nx, z + nz, c.footprint));
+  return owners.length === 1 ? owners[0] : null;
+}
+
 export class BuildingSelectionManager {
   private chunks = new Map<string, ChunkBuildingSelection>();
   private pending = new Map<string, { controller: AbortController; promise: Promise<boolean> }>();
@@ -121,7 +132,7 @@ export class BuildingSelectionManager {
   /**
    * レイキャスト交差点 (hitPoint) から該当建物を検索
    */
-  findBuilding(hitPoint: THREE.Vector3): BuildingRecord | null {
+  findBuilding(hitPoint: THREE.Vector3, surfaceNormal?: THREE.Vector3): BuildingRecord | null {
     const x = hitPoint.x;
     const y = hitPoint.y;
     const z = hitPoint.z;
@@ -143,6 +154,13 @@ export class BuildingSelectionManager {
 
     if (candidates.length === 0) return null;
     if (candidates.length === 1) return candidates[0];
+
+    // A wall belongs to the building whose outline it sits on: just behind the surface is
+    // inside that outline and just in front is outside. Outlines are convex hulls, so a
+    // neighbour's wall can lie inside a larger building's hull; containment alone would
+    // then name the larger building. Used only when exactly one candidate fits.
+    const wall = wallOwner(candidates, x, z, surfaceNormal);
+    if (wall) return wall;
 
     // 水平多角形の内外判定
     const inPoly = candidates.filter(c => isPointInPolygon(x, z, c.footprint));

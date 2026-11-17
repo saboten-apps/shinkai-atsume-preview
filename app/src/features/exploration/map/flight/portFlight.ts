@@ -34,7 +34,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   }
   const ui = document.createElement('div');
   ui.className = 'flight-ui';
-  ui.innerHTML = `<button class="flight-toggle">飛んでみる</button><div class="flight-instructions" hidden><span class="flight-depth"></span></div><div class="flight-pad" hidden><div class="flight-knob"></div></div><div class="flight-vertical" hidden><button data-dir="1">上がる</button><button data-dir="-1">落下</button></div>`;
+  ui.innerHTML = `<button class="flight-toggle">飛んでみる</button><div class="flight-instructions" hidden><span class="flight-depth"></span></div><div class="flight-pad" role="group" aria-label="移動スティック" hidden><div class="flight-knob"></div></div><div class="flight-vertical" hidden><button data-dir="1"><span class="flight-control-icon" aria-hidden="true">↑</span><span class="flight-control-label">上がる</span></button><button data-dir="-1"><span class="flight-control-icon" aria-hidden="true">↓</span><span class="flight-control-label">降りる</span></button></div>`;
   container.appendChild(ui);
   const toggle = ui.querySelector<HTMLButtonElement>('.flight-toggle')!;
   const guide = ui.querySelector<HTMLElement>('.flight-instructions')!;
@@ -71,13 +71,14 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   }
   toggle.hidden = true; // The visible start button is owned by React.
   toggle.onclick = () => setMode(!controller.active);
-  function stick(e: PointerEvent) { const rect = pad.getBoundingClientRect(); let x = (e.clientX - rect.left - rect.width / 2) / (rect.width * .38); let y = -(e.clientY - rect.top - rect.height / 2) / (rect.height * .38); const m = Math.hypot(x,y); if (m > 1) { x /= m; y /= m; } controller.setStick(x,y); knob.style.transform = `translate(${x * 38}px, ${-y * 38}px)`; }
+  function stick(e: PointerEvent) { const rect = pad.getBoundingClientRect(); let x = (e.clientX - rect.left - rect.width / 2) / (rect.width * .38); let y = -(e.clientY - rect.top - rect.height / 2) / (rect.height * .38); const m = Math.hypot(x,y); if (m > 1) { x /= m; y /= m; } controller.setStick(x,y); knob.style.transform = `translate(${x * rect.width * .28}px, ${-y * rect.width * .28}px)`; }
   pad.onpointerdown = e => { e.preventDefault(); cancelTravel(); pad.setPointerCapture(e.pointerId); stick(e); };
   pad.onpointermove = e => { if (pad.hasPointerCapture(e.pointerId)) stick(e); };
   const stopStick = () => { controller.setStick(0,0); knob.style.transform = ''; };
   pad.onpointerup = stopStick; pad.onpointercancel = stopStick; pad.onlostpointercapture = stopStick;
   const rise = vertical.querySelector<HTMLButtonElement>('[data-dir="1"]')!;
   const drop = vertical.querySelector<HTMLButtonElement>('[data-dir="-1"]')!;
+  const riseLabel=rise.querySelector<HTMLElement>('.flight-control-label')!,dropLabel=drop.querySelector<HTMLElement>('.flight-control-label')!;
   rise.onpointerdown = e => {
     e.preventDefault();
     cancelTravel();
@@ -180,7 +181,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
     },
     update(dt: number, time: number) { if (!controller.active) return; refreshColliders(); controller.update(dt, trees, character, camera, time, destination, falling);
       if (falling && controller.state !== 'air') falling = false;
-      drop.textContent = controller.state==='water'?'潜る':falling ? '落下停止' : '落下';
+      dropLabel.textContent = controller.state==='water'?'潜る':falling ? '止まる' : '降りる';
       if (destination) {
         const gap = controller.state==='ground' ? Math.hypot(controller.position.x-destination.x,controller.position.z-destination.z) : controller.position.distanceTo(destination);
         if (gap < bestDistance - .2) {
@@ -192,8 +193,8 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
           controller.velocity.set(0, 0, 0);
         }
       }
-       const data=controller.getHookData(); rise.textContent=data.state==='ground'?'飛び立つ':'上がる';drop.disabled=data.state==='ground'; depth.textContent = data.state==='ground'?'徒歩':data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; setUnderwater(data.state === 'water'); },
-    getNetworkPose() { return {x:controller.position.x,y:controller.position.y,z:controller.position.z,yaw:character.getYaw(),speed:Math.min(500,controller.velocity.length()),state:controller.state,active:controller.active}; },
+       const data=controller.getHookData(); riseLabel.textContent=data.state==='ground'?'飛び立つ':'上がる';drop.disabled=data.state==='ground'; depth.textContent = data.state==='ground'?'徒歩':data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; setUnderwater(data.state === 'water'); },
+    getNetworkPose() { return {x:controller.position.x,y:controller.position.y,z:controller.position.z,vx:controller.velocity.x,vy:controller.velocity.y,vz:controller.velocity.z,yaw:Math.atan2(Math.sin(character.getYaw()),Math.cos(character.getYaw())),speed:controller.velocity.length(),state:controller.state,active:controller.active}; },
     getPosition() { return controller.position; },
     getStatus() { return controller.getHookData(); },
     setWaterQuery(query:(x:number,z:number)=>boolean){isWaterAt=query;controller.setWaterQuery(query);},

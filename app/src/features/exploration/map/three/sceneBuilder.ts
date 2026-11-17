@@ -25,6 +25,7 @@ export interface SceneBuildResult {
   setAdminMode?: (enabled: boolean) => void;
   loadSelectionForLoadedChunks?: () => Promise<void>;
   getBuildingTargets?: () => THREE.Object3D[];
+  loadedChunkCount?: () => number;
   dispose?: () => void;
 }
 
@@ -255,6 +256,7 @@ export function buildNumazuPortScene(
     setAdminMode: station.setAdminMode,
     loadSelectionForLoadedChunks: station.loadSelectionForLoadedChunks,
     getBuildingTargets: station.getBuildingTargets,
+    loadedChunkCount: station.loadedChunkCount,
     dispose
   };
 }

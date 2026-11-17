@@ -41,4 +41,21 @@ export interface PerformanceStats {
   dpr: number;
   geometries: number;
   textures: number;
+  /** Rendered frames since the 3D view opened; differences give an exact average FPS. */
+  frames?: number;
+  /** Interval between browser animation callbacks, capped or not: shows the display rate and main-thread stalls. */
+  rafP50Ms?: number;
+  rafP95Ms?: number;
+  /** Main-thread time per rendered frame over the last second: scene update, then draw submission. */
+  updateMsAvg?: number;
+  renderMsAvg?: number;
+  renderMsMax?: number;
+  /** Resolution changes since the 3D view opened. */
+  dprChanges?: number;
+  loadedChunks?: number;
+  /** Chrome only. */
+  jsHeapMB?: number;
+  /** Drawing-buffer size in pixels. */
+  canvas?: [number, number];
+  gpu?: string;
 }
