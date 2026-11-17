@@ -1,3 +1,4 @@
+import {PLACES} from './places';
 // Public viewpoint URLs contain virtual camera coordinates only, never fish or device location.
 export type Vec3 = [number, number, number];
 export interface Viewpoint { camera: Vec3; target: Vec3; focus: [number, number]; fov: number }
@@ -6,6 +7,7 @@ export const VIEWS: Record<string, {ja:string; en:string; view:Viewpoint}> = {
   byuuo:{ja:'びゅうお周辺',en:'Around Byuuo',view:{camera:[-120,80,-65],target:[-276,76,22],focus:[-276,22],fov:55}},
   'city-hall':{ja:'市役所周辺',en:'Around City Hall',view:{camera:[671,108,-1478],target:[543,66,-1562],focus:[548,-1567],fov:55}},
 };
+for(const p of PLACES)if(!Object.prototype.hasOwnProperty.call(VIEWS,p.id)&&p.x!==undefined&&p.z!==undefined)VIEWS[p.id]={ja:p.ja,en:p.en,view:{camera:[p.x+120,140,p.z+160],target:[p.x,60,p.z],focus:[p.x,p.z],fov:55}};
 const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 export function validView(v: Viewpoint): boolean {
   const vectors=[v.camera,v.target];

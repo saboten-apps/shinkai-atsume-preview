@@ -1,126 +1,128 @@
-> 2026-11-16追加: 3Dの描画上限・解像度調整・30秒測定。[3D-PERFORMANCE.md](./3D-PERFORMANCE.md) を参照。Pixel実機性能は未確認。
+> 2026-11-17更新：建物紹介の編集・端末下書き・JSON書き出し／復元・公開取り込みを実装。本文の未実装記述は前段階の記録。現行仕様は `docs/PLACE-DRAFTS.md` を優先。Pixelの実機計測は引き続き未確認。
 
-> 2026-11-16追加: 長押し選択に場所の紹介カードを追加。[PLACE-INTRODUCTIONS.md](./PLACE-INTRODUCTIONS.md) を参照。
+# 深海あつめ：次のAIへの引継書
 
-> 次段階の更新: 自由な景色撮影とガチャ不要の共有リンクを追加。仕様・検証・制限は [SCENERY-PHOTOS.md](./SCENERY-PHOTOS.md) を参照。
+更新日：2026-11-16。**最初に本書を読む。** 現行コードとGitHubの公開結果を確認して整理した。
+旧版は `docs/archive/AI-HANDOFF-2026-11-15.md` に保存。旧版やASTRA-HANDOFF、NEXT-DEVELOPMENT-DESIGNには実装前の記述があるため、現在の未実装事項と取り違えない。
+今回の依頼は引継書の作成・GitHubへのpush。新機能の実装依頼ではない。
 
-> 2026-11-16更新: 外部AIの建物選択・修正台帳・びゅうお実装を取り込み、公開前レビューで修正しました。最新状態と制限は [IMPORT-REVIEW-2026-11-16.md](./IMPORT-REVIEW-2026-11-16.md) を先に参照。以下の未実装記述には当時の状態を含みます。
+## 目的と最新の方針
 
-# 実装担当AIへの引継書
+- 沼津在住の制作者「うみまちラボ」のアプリ。地域の人に喜ばれるものを作り、将来の静岡県東部でのAI導入支援の仕事につなげたい。
+- ガチャ・図鑑・カードと沼津3D探索を一つのアプリで提供。主な対象はスマホ、検証端末は **Pixel 10 Pro**。
+- ガチャが入口。3Dコード・データは探索を開いて初めて読み込む。写真付きの場所一覧・紹介も、3Dを開くまでは軽い案内として利用できる。
+- **ほかの人から写真を受け取り、制作者本人が確認・更新・公開する運用**を希望。SNS機能は当面後回し。現時点でDB・アカウント・投稿サーバーは不要という方針。
+- 建物情報の編集・端末内の下書き保存・書き出しは提案段階で、まだ実装していない。ユーザーの次の依頼に合わせて範囲を決める。
+- 店への営業、協力店制度、来店記録、店頭QRスタンプ、ランキング、同時プレイは現在の範囲に含めない。
 
-作成日: 2026-11-15。特定のモデル・開発サービスに依存しない再開用文書。
+## リポジトリ・公開の基準
 
-## 最初に読むもの
-
-1. 本書。
-2. [NEXT-DEVELOPMENT-DESIGN.md](./NEXT-DEVELOPMENT-DESIGN.md): 今後の設計・段階ごとの完了条件。
-3. [ASTRA-HANDOFF.md](./ASTRA-HANDOFF.md): 既存実装の詳細・素材・公開手順。
-
-今回ユーザーが依頼したのは今後の設計と引継書。**今回の文書作成では新機能を実装・デプロイしていない。** 次の実装依頼を受けたら、まず一区画の建物選択を完成させる。
-設計の提案値を、ユーザーが合意した仕様と取り違えない。古い履歴と食い違ったら現行コード・manifest・公開版を確認する。
-
-## ユーザーと目的
-
-- 沼津在住。写真を自身で撮影できる。市役所・びゅうお等の素材を既に提供済み。
-- 最終目的は静岡県東部でのAI導入支援の仕事。当面はうみまちラボの認知と、地元で喜ばれるアプリ。
-- ガチャを入口にした軽いスマホブラウザゲーム。実機はPixel 10 Pro。
-- 画質を上げたいが、動作と通信は軽くしたい。事前保存も必要で、既に実装済み。
-- 地元の希望者から写真や紹介リンクを受け取り、古くなった建物を個別更新する方向を相談中。
-- 重複した確認や写真の再送依頼を避ける。できたことと未確認を区別して簡潔に報告する。
-
-## 作業場所と版の基準
-
-| 用途 | 場所・状態 |
+| 項目 | 確認した内容 |
 |---|---|
-| 正本 | `/workspace/shinkai-atsume`、private `saboten-apps/shinkai-atsume` |
-| 正本の作業ブランチ | `codex/daily-exploration` |
-| 本書作成前の正本HEAD | `3f243e875451c51b2e8c4414cc0ebd15abb1642b`（前回引継書） |
-| 現行アプリコード | `8b91cdc5362472ebc68d0c628aa8ad33475c87e7` |
-| テスト用リポジトリ | `/workspace/shinkai-atsume-preview`、public `saboten-apps/shinkai-atsume-preview` |
-| テスト公開URL | https://saboten-apps.github.io/shinkai-atsume-preview/ |
-| 既存記録の公開版 | main `315744f17db99d71bc29b651c5e0185423a8abf3`、PR #23、Actions 43706527991成功 |
-| ローカルpreview | `codex/coast-expansion`、`16e2733` |
+| 正本 | `saboten-apps/shinkai-atsume`（private）、ローカル `/workspace/shinkai-atsume` |
+| 正本の開発ブランチ | `codex/daily-exploration` |
+| 最新アプリコードの正本コミット | `7929900e759fc8c88519e50985b1aa1d09803512` |
+| テスト公開先 | `saboten-apps/shinkai-atsume-preview`（public）、ローカル `/workspace/shinkai-atsume-preview` |
+| テストURL | https://saboten-apps.github.io/shinkai-atsume-preview/ |
+| 最新アプリ変更のpreview PR | https://github.com/saboten-apps/shinkai-atsume-preview/pull/31 （MERGED） |
+| 同PRのmainマージ | `f44fbd58723cbec39837cfb3c2194a9aca12d0ec` |
+| 同コードの公開Actions | `43965733399`、success |
+| preview同期元 | `app/UPSTREAM.json` のcommitが上記正本コード、魚データSHA-256は `18419a05e7a68b8936bce5a997ff5871d9d06da36d13279dfc2e5b4ffe927455` |
 
-今回ローカルのbranch/statusと `app/UPSTREAM.json` の正本コード参照を再確認した。公開サイトとリモート最新状態の再照合は今回していない。作業再開時はgit statusとリモート差分を確認する。
-正本mainは本番。ユーザーの新たな指示なく本番マージしない。テスト先への反映はこれまで許可されている。
-previewの `app/` は生成コピー。そこを正本として手編集しない。
+これは**文書更新前のアプリコードの基準**。後続の引継書コミットとは分けて扱う。再開時は必ずgit status・リモート・UPSTREAMを確認する。
+**正本mainは本番。新たな指示なくマージしない。** テスト公開先への反映はこれまで許可されている。
+previewの `app/` は正本からの生成コピーであり、直接編集して実装の正本にしない。
 
-previewに残っている生成診断:
-- 変更: `realdata-test/corridor-dem-stats.json`、`corridor-water-stats.json`
-- 未追跡: `realdata-test/port-lod3-comparison.json`、`spike-3d/public/data/station-manifest-2023.json`
+## 実装済み
 
-これらを無関係な変更とまとめてコミットしたり、一括破棄したりしない。
+1. 日本時間の日付で全員共通のガチャ、24種の魚、図鑑のlocalStorage保存、日英対応、カード。
+2. 日替わりの魚探し、探知機、発見カード、発見後の散策、2D代替。海・川を含む魚の配置と今日の魚の発光。
+3. 港から駅南口、千本浜公園周辺、我入道周辺の3D。飛行・歩行・潜水、衝突、区画読み込みと解放、事前保存。
+4. 建物は2023年度PLATEAU LOD3配布セット由来。**全棟に高精細形状・写真テクスチャがあるわけではない**。市役所・びゅうおは写真を使った近景用の置換モデル。
+5. **建物選択は長押し約500ms**。短いタップは移動、8pxを超えるドラッグは選択しない。飛行中も選択可能。選択用JSONは必要時に読み込む。
+6. 長押しで市役所・びゅうおの写真付き紹介と共有を表示。未登録建物は「紹介はまだありません」。ID・座標・台帳は折りたたみ。紹介先は明示した原本IDで判定し、近隣建物を一括で紹介しない。
+7. `#/places` の「まちを見る」で写真付き一覧。`#/view/port`、`#/view/city-hall`、`#/view/byuuo` から案内・紹介→3Dへ進む。ガチャ不要。
+8. 景色の撮影、PNG保存、Web Share、共有視点URL。画像そのものをURLに保存する機能ではなく、景色ごとのOGP生成もない。
+9. **最新の軽量化**：移動・飛行は最大60 FPS、静止した地図は30 FPS。持続する負荷でDPRを段階調整。非表示時・写真プレビュー中は描画を休止。目印のレイアウトは景色モードで最大10回/秒、統計通知は1回/秒。
+10. 景色ページと探索の設定で **30秒測定・JSON保存**。FPS、フレーム時間、DPR、描画数、カメラ位置、飛行状態を記録する。ページ非表示で測定を中止。保存のみで外部送信しない。
 
-## 次の実装依頼に使うプロンプト
+## データと素材
 
-```text
-docs/AI-HANDOFF.md、docs/NEXT-DEVELOPMENT-DESIGN.md、docs/ASTRA-HANDOFF.mdを読み、
-深海あつめの開発を引き継いでください。
+- 魚の正本は正本リポジトリの `data/fish.json`。preview側のコピーを別管理しない。
+- 地理座標の原点はlat 35.0815 / lon 138.8576 / h 0、x東・y上・z南。建物は基部から1.3倍の高さ表現。
+- 選択用sidecarは56区画・20,522レコード。凸包・高さによる推定であり、すべての面に原本IDを厳密に保持する方式ではない。密集・重複した建物の誤選択には注意。
+- `gml_id` は店舗IDではなく、年度更新で不変とも限らない。将来の店舗・場所の管理には独立したIDと原本IDの対応を持たせる。
+- 現行モデル版は `release-2026-11-v3-reviewed` / `plateau-2023-lod3`。
+- 事前保存は **75アセット / 74,055,085 bytes / version `6dbb2b6b3c65dd72`**。正本・previewの現行生成manifestが一致。古い74アセットの記録を現行値と誤解しない。選択用sidecarは事前保存対象外。
+- 軽量化の最終変更は描画側。写真テクスチャ・建物形状・保持範囲・ダウンロード量を削減した変更ではない。
+- 提供済み写真は `public/environment/city-hall/` と `public/environment/byuuo/`。由来・ハッシュは各 `sources.json`。市役所の一覧用 `preview.webp` は44,428 bytes、元の `entrance.jpg` を縮小したもの。
+- 外部AI由来の試作解体データは公開しない。びゅうお以外の近隣建物を巻き込む置換・削除を再発させない。詳細は `docs/IMPORT-REVIEW-2026-11-16.md`。
 
-今回の範囲は「一区画の建物選択」です。原本のgml_idと描画建物を対応させ、
-管理用モードでタップした建物のIDと緯度経度を確認・コピーできるようにしてください。
-圧縮後もIDが正しい方式を小さなデータで検証してから採用してください。
-高さ倍率、市役所置換、区画の読み込みと解放、飛行ドラッグとの競合を考慮してください。
+## 検証済み・未確認
 
-ガチャの遅延読み込み、2D代替、既存保存データ、軽さを維持してください。
-全棟への展開、投稿フォーム、オンライン機能、本番mainへのマージは今回含めません。
-意味のあるテストと変更前後の計測を行い、テスト公開先へ反映してください。
-公開Actionsと実際の配信内容を確認したうえで、結果・未確認事項・次の作業を記録してください。
-```
+最新コードで正本とpreviewの **86テスト・ビルド成功**。これらはコード `7929900` の実施結果であり、今回の文書更新だけではアプリテストを再実行していない。
 
-## 実装の入口
+- 60/90/120/144 Hz相当の描画上限、DPRの低下・回復・上下限・読み込み除外を単体テストで確認。
+- ビルド版のChromiumで市役所・びゅうおの長押し、紹介写真、共有URL、飛行中の選択を確認。
+- スマホ幅の日英一覧・紹介、写真、共有代替、横はみ出し、3Dを先読みしないことを確認。
+- 港の変更前後、変更後の駅前・飛行の描画状況を取得。30秒記録のJSON保存、非表示時の描画停止と復帰を確認。
+- 公開HTMLが最新のentryを参照し、公開のMap3DView・SceneryPage・ExplorationPageのJSがローカル成果物とバイト一致することを確認。
 
-正本:
-- `src/features/exploration/map/components/Map3DView.tsx`: 3D画面と操作。
-- `src/features/exploration/map/three/stationChunks.ts`: 建物区画の読み込み・解放。
-- `src/features/exploration/map/three/sceneBuilder.ts`: シーンと衝突形状の登録。
-- `src/features/exploration/map/three/buildingHeight.ts`: 高さの表示調整。
-- `src/features/exploration/map/three/cityHall.ts`、`cityHallPhotos.ts`: 個別モデルと写真。
-- `src/features/exploration/MapDownload.tsx`、`scripts/build-map-download.mjs`: 保存と配信版生成。
+**Pixel 10 ProのFPS、発熱、電池消費、共有シートは未確認。** Chromium + SwiftShaderはソフトウェア描画で極端に遅くなり、比較時は診断UIでcanvas高も異なる。そこから実機の改善率や同条件の速度向上を断定しない。
 
-preview側のデータ生成:
-- `realdata-test/build-2023-corridor.mjs`: 2023年度の建物データ生成。
-- `realdata-test/convert-bldg-tex.mjs`: b3dm変換。原本の `_BATCHID` を読み取るが最終描画データにID対応を残していない。
-- `realdata-test/audit-coast-coverage.mjs`: 追加範囲の収録照合。
-- `realdata-test/validate-station-corridor.mjs`: 配信区画・UV・収録範囲の検証。
+## 次の候補と完了条件
 
-原本キャッシュ `/tmp/plateau-scratch/source-bldg2023/` は一時ファイル。別環境では存在を確認し、なければ既存生成スクリプトで取得する。キャッシュがある前提の手順だけで引き継がない。
-公式カタログ: https://api.plateauview.mlit.go.jp/datacatalog/plateau-datasets
-原点lat35.0815/lon138.8576/h0、x東/y上/z南。高さは建物基部から1.3倍表示。
+### A. まずPixelの実測を受け取る
 
-## やってはいけない誤解
+`docs/3D-PERFORMANCE.md` の手順で港・駅前の静止と飛行を各30秒測定。数分飛行後も測り、発熱・操作感と合わせて見る。
+静止中30 FPSは意図した上限。飛行中は30 FPS以上の持続を目標とするが、未達かはまだ不明。DPR下限でも重い場合、描画数・衝突・区画保持量などを原因別に調べる。解像度を落とすだけで性能問題を解決したとしない。
 
-- LOD3配布セットだから全建物の写真や詳細形状がある、と説明しない。
-- 圧縮前faceIndexを圧縮後GLBにそのまま対応させない。
-- 描画だけ隠して古い衝突形状を残さない。
-- 建物IDを店舗IDと同一にしない。年度を変えてもgml_idが不変とは限らない。
-- キャッシュ削除で図鑑を消さない。`shinkai_gacha_collection_v1` と既存発見記録を維持する。
-- Googleマップ画像を抜き出して壁面素材にしない。
-- 公共建築だから無条件で自由、民間建築だから一律不可、という説明をしない。
-- 写真提供・店舗紹介・施設の公認を混同しない。未確認の協力店を作らない。
-- ソフトウェアGPUのFPSをPixel実機の性能として報告しない。
+### B. 制作者用の建物情報編集（未実装の提案）
 
-## 検証と記録
+建物を長押し→建物名・紹介文・URLを入力→端末に下書き保存→JSON書き出し→確認してアプリに取り込み公開、という流れを想定。
+写真は他の人からドライブ等で受け取り、撮影者・公開加工の利用許可・希望クレジットを記録する。端末保存と全員への公開は別操作として説明する。
 
-従来記録では56テスト・ビルド成功。今回文書のみのためアプリテストは再実行していない。
-実装時は `npm test` と `npm run build`、影響する既存ブラウザ検証を実施する。
-既存の `check-exploration.mjs`、`check-city-hall.mjs`、`check-coast-expansion.mjs`、`check-map-download.mjs` を参照。
+実装する場合の完了条件案：
+- 原本IDと独立した場所IDを紐づけ、再選択で下書きを復元できる。
+- ガチャ・図鑑・発見記録の既存保存キーを変更・削除しない。
+- JSONの書き出し・取り込みで形式、版、文字数、URLの許可スキームを検証。文字列をHTMLとして挿入しない。
+- 写真バイナリをlocalStorageに詰め込まない。画像ファイル・公開パス・権利記録の扱いを設計する。
+- 公開アプリに「管理用ボタン」を隠すだけで認証できたとは扱わない。将来の更新権限と、DB不要のファイル公開運用は区別する。
 
-追加する検証:
-1. 原本から期待IDを決めた最低10建物で屋根・壁の選択を照合する。
-2. 隣接建物、区画境界、空振り、UIタップ、ドラッグを確認する。
-3. 解放・再読込で同じIDになり、メモリが累積しないことを確認する。
-4. 追加データの通信量と描画負荷を現行版と比較する。
-5. 事前保存した版と選択情報の版が一致することを確認する。
+SNSタイムライン、一般投稿、DB、ログイン、オンライン鬼ごっこを今回の次工程として勝手に追加しない。
 
-検証結果にはコミット、対象区画、操作、期待値、実測、未確認を残す。
-他AIへ渡す際は変更ファイルだけでなく、再現コマンド・生成元データ・公開状況・残課題を更新する。
+## コード・文書の入口（正本のルート基準）
 
-## テスト公開
+| 対象 | パス |
+|---|---|
+| 選択・描画・キャプチャ | `src/features/exploration/map/components/Map3DView.tsx` |
+| 描画制御 / 測定UI | `src/features/exploration/map/renderBudget.ts` / `map/components/PerformancePanel.tsx` |
+| 区画・選択 / 台帳 | `map/three/stationChunks.ts` / `buildingSelection.ts` / `buildingOverride.ts`（いずれも探索ディレクトリ配下） |
+| 紹介データ・カード | `src/features/scenery/places.ts` / `PlaceIntroduction.tsx` |
+| 一覧・景色ルート | `src/features/scenery/PlacesPage.tsx` / `SceneryPage.tsx` / `viewpoint.ts` |
+| 軽量化・実機手順 | `docs/3D-PERFORMANCE.md` |
+| 紹介と写真一覧 | `docs/PLACE-INTRODUCTIONS.md` |
+| 撮影と共有URL | `docs/SCENERY-PHOTOS.md` |
+| 取り込みの検証・残課題 | `docs/IMPORT-REVIEW-2026-11-16.md` |
 
-詳細はASTRA-HANDOFFの手順に従う。
-正本で実装・検証・コミット → 正本devをpush → previewのorigin/mainから作業ブランチ →
-`python scripts/sync-app-from-main.py /workspace/shinkai-atsume` → `node scripts/prepare-app-map.mjs` →
-preview appで検証 → preview PR/マージ → Actions成功 → 公開manifest/hash/表示を確認。
-同期はコミット済み正本が前提。GLBはpreviewの元データから用意し、二重管理しない。
-公開後、同期元コミットと公開版を引継書へ追記する。APIキー・写真の個人情報・連絡先は公開リポジトリへ含めない。
+## 再現と公開の手順
+
+1. 正本の `codex/daily-exploration` を取得しstatusを確認。`npm ci`（依存が未導入なら）→`npm test`→`npm run build`。
+2. 必要なブラウザ検証は `scripts/check-place-introductions.mjs`、`check-places-gallery.mjs`、`check-render-performance.mjs`。PlaywrightとChromiumが必要。`APP_URL` を検証サーバーへ向ける。描画検証はSwiftShaderを使用する。
+3. 性能スクリプトは任意の `BASELINE_URL`、`TEST_DPR`（既定0.5）、`REPORT_PATH` を受け取る。比較前後で同じDPR・画面・読み込み状態にそろえる。既定の小さな解像度はソフトウェア環境の機能検証用。
+4. 正本をコミット・devブランチにpush。previewのorigin/mainから作業ブランチを作成。
+5. previewルートで `python scripts/sync-app-from-main.py /workspace/shinkai-atsume` → `node scripts/prepare-app-map.mjs`。同期は正本がクリーンかつコミット済みであることが前提。
+6. `npm --prefix app test` → `npm --prefix app run build`。今回変更する `app/` だけを選んでコミットし、preview PRでmainへ反映。
+7. Actions成功と、公開HTML・JS・必要なmanifest/素材の一致を確認。正本mainへの本番反映とは別の操作。
+
+開発用worktreeでnode_modulesを共有するとViteの依存最適化キャッシュが干渉し、ReactのuseStateエラーになった。比較検証にはビルド済みファイルを別ポートで配信する方法を使う。
+
+## ワークスペースの注意
+
+previewには以前から以下の診断生成物がある。今回の文書に便乗してコミット・一括破棄しない。
+- 変更：`realdata-test/corridor-dem-stats.json`、`realdata-test/corridor-water-stats.json`
+- 未追跡：`realdata-test/2023-reviewed-port-stats.json`、`realdata-test/port-lod3-comparison.json`、`spike-3d/public/data/station-manifest-2023.json`
+
+`/tmp/shinkai-perf-baseline` は `be85eee` の比較用detached worktree。`/tmp/shinkai-render-performance.json`、`/tmp/render-benchmark-small.log`、`/tmp/perf-introductions-built.log` 等は一時記録で、別環境では存在しない。再現を一時ファイルだけに依存させない。
+
+Googleマップ画像を抜き出して素材にしない。公共建築だから無条件に自由と説明しない。写真利用の許可と施設との提携を混同しない。PLATEAU/GSIの出典・概略表現の説明を維持する。「親ガチャ」という表現を使わない。

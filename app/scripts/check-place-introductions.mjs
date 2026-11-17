@@ -12,7 +12,7 @@ for(const [x,y] of [[.5,.5],[.45,.4],[.55,.4],[.4,.5],[.6,.5],[.5,.3],[.35,.6],[
 assert.equal(await page.locator('.building-selection-card').count(),1,'long press did not select');
 await page.locator('.place-introduction h3').filter({hasText:'沼津市役所'}).waitFor();
 assert(await page.locator('.place-introduction img').evaluate(el=>el.complete&&el.naturalWidth>0));
-assert.equal(await page.locator('.building-selection-card details').getAttribute('open'),null);
+assert.equal(await page.locator('.building-selection-card > details').last().getAttribute('open'),null);
 assert((await page.getByRole('link',{name:'この場所から開く'}).getAttribute('href')).endsWith('#/view/city-hall'));
 await page.screenshot({path:'/tmp/place-city-hall.png'});
 console.log('PASS city hall photo, collapsed data and share URL');assert(requests.some(u=>/buildings-.*json/.test(u)));console.log('PASS short tap / long press selects building / sidecar lazy loads');
