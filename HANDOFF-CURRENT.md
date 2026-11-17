@@ -1,3 +1,5 @@
+> 2026-11-17追記：建物紹介の編集・端末下書き保存・JSON書き出し／復元・検査付き公開取り込みを追加。現行仕様と操作は `app/docs/PLACE-DRAFTS.md` を参照。下記の「未実装」は前段階の記録です。同期元アプリコード：`8e76af4`。
+
 > このファイルは正本の引継書（2026-11-16）のコピーです。
 > 正本の最新版：https://github.com/saboten-apps/shinkai-atsume/blob/codex/daily-exploration/docs/AI-HANDOFF.md
 > このコピーの元コミット：`2027d8a`。preview内でコード・文書を読む場合、本文の正本ルート基準のパスに `app/` を付けてください。

@@ -16,8 +16,9 @@ export function PlaceIntroduction({buildingId,en,showLocationLink=true}:{buildin
   return <section className="place-introduction" aria-label={title}>
     <h3>{title}</h3>
     {!imageFailed?<img src={`${import.meta.env.BASE_URL}${place.photo}`} alt={en?`Photograph of ${title}`:`${title}の現地写真`} onError={()=>setImageFailed(true)}/>:<p>{en?'Photograph unavailable':'写真を読み込めませんでした'}</p>}
-    <small>{en?'Photo provided by the project owner':'現地写真：制作者撮影・提供'}</small>
+    <small>{place.credit||(en?'Photo provided by the project owner':'現地写真：制作者撮影・提供')}</small>
     <p>{en?place.descriptionEn:place.descriptionJa}</p>
+    {place.url&&<p><a href={place.url} target="_blank" rel="noopener noreferrer">{en?'Related website':'関連サイト'} ↗</a></p>}
     <small>{en?'Virtual reconstruction based on photographs and city data.':'写真と都市データをもとにしたバーチャル表現です。'}</small>
     <div className="place-actions"><button type="button" onClick={share}>{en?'Share this place':'この場所を共有'}</button>{(showLocationLink||notice)&&<a href={url}>{en?'Location link':'この場所から開く'}</a>}</div>
     {notice&&<p role="status">{notice}</p>}
