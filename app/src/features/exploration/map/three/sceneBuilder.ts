@@ -1,3 +1,4 @@
+import {createHarborLife} from './harborLife';
 import {createCityHallStreet} from './cityHallStreet';
 import { createCityStructures } from './cityStructures';
 import { styleRegionalLandscape } from './regionalLandscape';
@@ -19,6 +20,7 @@ export interface SceneBuildResult {
   ready: Promise<void>;
   updateBuildings?: (position: THREE.Vector3, viewer?:THREE.Vector3) => void;
   updateWater?: (delta: number) => void;
+  updateHarbor?: (time:number,viewer:THREE.Vector3,reducedMotion:boolean)=>void;
   groundReady?: () => Promise<void>;
   isWaterAt: (x:number,z:number)=>boolean;
   selectionManager?: BuildingSelectionManager;
@@ -42,6 +44,7 @@ export function buildNumazuPortScene(
   onAreaStatus?: (text: string) => void
 ): SceneBuildResult {
   let isDisposed = false;
+  let harbor:ReturnType<typeof createHarborLife>|undefined;
   let street:ReturnType<typeof createCityHallStreet>|undefined;
   let city:ReturnType<typeof createCityStructures>|undefined;
   let aerial: ReturnType<typeof createAerialGround> | undefined;
@@ -226,6 +229,7 @@ export function buildNumazuPortScene(
       street=createCityHallStreet(scene,roadScene,terrainScene,onCollisionGeometry);
       aerial = createAerialGround(scene, terrainScene, [waterSeaScene, waterRiverScene]);
       aerial.maskRoads(roadScene);
+      harbor=createHarborLife(scene,terrainScene,aerial.isWaterAt);
       water.setShoreMask(aerial.waterMask,aerial.maskBounds);
       void aerial.ready.catch(error => { if(!isDisposed) console.warn('Ground photos unavailable:', error); });
     })
@@ -239,6 +243,7 @@ export function buildNumazuPortScene(
     station.dispose();
     city?.dispose();
     street?.dispose();
+    harbor?.dispose();
     aerial?.dispose();
     water.dispose();
     disposables.forEach((item) => {
@@ -252,6 +257,7 @@ export function buildNumazuPortScene(
     disposables,
     ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}),
     updateWater: water.update,
+    updateHarbor:(time,viewer,reducedMotion)=>harbor?.update(time,viewer,reducedMotion),
     updateBuildings: (position,viewer) => { station.update(position,viewer); street?.update(viewer??position); aerial?.update(position); },
     groundReady: async () => { await aerial?.settled(); await station.detailReady(); },
     isWaterAt:(x,z)=>aerial?.isWaterAt(x,z)??true,
