@@ -34,6 +34,7 @@ type RouteState =
 function parseHashRoute(hash: string): RouteState {
   const cleaned = hash.replace(/^#\/?/, '').trim();
   if(cleaned==='places')return {page:'places'};
+  if(cleaned.startsWith('join/'))return {page:'scenery',hash};
   if(cleaned==='view'||cleaned.startsWith('view/'))return {page:'scenery',hash};
   if (!cleaned || cleaned === 'today') {
     return { page: 'today' };

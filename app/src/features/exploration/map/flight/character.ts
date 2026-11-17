@@ -27,19 +27,20 @@ export class HumanoidCharacter {
 
     // --- マテリアル（夕景の港・水中で視認性の高い白＋ネオンオレンジ＋シアン発光） ---
     this.suitMat = new THREE.MeshStandardMaterial({
-      color: 0x26b9e0,
-      roughness: 0.3,
-      metalness: 0.15,
-      emissive: 0x4aa3cc,
-      emissiveIntensity: 0.20, // 白飛び防止（水中移行時に動的増強）
+      color: 0xe6ddcb,
+      roughness: 0.75,
+      metalness: 0.02,
+      emissive: 0x000000,
+      emissiveIntensity: 0,
     });
     const suitMat = this.suitMat;
+    const hoodMat = new THREE.MeshStandardMaterial({color:0xba7770, roughness:.9});
 
     const accentMat = new THREE.MeshStandardMaterial({
-      color: 0xf97316, // オレンジ
+      color: 0xf4d7a7, // 潜水服のあたたかい縁
       roughness: 0.3,
-      emissive: 0xf97316,
-      emissiveIntensity: 0.65,
+      emissive: 0x5a3625,
+      emissiveIntensity: 0.12,
     });
 
     const darkMat = new THREE.MeshStandardMaterial({
@@ -77,28 +78,31 @@ export class HumanoidCharacter {
 
     const headSphere = new THREE.Mesh(
       new THREE.SphereGeometry(0.34, 16, 12),
-      suitMat
+      hoodMat
     );
+    headSphere.scale.set(1.15, .98, 1.03);
     this.head.add(headSphere);
+    // メンダコらしい耳ひれ。正面・背面のどちらからも輪郭が見える。
+    const finGeometry = new THREE.SphereGeometry(.16, 12, 8);
+    for (const side of [-1,1]) {
+      const fin=new THREE.Mesh(finGeometry,hoodMat);
+      fin.scale.set(.58,1.05,.34);fin.position.set(side*.36,.19,0);
+      fin.rotation.z=-side*.72;this.head.add(fin);
+    }
 
     // バイザー（顔の前方：-Z 方向をローカル正面とする）
-    const visorGeom = new THREE.SphereGeometry(0.27, 16, 12);
-    const visorMesh = new THREE.Mesh(visorGeom, visorMat);
-    visorMesh.scale.set(1, .78, .55);
-    visorMesh.position.set(0, 0.02, -0.20);
+    // A flat inset sits in front of the hood surface, avoiding intersecting meshes.
+    const visorMesh = new THREE.Mesh(new THREE.CircleGeometry(.245,32), new THREE.MeshBasicMaterial({color:0x20373b}));
+    visorMesh.scale.set(1,.78,1);visorMesh.position.set(0,.02,-.355);visorMesh.rotation.y=Math.PI;
     this.head.add(visorMesh);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(.275,.035,6,20), accentMat);
-    rim.position.set(0,.02,-.27); this.head.add(rim);
-    for (const side of [-1,1]) {
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(.034,8,6), new THREE.MeshBasicMaterial({color:0xb9ffff}));
-      eye.scale.y=1.5;eye.position.set(side*.09,.035,-.345);this.head.add(eye);
-      const antenna = new THREE.Mesh(new THREE.CapsuleGeometry(.022,.17,4,6),accentMat);
-      antenna.position.set(side*.21,.35,0);antenna.rotation.z=-side*.45;this.head.add(antenna);
-      const tip=new THREE.Mesh(new THREE.SphereGeometry(.045,8,6),accentMat);
-      tip.position.set(side*.26,.45,0);this.head.add(tip);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(.255,.022,6,32),accentMat);
+    rim.scale.y=.78;rim.position.set(0,.02,-.364);this.head.add(rim);
+    const eyeMat=new THREE.MeshBasicMaterial({color:0xf8ede0});
+    const eyeGeometry=new THREE.CircleGeometry(.025,12);
+    for(const side of [-1,1]){
+      const eye=new THREE.Mesh(eyeGeometry,eyeMat);eye.rotation.y=Math.PI;
+      eye.position.set(side*.085,.03,-.37);this.head.add(eye);
     }
-    const wave=new THREE.Mesh(new THREE.TorusGeometry(.10,.02,4,12,Math.PI),new THREE.MeshBasicMaterial({color:0xffffff}));
-    wave.position.set(0,.94,-.3);this.modelRoot.add(wave);
 
     this.modelRoot.add(this.head);
 
@@ -107,6 +111,11 @@ export class HumanoidCharacter {
     const backpackMesh = new THREE.Mesh(backpackGeom, darkMat);
     backpackMesh.position.set(0, 0.84, 0.22);
     this.modelRoot.add(backpackMesh);
+    // 後ろ姿で分かる丸い空気タンクと浮き輪の縁。
+    const tank = new THREE.Mesh(new THREE.SphereGeometry(.18,12,8), accentMat);
+    tank.scale.set(1,1.25,.45);tank.position.set(0,.86,.32);this.modelRoot.add(tank);
+    const tankWindow = new THREE.Mesh(new THREE.SphereGeometry(.095,10,8), visorMat);
+    tankWindow.scale.set(1,1,.35);tankWindow.position.set(0,.86,.405);this.modelRoot.add(tankWindow);
 
     const thrusterRing = new THREE.Mesh(
       new THREE.CylinderGeometry(0.08, 0.10, 0.08, 12),
@@ -117,12 +126,12 @@ export class HumanoidCharacter {
     this.modelRoot.add(thrusterRing);
 
     // スラスターライト（背後からの照光：白飛び防止のため初期値・水上を適正化）
-    this.backpackLight = new THREE.PointLight(0x7dd3fc, 0.6, 4.0);
+    this.backpackLight = new THREE.PointLight(0x7dd3fc, 0, 4.0);
     this.backpackLight.position.set(0, 0.74, 0.45);
     this.modelRoot.add(this.backpackLight);
 
     // チェストライト（水中でも胸元・手足を照らす補助光）
-    this.chestLight = new THREE.PointLight(0x7dd3fc, 0.4, 3.0);
+    this.chestLight = new THREE.PointLight(0x7dd3fc, 0, 3.0);
     this.chestLight.position.set(0, 0.85, -0.45);
     this.modelRoot.add(this.chestLight);
 
@@ -267,20 +276,20 @@ export class HumanoidCharacter {
 
     // 5. 状態に応じたライトと自発光の最適化（白飛び防止と水中視認性の両立）
     if (state === 'water') {
-      this.backpackLight.intensity = 1.6;
+      this.backpackLight.intensity = 0;
       this.backpackLight.distance = 6.0;
-      this.chestLight.intensity = 1.2;
+      this.chestLight.intensity = 0;
       this.chestLight.distance = 5.0;
-      this.suitMat.emissiveIntensity = 0.40;
+      this.suitMat.emissiveIntensity = 0;
     } else if(state==='ground'){
-      this.backpackLight.intensity=.2;this.chestLight.intensity=.15;
-      this.suitMat.emissiveIntensity=.15;
+      this.backpackLight.intensity=0;this.chestLight.intensity=0;
+      this.suitMat.emissiveIntensity=0;
     } else {
-      this.backpackLight.intensity = 0.6;
+      this.backpackLight.intensity = 0;
       this.backpackLight.distance = 4.0;
-      this.chestLight.intensity = 0.4;
+      this.chestLight.intensity = 0;
       this.chestLight.distance = 3.0;
-      this.suitMat.emissiveIntensity = 0.20;
+      this.suitMat.emissiveIntensity = 0;
     }
   }
 
@@ -397,25 +406,25 @@ export class HumanoidCharacter {
 
     // 7. 状態に応じたライトと自発光の最適化（TASK-GRAVITYMODE-FIX1 §修正要件3: 正対時の白飛び軽減）
     if (state === 'water') {
-      this.backpackLight.intensity = 1.6;
+      this.backpackLight.intensity = 0;
       this.backpackLight.distance = 6.0;
-      this.chestLight.intensity = 1.2;
+      this.chestLight.intensity = 0;
       this.chestLight.distance = 5.0;
-      this.suitMat.emissiveIntensity = 0.40;
+      this.suitMat.emissiveIntensity = 0;
     } else if (state === 'stand') {
       // 壁立ち時は壁面直近（0.55m）での照り返し・白飛びを徹底抑制
-      this.backpackLight.intensity = 0.35;
+      this.backpackLight.intensity = 0;
       this.backpackLight.distance = 2.5;
-      this.chestLight.intensity = 0.25;
+      this.chestLight.intensity = 0;
       this.chestLight.distance = 2.0;
-      this.suitMat.emissiveIntensity = 0.15;
+      this.suitMat.emissiveIntensity = 0;
     } else {
       // 通常空中（float / fall）
-      this.backpackLight.intensity = 0.6;
+      this.backpackLight.intensity = 0;
       this.backpackLight.distance = 4.0;
-      this.chestLight.intensity = 0.4;
+      this.chestLight.intensity = 0;
       this.chestLight.distance = 3.0;
-      this.suitMat.emissiveIntensity = 0.20;
+      this.suitMat.emissiveIntensity = 0;
     }
   }
 }

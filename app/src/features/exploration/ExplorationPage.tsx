@@ -12,6 +12,8 @@ import type { Search3DBridge } from './map/components/Map3DView';
 import type { PerformanceStats } from './map/types';
 import { makeDiscoveryCard } from './discoveryCard';
 import './exploration.css';
+import {HudIcon} from './HudIcon';
+import {HudMenu} from './HudMenu';
 
 class MapBoundary extends Component<{children: import('react').ReactNode; onFallback:()=>void; en:boolean}, {failed:boolean}> {
   state={failed:false};
@@ -33,12 +35,13 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
   const [mode,setMode] = useState<SearchMode>(props.initialMode??'3d');
   const autoFly=useRef((props.initialMode??'3d')==='3d');
   const [sceneReady,setSceneReady]=useState(false);
-  const onSceneReady=useCallback(()=>{setSceneReady(true);requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>('.search-flight-button')?.focus({preventScroll:true}));},[]);
+  const onSceneReady=useCallback(()=>{setSceneReady(true);requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>('.search-menu-button')?.focus({preventScroll:true}));},[]);
   const [optionsOpen,setOptionsOpen] = useState(false);
   const [found,setFound] = useState<Discovery|null>(()=>session.found);
   const [showingCard,setShowingCard]=useState(()=>!!found);
   const [position,setPosition] = useState<Position>(()=>found?{x:place.x,z:place.z}:START);
   const entryRef = useRef<Position>(position);
+  const [heading,setHeading]=useState(0);
   const [visible,setVisible] = useState(false);
   const [notice,setNotice] = useState('');
   const [stats,setStats] = useState<PerformanceStats|null>(null);
@@ -52,7 +55,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
   const slowCount = useRef(0);
   const hint = detector(position,place);
   const hintRef = useRef(hint);hintRef.current = hint;
-  const onPosition = useCallback((p:Position,canSee:boolean)=>{setPosition(p);setVisible(canSee);},[]);
+  const onPosition = useCallback((p:Position,canSee:boolean,heading=0)=>{setPosition(p);setVisible(canSee);setHeading(heading);},[]);
   const onCaptureReady = useCallback((capture:(()=>string)|null)=>{captureRef.current=capture;},[]);
   const onStats = useCallback((value:PerformanceStats)=>{
     setStats(value);slowCount.current=value.fps<20?slowCount.current+1:0;
@@ -88,7 +91,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     };tick();return()=>clearTimeout(timer);
   },[sound,found]);
   useEffect(()=>()=>{void audioRef.current?.close();},[]);
-  const switchMode=(next:SearchMode)=>{if(next===mode)return;entryRef.current=position;autoFly.current=false;setSceneReady(false);setMode(next);setNotice('');setVisible(next==='2d');setSlow(false);slowCount.current=0;};
+  const switchMode=(next:SearchMode)=>{setOptionsOpen(false);if(next===mode)return;entryRef.current=position;autoFly.current=false;setSceneReady(false);setMode(next);setNotice('');setVisible(next==='2d');setSlow(false);slowCount.current=0;};
   const resume=(next:SearchMode)=>{
     entryRef.current=position;autoFly.current=next==='3d';setMode(next);setSceneReady(false);
     setOptionsOpen(false);setNotice('');setSlow(false);slowCount.current=0;setShowingCard(false);
@@ -120,22 +123,34 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     <header className="search-heading"><div><p>{date} · {en?'VIRTUAL NUMAZU':'バーチャル沼津'}</p><h2>{en?'Find today’s fish':'今日の魚を探そう'}</h2></div><button onClick={props.onBack}>{en?'Back':'今日へ戻る'}</button></header>
     {!showingCard&&<>
       <div className="search-toolbar">
-        {immersive&&<button onClick={props.onBack}>{en?'Back':'今日へ戻る'}</button>}
-        <div><button aria-pressed={mode==='3d'} onClick={()=>switchMode('3d')}>3D</button><button aria-pressed={mode==='2d'} onClick={()=>switchMode('2d')}>2D</button></div>
-        <button aria-expanded={optionsOpen} aria-controls="search-options" onClick={()=>setOptionsOpen(!optionsOpen)}>{en?'Guide':'案内・設定'}</button>
+        {immersive&&<button className="hud-icon-button" onClick={props.onBack} aria-label={en?'Back to Today':'今日へ戻る'}><HudIcon name="back"/></button>}
+        <div className="search-mission">
+          <span className="search-mission-fish" aria-hidden="true">{fish.illustration?<img src={`${import.meta.env.BASE_URL}${fish.illustration}`} alt=""/>:<HudIcon name="fish"/>}</span>
+          <div><small>{found?(en?'FREE EXPLORATION':'発見後の自由さんぽ'):(en?'TODAY’S FISH':'きょうの魚を探そう')}</small><strong>{getFishDisplayName(fish,props.locale)}</strong></div>
+        </div>
+        <button className="hud-icon-button search-menu-button" aria-label={en?'Guide and settings':'案内・設定'} aria-expanded={optionsOpen} aria-controls="search-options" onClick={()=>setOptionsOpen(true)}><HudIcon name="menu"/></button>
       </div>
-      {found?<div className="search-detector"><strong>{en?'Found':'発見済み'}</strong><span>{en?'Enjoy exploring Numazu. Your discovery card is saved below.':'沼津の街を自由に散策しよう。発見カードはいつでも開けます。'}</span></div>:<div className={`search-detector ${hint.near?'is-near':''}`} aria-live="polite"><span style={{display:'inline-block',transform:`rotate(${hint.bearing}deg)`}} aria-hidden="true">↑</span><strong>{(en?DIRECTIONS_EN:DIRECTIONS)[hint.direction]} · {Math.round(hint.distance)}m</strong><span>{place.medium&&place.medium!=='air'?`${en?'Dive':'潜って探そう'} · ${en?'Depth':'水深'} ${(41.5-(place.y??41.5)).toFixed(1)}m`:hint.near?(en?'Fish nearby!':'すぐ近くに反応！'):en?place.hintEn:place.hint}</span></div>}
-      <div id="search-options" className="search-options" role="region" aria-label={en?'Guide and settings':'操作案内・設定'} hidden={!optionsOpen}>
-        <div className="search-options-heading"><strong>{en?'Guide & settings':'操作案内・設定'}</strong><button onClick={()=>setOptionsOpen(false)}>{en?'Close':'閉じる'}</button></div>
-        <p className="search-help">{mode==='3d'?(en?'Building heights are emphasized 1.3× and bridges are approximate models aligned with the map. Fish placements and depths are fictional. Dive to find underwater fish; only today’s fish glows nearby. Map: drag with two fingers to move the center. Flight: use the left stick to move, drag to look around, or tap a destination to fly. Landing switches to walking; use Rise to fly again. Approach the glowing fish. Press and hold a building to inspect it.':'建物の高さは見やすさのため1.3倍に強調し、橋は位置を地図に合わせた簡易モデルです。魚はゲーム上の配置で、実際の生息地や水深とは異なります。海・川の魚は水面から潜って探せます。今日の魚だけ近づくほど光ります。地図：2本指で中心を移動。飛行：左スティックで移動、ドラッグで見回し、タップした場所へ自動飛行。着地すると歩行に切り替わり、「飛び立つ」で再び飛べます。光る魚に近づこう。建物を長押しすると情報を確認できます。'):(en?'Tap the map to move the orange search marker.':'地図をタップしてオレンジ色の探索マーカーを移動します。')}</p>
-        <p>{en?place.hintEn:place.hint}</p>
+      {found?<div className="search-detector is-found"><span className="detector-arrow" aria-hidden="true">✓</span><div><strong>{en?'Fish discovered!':'今日の魚、発見！'}</strong><small>{en?'Keep exploring, or take a photo.':'このまま街歩きや撮影を楽しもう'}</small></div></div>:<div className={`search-detector ${hint.near?'is-near':''}`}>
+        <span className="detector-arrow" aria-hidden="true"><span style={{transform:`rotate(${hint.bearing-(mode==='3d'?heading:0)}deg)`}}>↑</span></span>
+        <div><strong>{(en?DIRECTIONS_EN:DIRECTIONS)[hint.direction]} <span className="detector-distance">{Math.round(hint.distance)}<small>m</small></span></strong><small>{hint.near?(en?'Fish nearby!':'すぐ近くに反応！'):place.medium&&place.medium!=='air'?`${en?'Underwater':'水の中にいるよ'} · ${en?'Depth':'水深'} ${(41.5-(place.y??41.5)).toFixed(1)}m`:(en?'Follow the signal':'反応を頼りに近づこう')}</small></div>
+      </div>}
+      <HudMenu open={optionsOpen} onClose={()=>setOptionsOpen(false)} en={en}>
+        <div className="hud-view-switch" role="group" aria-label={en?'View mode':'表示モード'}><button aria-pressed={mode==='3d'} onClick={()=>switchMode('3d')}>3D <small>{en?'Explore the city':'街を探索'}</small></button><button aria-pressed={mode==='2d'} onClick={()=>switchMode('2d')}>2D <small>{en?'Lightweight map':'軽い地図'}</small></button></div>
+        <h3>{en?'Controls':'操作のしかた'}</h3>
+        {mode==='3d'?<div className="hud-help-grid"><div><b>{en?'Move':'移動する'}</b><span>{en?'Left stick':'左のスティック'}</span></div><div><b>{en?'Look around':'見回す'}</b><span>{en?'Drag the scenery':'景色をドラッグ'}</span></div><div><b>{en?'Rise / descend':'上がる・降りる'}</b><span>{en?'Buttons on the right':'右の上下ボタン'}</span></div><div><b>{en?'About a place':'場所の紹介を見る'}</b><span>{en?'Hold a building':'建物を長押し'}</span></div></div>:<p>{en?'Tap the map to move.':'地図をタップすると移動できます。'}</p>}
+        <p className="hud-search-hint"><small>{en?'Today’s clue':'今日のヒント'}</small>{en?place.hintEn:place.hint}</p>
+        <details className="hud-world-note"><summary>{en?'About this virtual city':'街の表現と操作の補足'}</summary><p className="search-help">{mode==='3d'?(en?'Building heights are emphasized 1.3× and bridges are approximate models aligned with the map. Fish placements and depths are fictional. Dive to find underwater fish; only today’s fish glows nearby. Map: drag with two fingers to move the center. Flight: use the left stick to move, drag to look around, or tap a destination to fly. Landing switches to walking; use Rise to fly again. Approach the glowing fish. Press and hold a building to inspect it.':'建物の高さは見やすさのため1.3倍に強調し、橋は位置を地図に合わせた簡易モデルです。魚はゲーム上の配置で、実際の生息地や水深とは異なります。海・川の魚は水面から潜って探せます。今日の魚だけ近づくほど光ります。地図：2本指で中心を移動。飛行：左スティックで移動、ドラッグで見回し、タップした場所へ自動飛行。着地すると歩行に切り替わり、「飛び立つ」で再び飛べます。光る魚に近づこう。建物を長押しすると情報を確認できます。'):(en?'Tap the map to move the orange search marker.':'地図をタップしてオレンジ色の探索マーカーを移動します。')}</p>
+        </details>
         <button aria-pressed={sound} onClick={async()=>{if(!sound){try{audioRef.current??=new AudioContext();await audioRef.current.resume();}catch{setNotice(en?'Sound unavailable':'音を使えませんでした');return;}}setSound(!sound);}}>{en?'Sound':'探知音'} {sound?'ON':'OFF'}</button>
       {slow&&mode==='3d'&&<div role="status">{en?'3D is running slowly. Your search can continue in 2D.':'3Dの動作が重いようです。同じ場所から2Dで続けられます。'} <button onClick={()=>switchMode('2d')}>{en?'Continue in 2D':'2Dで続ける'}</button></div>}
       {mode==='3d'&&<PerformancePanel stats={stats} en={en} context={`exploration:${date}:${position.x},${position.z}`}/>}
         <MapDownload en={en}/><p className="search-options-credit">{en?'Source: MLIT PLATEAU, Numazu buildings, roads and vegetation 2023, terrain and water 2021; GSI Maps aerial photographs, elevation and vector-map tiles. Modified for virtual exploration; not survey-accurate.':'出典：国土交通省 PLATEAU 沼津市（建物・道路・植生2023年度／地形・水面2021年度）、地理院タイル（国土地理院・空中写真・標高・地図）を加工。バーチャル探索用の表現で、正確な測量図ではありません。'} <a href="https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2023" target="_blank" rel="noreferrer">PLATEAU</a> · <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">GSI</a></p>
-      </div>
+      </HudMenu>
       <div className={`search-map ${sceneReady?'is-ready':''}`}>{mode==='3d'?<MapBoundary en={en} onFallback={()=>switchMode('2d')}><Suspense fallback={null}><Map3D pins={EMPTY_PINS} selectedPinId={null} onSelectPin={NO_SELECT} onUpdateStats={onStats} onWebGLError={onError} search={bridge}/></Suspense><span className="search-center" aria-hidden="true">＋</span></MapBoundary>:<Exploration2D en={en} position={position} onMove={setPosition} targetFishId={fish.id} target={place} discovered={!!found}/>}</div>
-      <div className="search-actions search-discover">{found?<button className="primary-action-btn" onClick={openCard}>{en?'View discovery card':'発見カードを見る'}</button>:<button className="primary-action-btn" disabled={!hint.near||(mode==='3d'&&!visible)} onClick={discover}>{hint.near?(en?'Discover the fish!':'魚を発見する！'):(en?'Follow the detector':'探知機を頼りに近づこう')}</button>}{immersive&&(slow?<button className="search-low-fps" onClick={()=>switchMode('2d')}>{en?'Lighter 2D':'軽い2Dへ'}</button>:<small>PLATEAU / GSI</small>)}</div>
+      <div className="search-actions search-discover">
+        {found?<button className="primary-action-btn" onClick={openCard}>{en?'View discovery card':'発見カードを見る'}</button>:(!immersive||hint.near)&&<button className="primary-action-btn" disabled={!hint.near||(mode==='3d'&&!visible)} onClick={discover}>{hint.near?(en?'Discover the fish!':'魚を発見する！'):(en?'Follow the detector':'探知機を頼りに近づこう')}</button>}
+        {immersive&&<>{slow&&<button className="search-low-fps" onClick={()=>switchMode('2d')}>{en?'Lighter 2D':'軽い2Dへ'}</button>}<small>PLATEAU / GSI</small></>}
+      </div>
     </>}
     {immersive&&!sceneReady&&<ExplorationLoading locale={props.locale} fish={fish} onBack={props.onBack} on2D={()=>switchMode('2d')}/>}
     {found&&showingCard&&<div className="search-found"><div className="search-actions"><button className="primary-action-btn" onClick={()=>resume('3d')}>{en?'Return to the 3D city':'3Dの街に戻る'}</button><button onClick={()=>resume('2d')}>{en?'Explore in 2D':'2Dで街を歩く'}</button></div><p className="search-found-label">{en?'DISCOVERED':'発見！'}</p><h2>{getFishDisplayName(fish,props.locale)}</h2><p>{en?place.nameEn:place.name} · {date}</p><p>{en?'A discovery in virtual Numazu. Make a postcard with the scenery.':'バーチャルの沼津で出会いました。街の景色と一緒にカードにしよう。'}</p><button className="primary-action-btn" disabled={busy} onClick={generate}>{busy?(en?'Creating…':'カードを作成中…'):en?'Create discovery card':'景色入りカードを作る'}</button>{card&&<><img className="discovery-card-preview" src={card.url} alt={en?'Discovery postcard':'発見カード'}/><div className="search-actions"><a className="primary-action-btn" download={`shinkai-discovery-${date}.png`} href={card.url}>{en?'Save image':'画像を保存'}</a><button onClick={share}>{en?'Share / copy text':'共有・共有文をコピー'}</button></div><textarea readOnly aria-label={en?'Share text':'共有文'} value={text}/></>}</div>}

@@ -1,3 +1,5 @@
+import {cameraHeading} from '../../navigation';
+import {HudIcon} from '../../HudIcon';
 import {RenderBudget} from '../renderBudget';
 import {PlaceIntroduction} from '../../../scenery/PlaceIntroduction';
 import React, { useEffect, useRef, useState } from 'react';
@@ -27,7 +29,7 @@ export interface Search3DBridge {
   target: HidingPlace;
   fishId?:string;
   locale?:Locale;
-  onPosition: (p: Position, visible: boolean) => void;
+  onPosition: (p: Position, visible: boolean, heading?:number) => void;
   onCaptureReady: (capture: (() => string) | null) => void;
   autoFly?: boolean;
   discovered?: boolean;
@@ -215,7 +217,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     const flight = setupPortFlight(container, scene, camera, controls, renderer.domElement, scenery.setUnderwater);
     let shared:ReturnType<typeof import('../../../multiplayer/sharedExploration').setupSharedExploration>|null=null;
     let sharedDisposed=false;
-    const together=document.createElement('button');together.className='shared-exploration-launch';together.textContent='一緒に探索';container.append(together);
+    const together=document.createElement('button');together.className='shared-exploration-launch';together.textContent='一緒に探索';together.hidden=import.meta.env.VITE_SHARED_EXPLORATION_ENABLED!=='true'&&!location.hash.startsWith('#/join/');container.append(together);
     together.onclick=async()=>{
       together.disabled=true;
       try {const {setupSharedExploration}=await import('../../../multiplayer/sharedExploration');
@@ -223,7 +225,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         shared=setupSharedExploration(container,scene,()=>flight.getNetworkPose());together.remove();
       }catch{together.disabled=false;together.textContent='接続画面を再読込';}
     };
-    if(new URL(location.href).searchParams.has('room'))together.click();
+    if(location.hash.startsWith('#/join/'))together.click();
 
     flightRef.current = flight;
 
@@ -344,11 +346,14 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       const hit=raycaster.intersectObjects(result?.getBuildingTargets?.()||[],true)[0];
       if(!hit){setSelectedBuilding(null);setSelectionNotice((locale??searchRef.current?.locale)==='en'?'No building found.':'建物が見つかりませんでした。建物の上で長押ししてください。');return;}
       const point=hit.point.clone();selecting=true;
+      // World-space face normal, turned toward the viewer, tells walls from roofs.
+      const normal=hit.face?hit.face.normal.clone().transformDirection(hit.object.matrixWorld):undefined;
+      if(normal&&normal.dot(raycaster.ray.direction)>0)normal.negate();
       setSelectionNotice((locale??searchRef.current?.locale)==='en'?'Loading building information…':'建物情報を読み込み中…');
       try{
         await result?.loadSelectionForLoadedChunks?.();
         if(!alive)return;
-        const record=result?.selectionManager?.findBuilding(point);
+        const record=result?.selectionManager?.findBuilding(point,normal);
         setSelectedBuilding(record??null);setCopied(false);
         setSelectionNotice(record?'':((locale??searchRef.current?.locale)==='en'?'Could not identify the building.':'建物を特定できませんでした。もう一度長押ししてください。'));
       }catch{if(alive)setSelectionNotice('建物情報を読み込めませんでした。通信状態を確認してください。');}
@@ -383,8 +388,17 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     let frameCount = 0;
     let fps = 60;
     let lastStatsTime = performance.now();
-    let lastSearchTime = 0;
+    let lastSearchTime = 0, searchHeading = 0;
+    const searchDirection = new THREE.Vector3();
     const frameTimes: number[] = [];
+    const rafTimes: number[] = [];
+    let lastRaf = 0, framesRendered = 0, statFrames = 0, updateMsSum = 0, renderMsSum = 0, renderMsMax = 0;
+    const gpu = (() => {
+      try {
+        const gl = renderer.getContext(), info = gl.getExtension('WEBGL_debug_renderer_info');
+        return String(info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)).slice(0, 200);
+      } catch { return undefined; }
+    })();
     const sessionStart = performance.now();
     renderBudget.reset(sessionStart);
     const sharedFocus = new THREE.Vector3();
@@ -395,6 +409,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     const resumeRendering = () => {
       const now = performance.now();
       prevFrameTime = now; lastTime = now; frameCount = 0; frameTimes.length = 0;
+      rafTimes.length = 0; lastRaf = 0; statFrames = 0; updateMsSum = 0; renderMsSum = 0; renderMsMax = 0;
       renderBudget.reset(now); lastCameraMotion = now;
     };
     document.addEventListener('visibilitychange', resumeRendering);
@@ -403,10 +418,13 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       if (!alive || contextIsLost) return;
       animationFrameId = requestAnimationFrame(animate);
       if(photoOpenRef.current || document.visibilityState === 'hidden'){
-        prevFrameTime=currentTime;renderBudget.reset(currentTime);return;
+        prevFrameTime=currentTime;renderBudget.reset(currentTime);lastRaf=0;return;
       }
+      if(lastRaf){rafTimes.push(currentTime-lastRaf);if(rafTimes.length>600)rafTimes.shift();}
+      lastRaf=currentTime;
       renderTarget = !flight.isActive() && currentTime-lastCameraMotion>750 ? 30 : 60;
       if(!renderBudget.shouldRender(currentTime,renderTarget))return;
+      const updateStart=performance.now();
 
       if (document.visibilityState === 'visible') { frameTimes.push(currentTime - prevFrameTime); if(frameTimes.length>300)frameTimes.shift(); }
       const delta = Math.min((currentTime - prevFrameTime) * 0.001, 0.1);
@@ -429,7 +447,20 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       if (currentTime - lastStatsTime >= 1000) {
         lastStatsTime = currentTime;
         const sorted = [...frameTimes].sort((a,b)=>a-b);
+        const raf = [...rafTimes].sort((a,b)=>a-b);
+        const heap = (performance as Performance & {memory?:{usedJSHeapSize:number}}).memory?.usedJSHeapSize;
+        const frameStats = statFrames ? {updateMsAvg:updateMsSum/statFrames,renderMsAvg:renderMsSum/statFrames,renderMsMax} : {};
+        statFrames = 0; updateMsSum = 0; renderMsSum = 0; renderMsMax = 0;
         onUpdateStats({
+          frames: framesRendered,
+          rafP50Ms: raf[Math.floor(raf.length*.5)],
+          rafP95Ms: raf[Math.floor(raf.length*.95)],
+          ...frameStats,
+          dprChanges: renderBudget.changes,
+          loadedChunks: sceneResultRef.current?.loadedChunkCount?.(),
+          jsHeapMB: heap ? Math.round(heap/1e5)/10 : undefined,
+          canvas: [renderer.domElement.width, renderer.domElement.height],
+          gpu,
           frameP50Ms: sorted[Math.floor(sorted.length*.5)],
           frameP95Ms: sorted[Math.floor(sorted.length*.95)],
           elapsedMs: currentTime-sessionStart,
@@ -487,13 +518,19 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           }
         }
         navigation?.update(flight.isActive()?p:camera.position,landmarksRef.current);
-        searchRef.current.onPosition({ x:p.x, z:p.z,...(flight.isActive()?{y:p.y}:{}) }, visible);
+        camera.getWorldDirection(searchDirection);
+        searchHeading=cameraHeading(searchDirection.x,searchDirection.z,searchHeading);
+        searchRef.current.onPosition({ x:p.x, z:p.z,...(flight.isActive()?{y:p.y}:{}) }, visible,searchHeading);
       }
       fishWorld?.update(currentTime*.001,flight.isActive()?flight.getPosition():camera.position,!!searchRef.current?.discovered,reducedMotion);
       if(renderBudget.sample(currentTime,dataReady&&!loadingArea&&currentTime-sessionStart>5000)){
         renderer.setPixelRatio(renderBudget.dpr);
       }
-      if (!renderFrame()) cancelAnimationFrame(animationFrameId);
+      const renderStart=performance.now();
+      const rendered=renderFrame();
+      const renderMs=performance.now()-renderStart;
+      framesRendered++;statFrames++;updateMsSum+=renderStart-updateStart;renderMsSum+=renderMs;if(renderMs>renderMsMax)renderMsMax=renderMs;
+      if (!rendered) cancelAnimationFrame(animationFrameId);
       else if(dataReady&&!entered){
         entered=true;
         if(searchRef.current?.autoFly){
@@ -621,7 +658,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   };
 
   return (
-    <div className="search-world">
+    <div className={`search-world ${flying?'is-flying':''}`} onPointerDown={e=>{const menu=e.currentTarget.querySelector<HTMLDetailsElement>('.world-travel');if(menu?.open&&!menu.contains(e.target as Node))menu.open=false;}}>
       <div className="search-world-toolbar">
       <button
         type="button"
@@ -637,13 +674,16 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           setFlying(active);
         }}
         className="search-flight-button"
-      >{isLoading || (!flying && !!areaStatus) ? '飛行準備中…' : flying ? 'マップに戻る' : '飛んでみる'}</button>
-      <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{en?'Places':'目印'}</button>
+      aria-label={flying?(en?'Switch to overview':'街を見渡す'):(en?'Start flying':'飛んでみる')}
+      ><HudIcon name={flying?'map':'fly'}/><span>{isLoading || (!flying && !!areaStatus) ? (en?'Loading':'準備中') : flying ? (en?'Overview':'見渡す') : (en?'Fly':'飛ぶ')}</span></button>
+      <details className="world-travel" onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}}}><summary><HudIcon name="pin"/><span>{en?'Places':'移動先'}</span></summary><div className="world-travel-sheet">
+      <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{en?'Landmark labels':'目印を表示'} {landmarks?'ON':'OFF'}</button>
       <div className="search-world-destinations">
         <select aria-label={en ? 'Go to' : '移動先'} disabled={isLoading} defaultValue=""
           onChange={event => {
             const location = event.target.value;
             if (!location) return;
+            const menu=event.target.closest('details');if(menu){menu.open=false;menu.querySelector('summary')?.focus();}
             sharedFocusRef.current=undefined;
             flightRef.current?.setMode(false); setFlying(false);
             locationRef.current = location === 'station' ? 'station' : 'port';
@@ -686,10 +726,11 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           <option value="pilot">{en ? 'Building preview' : '建物の試作を見る'}</option>
         </select>
       </div>
+      </div></details>
       </div>
       <div ref={mountRef} className="search-world-canvas"/>
       <NavigationHud rootRef={navigationRef} en={en}/>
-      <button className="scenery-photo-trigger" disabled={isLoading||!!areaStatus||photoBusy} onClick={takePhoto}>{photoBusy?(en?'Creating…':'作成中…'):(en?'Take photo':'景色を撮る')}</button>
+      <button className="scenery-photo-trigger" aria-label={en?'Take photo':'景色を撮る'} disabled={isLoading||!!areaStatus||photoBusy} onClick={takePhoto}><HudIcon name="camera"/><span>{photoBusy?(en?'Saving':'保存中'):(en?'Photo':'撮影')}</span></button>
       {photoNotice&&<p className="scenery-photo-notice" role="status">{photoNotice}</p>}
       {photo&&<PhotoPreview photo={photo} en={en} onClose={()=>setPhoto(null)}/>}
       {pilotView && !flying && <div className="building-pilot-controls">
