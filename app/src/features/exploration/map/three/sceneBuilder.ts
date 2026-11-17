@@ -1,3 +1,4 @@
+import {createCityHallStreet} from './cityHallStreet';
 import { createCityStructures } from './cityStructures';
 import { styleRegionalLandscape } from './regionalLandscape';
 import { createWaterSurface } from './waterSurface';
@@ -41,6 +42,7 @@ export function buildNumazuPortScene(
   onAreaStatus?: (text: string) => void
 ): SceneBuildResult {
   let isDisposed = false;
+  let street:ReturnType<typeof createCityHallStreet>|undefined;
   let city:ReturnType<typeof createCityStructures>|undefined;
   let aerial: ReturnType<typeof createAerialGround> | undefined;
   const disposables: {
@@ -221,6 +223,7 @@ export function buildNumazuPortScene(
       water.attach(waterRiverScene);
       scene.add(waterSeaScene,waterRiverScene);
       city=createCityStructures(scene,terrainScene,roadScene,onCollisionGeometry);
+      street=createCityHallStreet(scene,roadScene,terrainScene,onCollisionGeometry);
       aerial = createAerialGround(scene, terrainScene, [waterSeaScene, waterRiverScene]);
       aerial.maskRoads(roadScene);
       water.setShoreMask(aerial.waterMask,aerial.maskBounds);
@@ -235,6 +238,7 @@ export function buildNumazuPortScene(
     isDisposed = true;
     station.dispose();
     city?.dispose();
+    street?.dispose();
     aerial?.dispose();
     water.dispose();
     disposables.forEach((item) => {
@@ -248,7 +252,7 @@ export function buildNumazuPortScene(
     disposables,
     ready: Promise.all([ready, station.ready,regionalReady]).then(() => {}),
     updateWater: water.update,
-    updateBuildings: (position,viewer) => { station.update(position,viewer); aerial?.update(position); },
+    updateBuildings: (position,viewer) => { station.update(position,viewer); street?.update(viewer??position); aerial?.update(position); },
     groundReady: async () => { await aerial?.settled(); await station.detailReady(); },
     isWaterAt:(x,z)=>aerial?.isWaterAt(x,z)??true,
     selectionManager: station.selectionManager,
