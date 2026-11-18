@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type {VehicleId} from './avatarOptions';
 import { FreeFlightState, FreeFlightStatus } from './types';
 import {
   START_POSITION_FREE,
@@ -13,6 +14,8 @@ export const SEA = 41.5;
 export class FreeFlightController {
   public active: boolean = false;
   public state: FreeFlightState = 'air';
+  public vehicle:VehicleId='none';
+  public setVehicle(id:VehicleId):boolean {if(id==='submarine'&&(!this.active||!this.isSubmerged()))return false;this.vehicle=id;this.velocity.set(0,0,0);return true;}
 
   public position: THREE.Vector3;
   public velocity: THREE.Vector3;
@@ -64,6 +67,7 @@ export class FreeFlightController {
 
   public activate(active: boolean): void {
     this.active = active;
+    this.vehicle='none';
     if (active) {
       this.resetPosition();
     }
@@ -86,6 +90,7 @@ export class FreeFlightController {
   }
 
   public teleport(x: number, y: number, z: number): void {
+    this.vehicle='none';
     this.position.set(x, y, z);
     this.velocity.set(0, 0, 0);
     this.state = this.isSubmerged() ? 'water' : 'air';
@@ -158,10 +163,11 @@ export class FreeFlightController {
 
     const wasGrounded = this.isGroundedOnSurface;
     const inWater = this.isSubmerged();
+    if(!inWater)this.vehicle='none';
     const takingOff = effectiveVert > .1;
     if(takingOff || inWater)this.walkingOffEdge=false;
     const walking = !inWater && !takingOff && (wasGrounded || this.walkingOffEdge);
-    const maxSpeed = walking ? FREE_FLIGHT_CONFIG.maxSpeedGround : inWater ? FREE_FLIGHT_CONFIG.maxSpeedWater : FREE_FLIGHT_CONFIG.maxSpeedAir;
+    const maxSpeed = walking ? FREE_FLIGHT_CONFIG.maxSpeedGround : inWater ? (this.vehicle==='submarine'?15:FREE_FLIGHT_CONFIG.maxSpeedWater) : FREE_FLIGHT_CONFIG.maxSpeedAir;
 
     // 2. カメラ方向ベクトルの算出
     // 水平前進ベクトル (yaw 基準, +Zが南、-Zが北、+Xが東、-Xが西)
@@ -274,6 +280,8 @@ export class FreeFlightController {
     }
 
     // 9. 人型キャラクターモデルの同期と姿勢制御
+    if(this.state!=='water')this.vehicle='none';
+    character.setVehicle(this.vehicle);
     character.setPosition(this.position);
     
     // キャラクターの向き：移動速度が一定以上あれば移動方向、それ以外はカメラの水平向き

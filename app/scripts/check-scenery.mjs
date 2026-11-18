@@ -26,7 +26,7 @@ try{
  await page.getByRole('button',{name:'3Dで景色を見る',exact:true}).click();
  await page.getByRole('button',{name:'景色を撮る',exact:true}).waitFor();
  await page.waitForFunction(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='景色を撮る');return b&&!b.disabled;},{},{timeout:120000});
- await page.getByRole('button',{name:'景色を撮る',exact:true}).click();
+ await page.getByRole('button',{name:'景色を撮る',exact:true}).click();await page.getByRole('button',{name:'この構図で撮る',exact:true}).click();
  const dialog=page.getByRole('dialog',{name:'撮影した景色',exact:true});await dialog.waitFor();
  const png=await page.locator('.scenery-photo-preview').evaluate(async img=>{await img.decode();return{width:img.naturalWidth,height:img.naturalHeight};});
  assert(png.width>200&&png.height>300);
@@ -40,7 +40,7 @@ try{
  await page.goto(link,{waitUntil:'domcontentloaded'});
  await page.getByRole('button',{name:'3Dで景色を見る',exact:true}).click();
  await page.waitForFunction(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='景色を撮る');return b&&!b.disabled;},{},{timeout:120000});
- await page.getByRole('button',{name:'景色を撮る',exact:true}).click();await dialog.waitFor();
+ await page.getByRole('button',{name:'景色を撮る',exact:true}).click();await page.getByRole('button',{name:'この構図で撮る',exact:true}).click();await dialog.waitFor();
  const restored=await page.getByRole('textbox',{name:'景色のリンク',exact:true}).inputValue();assert.equal(restored,link,'Shared camera did not restore');
  await page.getByRole('button',{name:'街に戻る',exact:true}).click();
  await page.getByRole('button',{name:'案内へ戻る',exact:true}).click();assert.equal(await page.locator('canvas').count(),0);
@@ -54,7 +54,7 @@ try{
  const original=await gp.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1'));
  await gp.getByRole('button',{name:'今日の魚を探しに行く',exact:true}).click();
  await gp.waitForFunction(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='景色を撮る');return b&&!b.disabled;},{},{timeout:120000});
- await gp.getByRole('button',{name:'景色を撮る',exact:true}).click();
+ await gp.getByRole('button',{name:'景色を撮る',exact:true}).click();await gp.getByRole('button',{name:'この構図で撮る',exact:true}).click();
  await gp.getByRole('dialog',{name:'撮影した景色',exact:true}).waitFor();
  const flightLink=await gp.getByRole('textbox',{name:'景色のリンク',exact:true}).inputValue();
  assert.equal(await gp.evaluate(()=>localStorage.getItem('shinkai_gacha_collection_v1')),original);
@@ -65,7 +65,7 @@ try{
  await gp.goto(flightLink,{waitUntil:'domcontentloaded'});
  await gp.getByRole('button',{name:'3Dで景色を見る',exact:true}).click();
  await gp.waitForFunction(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='景色を撮る');return b&&!b.disabled;},{},{timeout:120000});
- await gp.getByRole('button',{name:'景色を撮る',exact:true}).click();
+ await gp.getByRole('button',{name:'景色を撮る',exact:true}).click();await gp.getByRole('button',{name:'この構図で撮る',exact:true}).click();
  await gp.getByRole('dialog',{name:'撮影した景色',exact:true}).waitFor();
  assert.equal(await gp.getByRole('textbox',{name:'景色のリンク',exact:true}).inputValue(),flightLink,'Flight viewpoint did not restore');
  await game.close();console.log('PASS photo during fish exploration, progress unchanged, return to 2D, shared flight view');

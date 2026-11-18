@@ -69,7 +69,8 @@ export function setupSharedExploration(container:HTMLElement,scene:THREE.Scene,g
         if(!payload.active){remove(payload.id);return;}
         if(peer&&peer.pose.session!==payload.session){remove(payload.id);peer=undefined;}
         if(!peer){if(peers.size>=3)return;const avatar=new HumanoidCharacter();avatar.group.visible=true;avatar.setPosition(new THREE.Vector3(payload.x,payload.y,payload.z));scene.add(avatar.group);const badge=label(member.display_name);avatar.group.add(badge);avatar.group.traverse(o=>{if(o instanceof THREE.PointLight)o.visible=false;});peer={avatar,pose:payload,seen:performance.now(),label:badge};peers.set(payload.id,peer);}
-        peer.pose=payload;peer.seen=performance.now();
+        if(peer.avatar.group.userData.avatar!==(payload.avatar??'mendako'))peer.avatar.setAvatar(payload.avatar??'mendako');
+        peer.avatar.setVehicle(payload.vehicle??'none');peer.pose=payload;peer.seen=performance.now();
       }).on('presence',{event:'sync'},()=>{if(g===generation)void refreshMembers(g);}).subscribe(async state=>{
         if(g!==generation||disposed)return;
         const revision=++connectionRevision;
@@ -120,5 +121,5 @@ export function setupSharedExploration(container:HTMLElement,scene:THREE.Scene,g
     })();
   }
   document.addEventListener('visibilitychange',visibility);
-  return {update(dt:number,time:number){for(const peer of peers.values()){const predicted=predictPosition(peer.pose,performance.now()-peer.seen);peer.avatar.group.position.lerp(new THREE.Vector3(predicted.x,predicted.y,predicted.z),1-Math.exp(-dt*12));peer.avatar.updatePose(peer.pose.yaw,peer.pose.speed,22,peer.pose.state,dt,time);}},dispose(){disposed=true;clearInterval(timer);document.removeEventListener('visibilitychange',visibility);void exit();panel.remove();}};
+  return {update(dt:number,time:number){for(const peer of peers.values()){const predicted=predictPosition(peer.pose,performance.now()-peer.seen);peer.avatar.group.position.lerp(new THREE.Vector3(predicted.x,predicted.y,predicted.z),1-Math.exp(-dt*12));peer.avatar.updatePose(peer.pose.yaw,peer.pose.speed,22,peer.pose.state,dt,time);if(peer.pose.pose&&peer.pose.pose!=='natural'&&peer.pose.pose!=='none')peer.avatar.applyPhotoPose(peer.pose.pose,peer.pose.yaw);}},dispose(){disposed=true;clearInterval(timer);document.removeEventListener('visibilitychange',visibility);void exit();panel.remove();}};
 }

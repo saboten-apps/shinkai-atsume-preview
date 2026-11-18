@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {loadAvatar,type AvatarId,type PhotoPose,type VehicleId} from './avatarOptions';
 import { Octree } from 'three/examples/jsm/math/Octree.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FreeFlightController, SEA } from './freeFlight';
@@ -8,9 +9,10 @@ class ExpandedOctree extends Octree {
   calcBox() { super.calcBox(); this.box?.max.addScalar(0.01); return this; }
 }
 
-export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, camera: THREE.PerspectiveCamera, controls: OrbitControls, canvas: HTMLCanvasElement, setUnderwater: (value: boolean) => void) {
+export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, camera: THREE.PerspectiveCamera, controls: OrbitControls, canvas: HTMLCanvasElement, setUnderwater: (value: boolean) => void, onVehicleChange:(vehicle:VehicleId)=>void=()=>{}) {
   const controller = new FreeFlightController();
   const character = new HumanoidCharacter();
+  let avatarId=loadAvatar(),photoPose:PhotoPose|null=null,lastVehicle:VehicleId='none';character.setAvatar(avatarId);
   character.group.visible = false;
   scene.add(character.group);
   const trees: Octree[] = [];
@@ -63,7 +65,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   function setMode(active: boolean, start?: THREE.Vector3) {
     pressed.clear();cancelTravel();
     if (active) savedPosition.copy(camera.position);
-    controller.activate(active);
+    controller.activate(active);controller.setVehicle('none');character.setVehicle('none');lastVehicle='none';onVehicleChange('none');photoPose=null;
     if (active && start) controller.position.copy(start);
     controls.enabled = !active; character.group.visible = active;
     if (!active) { camera.position.copy(savedPosition); controls.update(); setUnderwater(false); }
@@ -99,7 +101,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   const keyboardCodes=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyE','KeyQ']);
   const syncKeyboard=()=>{controller.setStick(Number(pressed.has('KeyD')||pressed.has('ArrowRight'))-Number(pressed.has('KeyA')||pressed.has('ArrowLeft')),Number(pressed.has('KeyW')||pressed.has('ArrowUp'))-Number(pressed.has('KeyS')||pressed.has('ArrowDown')));controller.setVertical(Number(pressed.has('KeyE'))-Number(pressed.has('KeyQ')));};
   const editing=(target:EventTarget|null)=>target instanceof HTMLElement&&!!target.closest('input,textarea,select,[contenteditable="true"],dialog,.scenery-photo-overlay');
-  const keyDown=(e:KeyboardEvent)=>{if(!controller.active||!keyboardCodes.has(e.code)||e.ctrlKey||e.metaKey||e.altKey)return;if(editing(e.target)||document.querySelector('dialog[open],.scenery-photo-overlay,.world-travel[open]')){stopInputs();return;}e.preventDefault();if(pressed.has(e.code))return;cancelTravel();pressed.add(e.code);syncKeyboard();};
+  const keyDown=(e:KeyboardEvent)=>{if(!controller.active||photoPose!==null||!keyboardCodes.has(e.code)||e.ctrlKey||e.metaKey||e.altKey)return;if(editing(e.target)||document.querySelector('dialog[open],.scenery-photo-overlay,.world-travel[open]')){stopInputs();return;}e.preventDefault();if(pressed.has(e.code))return;cancelTravel();pressed.add(e.code);syncKeyboard();};
   const keyUp=(e:KeyboardEvent)=>{if(pressed.delete(e.code)){e.preventDefault();syncKeyboard();}};
   const focused=(e:FocusEvent)=>{if(editing(e.target))stopInputs();};
   const verticalKey=(direction:number)=>(e:KeyboardEvent)=>{if(e.code!=='Space'&&e.code!=='Enter')return;e.preventDefault();if(direction<0&&controller.state==='ground')return;cancelTravel();controller.setVertical(direction);};
@@ -111,7 +113,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   document.addEventListener('visibilitychange',hidden);
 
   function lookDown(e: PointerEvent) {
-    if (!controller.active || lookId !== null || e.button !== 0) return;
+    if (!controller.active || photoPose!==null || lookId !== null || e.button !== 0) return;
     lookId = e.pointerId;
     pressStarted = performance.now();
     startX = lastX = e.clientX;
@@ -161,8 +163,19 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
     bestDistance = Infinity;
   }
   canvas.addEventListener('pointerdown', lookDown); canvas.addEventListener('pointermove', lookMove); canvas.addEventListener('pointerup', lookUp); canvas.addEventListener('pointercancel', lookUp);
+  function previewPose(){
+    character.setVisible(controller.active&&photoPose!=='none');
+    if(photoPose&&photoPose!=='none'){
+      const dx=camera.position.x-controller.position.x,dz=camera.position.z-controller.position.z;
+      character.applyPhotoPose(photoPose,Math.atan2(-dx,-dz));
+    }
+  }
   return {
     setMode,
+    setAvatar(id:AvatarId){avatarId=id;character.setAvatar(id);},
+    setPhotoPose(pose:PhotoPose|null){stopInputs();photoPose=pose;if(pose!==null)previewPose();else character.setVisible(controller.active);},
+    setVehicle(id:VehicleId){stopInputs();const accepted=controller.setVehicle(id);if(accepted){character.setVehicle(id);lastVehicle=id;onVehicleChange(id);}return accepted;},
+    startSubmarineTrip(){if(!isWaterAt(-100,-140))return false;setMode(true,new THREE.Vector3(-100,SEA-2,-140));controller.state='water';controller.setVehicle('submarine');character.setPosition(controller.position);character.setVehicle('submarine');lastVehicle='submarine';onVehicleChange('submarine');return true;},
     addGeometry(group: THREE.Group) {
       group.updateWorldMatrix(true, true);
       const buckets = new Map<string, number[]>();
@@ -196,7 +209,8 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
       });
       return () => { trees.length = 0; for (const cell of added) { cells.delete(cell); cell.geometry.dispose(); } };
     },
-    update(dt: number, time: number) { if (!controller.active) return; refreshColliders(); controller.update(dt, trees, character, camera, time, destination);
+    update(dt: number, time: number) { if (!controller.active) return;if(photoPose!==null){previewPose();return;} refreshColliders(); controller.update(dt, trees, character, camera, time, destination);
+      if(controller.vehicle!==lastVehicle){lastVehicle=controller.vehicle;onVehicleChange(lastVehicle);}
       dropLabel.textContent = controller.state==='water'?'潜る':'降りる';
       if (destination) {
         const gap = controller.state==='ground' ? Math.hypot(controller.position.x-destination.x,controller.position.z-destination.z) : controller.position.distanceTo(destination);
@@ -209,8 +223,8 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
           controller.velocity.set(0, 0, 0);
         }
       }
-       const data=controller.getHookData(); riseLabel.textContent=data.state==='ground'?'飛び立つ':'上がる';drop.disabled=data.state==='ground'; depth.textContent = data.state==='ground'?'徒歩':data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`; setUnderwater(data.state === 'water'); },
-    getNetworkPose() { return {x:controller.position.x,y:controller.position.y,z:controller.position.z,vx:controller.velocity.x,vy:controller.velocity.y,vz:controller.velocity.z,yaw:Math.atan2(Math.sin(character.getYaw()),Math.cos(character.getYaw())),speed:controller.velocity.length(),state:controller.state,active:controller.active}; },
+       const data=controller.getHookData(); riseLabel.textContent=data.state==='ground'?'飛び立つ':'上がる';drop.disabled=data.state==='ground'; depth.textContent = (controller.vehicle==='submarine'?'潜水艇 · ':'')+(data.state==='ground'?'徒歩':data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`); setUnderwater(data.state === 'water'); },
+    getNetworkPose() { return {avatar:avatarId,vehicle:controller.vehicle,pose:photoPose??'natural',x:controller.position.x,y:controller.position.y,z:controller.position.z,vx:controller.velocity.x,vy:controller.velocity.y,vz:controller.velocity.z,yaw:Math.atan2(Math.sin(character.getYaw()),Math.cos(character.getYaw())),speed:controller.velocity.length(),state:controller.state,active:controller.active}; },
     getPosition() { return controller.position; },
     getStatus() { return controller.getHookData(); },
     setWaterQuery(query:(x:number,z:number)=>boolean){isWaterAt=query;controller.setWaterQuery(query);},
@@ -219,6 +233,6 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
       const visible=character.group.visible;character.group.visible=false;
       try{return capture();}finally{character.group.visible=visible;}
     },
-    dispose() { stopInputs();window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);document.removeEventListener('focusin',focused);window.removeEventListener('pointerup',verticalReleased);window.removeEventListener('pointercancel',verticalReleased);window.removeEventListener('blur',stopInputs);document.removeEventListener('visibilitychange',hidden);canvas.removeEventListener('pointerdown',lookDown); canvas.removeEventListener('pointermove',lookMove); canvas.removeEventListener('pointerup',lookUp); canvas.removeEventListener('pointercancel',lookUp); ui.remove(); cells.forEach(cell => cell.geometry.dispose()); cells.clear(); trees.length = 0; colliderMaterial.dispose(); scene.remove(character.group); character.group.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.geometry.dispose(); const mats = Array.isArray(obj.material) ? obj.material : [obj.material]; mats.forEach(m => m.dispose()); } }); }
+    dispose() { stopInputs();window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);document.removeEventListener('focusin',focused);window.removeEventListener('pointerup',verticalReleased);window.removeEventListener('pointercancel',verticalReleased);window.removeEventListener('blur',stopInputs);document.removeEventListener('visibilitychange',hidden);canvas.removeEventListener('pointerdown',lookDown); canvas.removeEventListener('pointermove',lookMove); canvas.removeEventListener('pointerup',lookUp); canvas.removeEventListener('pointercancel',lookUp); ui.remove(); cells.forEach(cell => cell.geometry.dispose()); cells.clear(); trees.length = 0; colliderMaterial.dispose(); character.dispose(); }
   };
 }

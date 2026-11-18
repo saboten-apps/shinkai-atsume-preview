@@ -1,3 +1,5 @@
+import {AVATARS,AVATAR_KEY,loadAvatar,type AvatarId,type PhotoPose,type VehicleId} from '../flight/avatarOptions';
+import {PhotoSetup} from '../../../scenery/PhotoSetup';
 import {createWorldAtmosphere} from '../three/worldAtmosphere';
 import {loadAtmosphere,resolveAtmosphere,ATMOSPHERE_KEY,type AtmosphereChoice,type TimeChoice,type SeasonChoice} from '../atmosphere';
 import {cameraHeading} from '../../navigation';
@@ -80,6 +82,12 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const capturePhotoRef=useRef<(()=>{image:string;view:Viewpoint})|null>(null);
   const [photo,setPhoto]=useState<SceneryPhoto|null>(null);
   const [photoBusy,setPhotoBusy]=useState(false);
+  const [photoSetup,setPhotoSetup]=useState(false);
+  const [photoPose,setPhotoPose]=useState<PhotoPose>('wave');
+  const photoPoseRef=useRef(photoPose);photoPoseRef.current=photoPose;
+  const [avatar,setAvatar]=useState<AvatarId>(loadAvatar);
+  const avatarRef=useRef(avatar);avatarRef.current=avatar;
+  const [vehicle,setVehicle]=useState<VehicleId>('none');
   const [photoNotice,setPhotoNotice]=useState('');
   const photoOpenRef=useRef(false);photoOpenRef.current=!!photo||photoBusy;
   const photoGeneration=useRef(0);
@@ -91,6 +99,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     setPhotoNotice('');setPhotoBusy(true);
     try{
       const snapshot=capturePhotoRef.current?.();if(!snapshot)throw Error('Not ready');
+      setPhotoSetup(false);
       const blob=await makeSceneryPhoto(snapshot.image,en);
       if(generation!==photoGeneration.current)return;
       const link=viewUrl(snapshot.view,location.href);
@@ -117,6 +126,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const [areaStatus, setAreaStatus] = useState('');
   const locationRef = useRef<'port' | 'station'>('port');
   const [flying, setFlying] = useState(false);
+  useEffect(()=>{flightRef.current?.setAvatar(avatar);try{localStorage.setItem(AVATAR_KEY,avatar);}catch{}},[avatar]);
+  useEffect(()=>{flightRef.current?.setPhotoPose(photoSetup?(flying?photoPose:'none'):null);},[photoSetup,photoPose,flying]);
   const controlsRef = useRef<OrbitControls | null>(null);
   const pinObjectsRef = useRef<Pin3DObject[]>([]);
   const targetCamFocusRef = useRef<THREE.Vector3 | null>(null);
@@ -224,7 +235,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     controlsRef.current = controls;
     controls.addEventListener('start',()=>{sharedFocusRef.current=undefined;});
 
-    const flight = setupPortFlight(container, scene, camera, controls, renderer.domElement, scenery.setUnderwater);
+    const flight = setupPortFlight(container, scene, camera, controls, renderer.domElement, scenery.setUnderwater,setVehicle);
+    flight.setAvatar(avatarRef.current);
     let shared:ReturnType<typeof import('../../../multiplayer/sharedExploration').setupSharedExploration>|null=null;
     let sharedDisposed=false;
     const together=document.createElement('button');together.className='shared-exploration-launch';together.textContent='一緒に探索';together.hidden=import.meta.env.VITE_SHARED_EXPLORATION_ENABLED!=='true'&&!location.hash.startsWith('#/join/');container.append(together);
@@ -318,11 +330,12 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       const hide=[fishWorld?.root,highlightGroupRef.current,...pinObjs.map(p=>p.group)].filter((o):o is NonNullable<typeof o>=>!!o);
       const visible=hide.map(o=>o.visible);hide.forEach(o=>{o.visible=false;});
       try{
-        return flight.withoutCharacter(()=>{
+        const capture=()=>{
           scene.userData.forceReflectionUpdate=true;
           if(!renderFrame())throw Error('Render interrupted');
           return {image:renderer.domElement.toDataURL('image/png'),view};
-        });
+        };
+        return !flight.isActive()||photoPoseRef.current==='none'?flight.withoutCharacter(capture):capture();
       }finally{scene.userData.forceReflectionUpdate=false;hide.forEach((o,i)=>{o.visible=visible[i];});}
     };
 
@@ -696,6 +709,12 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         <label>{en?'Time':'時間帯'}<select aria-label={en?'Time of day':'時間帯'} value={atmosphereChoice.time} onChange={e=>chooseAtmosphere({time:e.target.value as TimeChoice})}>{(['auto','morning','day','evening','night'] as const).map((v,i)=><option value={v} key={v}>{(en?['Auto (Japan time)','Morning','Day','Evening','Night']:['自動（日本時間）','朝','昼','夕方','夜'])[i]}</option>)}</select></label>
         <label>{en?'Season':'季節'}<select aria-label={en?'Season':'季節'} value={atmosphereChoice.season} onChange={e=>chooseAtmosphere({season:e.target.value as SeasonChoice})}>{(['auto','spring','summer','autumn','winter'] as const).map((v,i)=><option value={v} key={v}>{(en?['Auto (calendar)','Spring','Summer','Autumn','Winter']:['自動（暦）','春','夏','秋','冬'])[i]}</option>)}</select></label>
       </fieldset>
+      <fieldset className="world-atmosphere"><legend>{en?'Diver and vehicle':'キャラクターと乗り物'}</legend>
+        <label>{en?'Character':'キャラクター'}<select aria-label={en?'Character':'キャラクター'} value={avatar} onChange={e=>setAvatar(e.target.value as AvatarId)}>{AVATARS.map(a=><option key={a.id} value={a.id}>{en?a.en:a.ja}</option>)}</select></label>
+        <p>{en?'Your selection is also shared during online exploration.':'オンライン探索でも、選んだ姿を相手に表示します。'}</p>
+        <button type="button" disabled={isLoading||!!areaStatus} onClick={()=>{const flight=flightRef.current;if(!flight)return;const ok=vehicle==='submarine'?flight.setVehicle('none'):flight.setVehicle('submarine');if(!ok)setPhotoNotice(en?'Dive into water first, or board at the harbor.':'水中で乗るか、港の乗り場を選んでください。');else setPhotoNotice('');}}>{vehicle==='submarine'?(en?'Leave submarine':'潜水艇から降りる'):(en?'Board here (underwater)':'ここで潜水艇に乗る（水中）')}</button>
+        <button type="button" disabled={isLoading||!!areaStatus} onClick={e=>{if(flightRef.current?.startSubmarineTrip()){setFlying(true);setPhotoNotice('');const menu=e.currentTarget.closest('details');if(menu)menu.open=false;}else setPhotoNotice(en?'Wait for the harbor to load.':'港の読み込みを待ってください。');}}>{en?'Board at Numazu harbor':'港の乗り場で潜水艇に乗る'}</button>
+      </fieldset>
       <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{en?'Landmark labels':'目印を表示'} {landmarks?'ON':'OFF'}</button>
       <div className="search-world-destinations">
         <select aria-label={en ? 'Go to' : '移動先'} disabled={isLoading} defaultValue=""
@@ -761,7 +780,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       </div>
       <div ref={mountRef} className="search-world-canvas"/>
       <NavigationHud rootRef={navigationRef} en={en}/>
-      <button className="scenery-photo-trigger" aria-label={en?'Take photo':'景色を撮る'} disabled={isLoading||!!areaStatus||photoBusy} onClick={takePhoto}><HudIcon name="camera"/><span>{photoBusy?(en?'Saving':'保存中'):(en?'Photo':'撮影')}</span></button>
+      <button className="scenery-photo-trigger" aria-label={en?'Take photo':'景色を撮る'} disabled={isLoading||!!areaStatus||photoBusy} onClick={()=>setPhotoSetup(true)}><HudIcon name="camera"/><span>{photoBusy?(en?'Saving':'保存中'):(en?'Photo':'撮影')}</span></button>
+      {photoSetup&&<PhotoSetup en={en} pose={photoPose} canPose={flying} onPose={setPhotoPose} onCapture={()=>void takePhoto()} onClose={()=>setPhotoSetup(false)}/>}
       {photoNotice&&<p className="scenery-photo-notice" role="status">{photoNotice}</p>}
       {photo&&<PhotoPreview photo={photo} en={en} onClose={()=>setPhoto(null)}/>}
       {pilotView && !flying && <div className="building-pilot-controls">
