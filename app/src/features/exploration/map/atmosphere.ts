@@ -14,10 +14,16 @@ const PALETTES={
  day:{top:0x4590d4,horizon:0xc2e0f0,cloud:0xfafaf5,fog:0xc3dce8,sun:0xfff7ed,water:0x0e4558,ambient:.9,direct:1.4,fill:.6,night:0,photo:1},
  evening:{top:0x566e9d,horizon:0xf5ac80,cloud:0xf5b9a1,fog:0xb3a6b1,sun:0xffb77e,water:0x384d69,ambient:.72,direct:.7,fill:.35,night:.2,photo:.75},
 };
+/** Shared wall-clock epoch: late joiners see the same game time without a server timer. */
+export const GAME_CLOCK={epoch:Date.UTC(2026,0,1),dayMs:10*60*1000,seasonMs:15*60*1000} as const;
+export function gameMoment(date=new Date()){
+ const elapsed=date.getTime()-GAME_CLOCK.epoch;
+ const mod=(n:number,d:number)=>((n%d)+d)%d;
+ return{hour:mod(elapsed,GAME_CLOCK.dayMs)/GAME_CLOCK.dayMs*24,season:(['spring','summer','autumn','winter'] as const)[Math.floor(mod(elapsed,GAME_CLOCK.seasonMs*4)/GAME_CLOCK.seasonMs)]};
+}
 export function resolveAtmosphere(choice:AtmosphereChoice,date=new Date()){
- const jst=new Date(date.getTime()+9*3600000),month=jst.getUTCMonth()+1;
- const season=choice.season==='auto'?(month>=3&&month<=5?'spring':month<=8&&month>=6?'summer':month>=9&&month<=11?'autumn':'winter'):choice.season;
- const settings=SEASONS[season],hour=choice.time==='auto'?jst.getUTCHours()+jst.getUTCMinutes()/60:choice.time==='morning'?settings.rise+.2:choice.time==='evening'?settings.set+.15:choice.time==='night'?22:12;
+ const game=gameMoment(date),season=choice.season==='auto'?game.season:choice.season;
+ const settings=SEASONS[season],hour=choice.time==='auto'?game.hour:choice.time==='morning'?settings.rise+.2:choice.time==='evening'?settings.set+.15:choice.time==='night'?22:12;
  const keys:[number,keyof typeof PALETTES][]=[[0,'night'],[settings.rise-.8,'night'],[settings.rise+.2,'morning'],[settings.rise+2,'day'],[settings.set-1,'day'],[settings.set+.15,'evening'],[settings.set+1.2,'night'],[24,'night']];
  const index=keys.findIndex(([h])=>h>hour),a=keys[Math.max(0,index-1)],b=keys[index<0?keys.length-1:index];
  let mix=b[0]===a[0]?0:(hour-a[0])/(b[0]-a[0]);mix=mix*mix*(3-2*mix);

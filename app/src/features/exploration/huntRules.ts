@@ -8,7 +8,7 @@ export function huntKind(id:string):HuntKind{
  if(['f03','f11','f15'].includes(id))return 'school';
  if(['f07','f16','f22'].includes(id))return 'track';return 'observe';
 }
-export const HUNT_HINTS:Record<HuntKind,[string,string]>={observe:['近づいて、魚をしばらく観察しよう','Get close and observe the fish.'],night:['夜に姿を見せる魚。「移動・景色」で夜にしよう','This game fish appears at night. Change the time in Places & sky.'],light:['探査ライトをONにし、画面中央で魚を照らそう','Turn on the survey light and aim the center at the fish.'],school:['小さな群れを見つけて、近くで観察しよう','Find the small school and watch it nearby.'],track:['泳ぐ魚を追いかけて、近くで観察しよう','Follow the swimming fish and watch it up close.']};
+export const HUNT_HINTS:Record<HuntKind,[string,string]>={observe:['近づいて、魚をしばらく観察しよう','Get close and observe the fish.'],night:['夜に姿を見せる魚。ゲーム内の夜に探そう','This game fish appears at night, following the game clock.'],light:['探査ライトをONにし、画面中央で魚を照らそう','Turn on the survey light and aim the center at the fish.'],school:['小さな群れを見つけて、近くで観察しよう','Find the small school and watch it nearby.'],track:['泳ぐ魚を追いかけて、近くで観察しよう','Follow the swimming fish and watch it up close.']};
 export class HuntTracker{
  private held=0;
  constructor(readonly kind:HuntKind){}
