@@ -18,11 +18,13 @@ import {
 import { recordTelemetryEvent } from './services/telemetryService';
 import type { FishCatalogData } from './types/schema';
 
+const AquariumPage=lazy(()=>import('./features/aquarium/AquariumPage'));
 const ExplorationPage = lazy(() => import('./features/exploration/ExplorationPage'));
 const PlacesPage = lazy(() => import('./features/scenery/PlacesPage'));
 const SceneryPage = lazy(() => import('./features/scenery/SceneryPage'));
 
 type RouteState =
+  | { page: 'aquarium' }
   | { page: 'places' }
   | { page: 'scenery'; hash: string }
   | { page: 'explore'; date: string; mode: '3d'|'2d' }
@@ -33,6 +35,7 @@ type RouteState =
 
 function parseHashRoute(hash: string): RouteState {
   const cleaned = hash.replace(/^#\/?/, '').trim();
+  if(cleaned==='aquarium')return{page:'aquarium'};
   if(cleaned==='places')return {page:'places'};
   if(cleaned.startsWith('join/'))return {page:'scenery',hash};
   if(cleaned==='view'||cleaned.startsWith('view/'))return {page:'scenery',hash};
@@ -204,6 +207,7 @@ export const App: React.FC = () => {
 
       {/* メインコンテンツ */}
       <main className="app-main">
+        {route.page==='aquarium'&&<Suspense fallback={<p role="status">{locale==='ja'?'水族館を準備中…':'Preparing aquarium…'}</p>}><AquariumPage fishList={catalogData.fish} collectionState={collectionState} locale={locale}/></Suspense>}
         {route.page === 'places' && <Suspense fallback={<p role="status">{locale==='ja'?'場所の案内を読み込み中…':'Loading places…'}</p>}><PlacesPage locale={locale}/></Suspense>}
         {route.page === 'scenery' && <Suspense fallback={<p role="status">{locale==='ja'?'景色の案内を読み込み中…':'Loading scenery guide…'}</p>}><SceneryPage key={route.hash} hash={route.hash} locale={locale} onBack={()=>navigateTo('#/today')}/></Suspense>}
         {route.page === 'today' && (

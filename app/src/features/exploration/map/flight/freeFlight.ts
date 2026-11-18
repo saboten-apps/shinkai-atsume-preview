@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type {VehicleId} from './avatarOptions';
+import {boatFitsWater} from './boat';
 import { FreeFlightState, FreeFlightStatus } from './types';
 import {
   START_POSITION_FREE,
@@ -15,10 +16,13 @@ export class FreeFlightController {
   public active: boolean = false;
   public state: FreeFlightState = 'air';
   public vehicle:VehicleId='none';
+  public autopilotSpeed:number|undefined;
   public setVehicle(id:VehicleId,colliders:Octree[]=[]):boolean {
     if(id!=='none'&&!this.active)return false;
     if(id==='submarine'&&!this.isSubmerged())return false;
+    if(id==='boat'&&(!boatFitsWater(this.waterQuery,this.position.x,this.position.z)||Math.abs(this.position.y-SEA)>2))return false;
     if(id==='car'&&(this.state!=='ground'||!this.isGroundedOnSurface||this.isSubmerged()||!this.carFitsAt(this.position,colliders)))return false;
+    if(id==='boat')this.position.y=SEA+.04;
     this.vehicle=id;this.velocity.set(0,0,0);return true;
   }
   private carFitsAt(point:THREE.Vector3,colliders:Octree[]):boolean {
@@ -137,7 +141,7 @@ export class FreeFlightController {
   }
 
   public setVertical(v: number): void {
-    this.verticalInput = this.vehicle==='car'?0:THREE.MathUtils.clamp(v, -1, 1);
+    this.verticalInput = (this.vehicle==='car'||this.vehicle==='boat')?0:THREE.MathUtils.clamp(v, -1, 1);
     if(Math.abs(this.verticalInput)<.02)this.velocity.y=0;
   }
 
@@ -186,7 +190,7 @@ export class FreeFlightController {
     // 1. 実効入力の決定（検証フックによる保持入力を優先統合）
     const effectiveStickX = this.hasScriptStick ? this.scriptStick.x : this.stickInput.x;
     const effectiveStickY = this.hasScriptStick ? this.scriptStick.y : this.stickInput.y;
-    const effectiveVert = this.vehicle==='car'?0:this.hasScriptVertical ? this.scriptVertical : this.verticalInput;
+    const effectiveVert = (this.vehicle==='car'||this.vehicle==='boat')?0:this.hasScriptVertical ? this.scriptVertical : this.verticalInput;
 
     const wasGrounded = this.isGroundedOnSurface;
     const inWater = this.isSubmerged();
@@ -195,7 +199,9 @@ export class FreeFlightController {
     const takingOff = effectiveVert > .1;
     if(takingOff || inWater)this.walkingOffEdge=false;
     const walking = !inWater && !takingOff && (wasGrounded || this.walkingOffEdge);
-    const maxSpeed = walking ? (this.vehicle==='car'?12:FREE_FLIGHT_CONFIG.maxSpeedGround) : inWater ? (this.vehicle==='submarine'?15:FREE_FLIGHT_CONFIG.maxSpeedWater) : FREE_FLIGHT_CONFIG.maxSpeedAir;
+    if(this.vehicle==='boat'&&!boatFitsWater(this.waterQuery,this.position.x,this.position.z))this.vehicle='none';
+    const boating=this.vehicle==='boat';
+    const maxSpeed = boating?8:walking ? (this.vehicle==='car'?12:FREE_FLIGHT_CONFIG.maxSpeedGround) : inWater ? (this.vehicle==='submarine'?15:FREE_FLIGHT_CONFIG.maxSpeedWater) : FREE_FLIGHT_CONFIG.maxSpeedAir;
 
     // 2. カメラ方向ベクトルの算出
     // 水平前進ベクトル (yaw 基準, +Zが南、-Zが北、+Xが東、-Xが西)
@@ -246,8 +252,8 @@ export class FreeFlightController {
 
     if (destination) {
       targetVel.subVectors(destination, this.position);
-      if(walking)targetVel.y=0;
-      targetVel.clampLength(0,maxSpeed/2).multiplyScalar(2);
+      if(walking||boating)targetVel.y=0;
+      targetVel.clampLength(0,maxSpeed/2).multiplyScalar(2);if(this.autopilotSpeed)targetVel.clampLength(0,this.autopilotSpeed);
     }
     const previousVertical = this.velocity.y;
 
@@ -273,8 +279,12 @@ export class FreeFlightController {
     // 高速落下時は移動を分割して薄い屋根をすり抜けにくくする。
     const steps = Math.max(1, Math.ceil(this.velocity.length() * dt / ((falling||walking||this.velocity.y<-.5)?.25:.5)));
     for (let step = 0; step < steps; step++) {
+      const oldX=this.position.x,oldZ=this.position.z;
       this.position.addScaledVector(this.velocity, dt / steps);
+      if(boating&&!boatFitsWater(this.waterQuery,this.position.x,this.position.z)){this.position.x=oldX;this.position.z=oldZ;this.velocity.x=0;this.velocity.z=0;}
+      if(boating){this.position.y=SEA+.04;this.velocity.y=0;}
       this.resolveCollisions(colliders);
+      if(boating&&!boatFitsWater(this.waterQuery,this.position.x,this.position.z)){this.position.x=oldX;this.position.z=oldZ;this.velocity.x=0;this.velocity.z=0;}
       if (falling && (this.isGroundedOnSurface || this.isSubmerged())) {
         this.velocity.y = 0;
         break;
@@ -282,7 +292,8 @@ export class FreeFlightController {
     }
 
     // Keep contact over small gaps and slopes; a real ledge transitions into a fall.
-    if(!takingOff && this.velocity.y<=.5)this.snapToGround(colliders,wasGrounded ? .45 : .06);
+    if(!boating&&!takingOff && this.velocity.y<=.5)this.snapToGround(colliders,wasGrounded ? .45 : .06);
+    if(boating){this.isGroundedOnSurface=false;this.position.y=SEA+.04;this.velocity.y=0;}
     if(this.isGroundedOnSurface){
       this.walkingOffEdge=false;
       const horizontal=Math.hypot(this.velocity.x,this.velocity.z);
@@ -314,11 +325,11 @@ export class FreeFlightController {
     character.setPosition(this.position);
     
     // キャラクターの向き：移動速度が一定以上あれば移動方向、それ以外はカメラの水平向き
-    let charTargetYaw = this.vehicle==='car'?character.getYaw():this.yaw;
+    let charTargetYaw = (this.vehicle==='car'||boating)?character.getYaw():this.yaw;
     const curSpeed = this.velocity.length();
     const horizSpeed = Math.hypot(this.velocity.x, this.velocity.z);
     if (horizSpeed > 0.4) {
-      charTargetYaw = Math.atan2(this.vehicle==='car'?-this.velocity.x:this.velocity.x, -this.velocity.z);
+      charTargetYaw = Math.atan2((this.vehicle==='car'||boating)?-this.velocity.x:this.velocity.x, -this.velocity.z);
     }
     character.updatePose(charTargetYaw, curSpeed, this.state==='ground'&&this.vehicle!=='car'?FREE_FLIGHT_CONFIG.maxSpeedGround:maxSpeed, this.state, dt, time);
 
@@ -365,6 +376,7 @@ export class FreeFlightController {
     }
 
     if(this.state==='water')actualCamPos.y=Math.min(actualCamPos.y,SEA-.4);
+    if(this.vehicle==='boat')actualCamPos.y=Math.max(actualCamPos.y,SEA+2);
     camera.position.copy(actualCamPos);
     camera.up.set(0, 1, 0); // Roll=0度完全固定
     camera.lookAt(targetLookAt);
@@ -378,7 +390,7 @@ export class FreeFlightController {
   }
   private resolveCollisions(colliders: Octree[]): void {
     const capsule = this.capsule;
-    capsule.radius=this.vehicle==='car'?1.2:.5;
+    capsule.radius=this.vehicle==='car'?1.2:this.vehicle==='boat'?1.3:.5;
     capsule.start.copy(this.position);capsule.start.y+=capsule.radius;
     capsule.end.copy(this.position);capsule.end.y+=Math.max(1.2,capsule.radius);
     let landed = false;

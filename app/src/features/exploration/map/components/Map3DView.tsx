@@ -1,3 +1,6 @@
+import {HuntTracker,huntKind,type HuntStatus} from '../../huntRules';
+import {FISH_SITES} from '../../fishWorld';
+import {PHOTO_MISSIONS,loadPhotoAchievements,matchPhotoMissions,recordPhotoAchievements} from '../../../scenery/photoMissions';
 import {AVATARS,AVATAR_KEY,loadAvatar,type AvatarId,type PhotoPose,type VehicleId} from '../flight/avatarOptions';
 import {PhotoSetup} from '../../../scenery/PhotoSetup';
 import {createWorldAtmosphere} from '../three/worldAtmosphere';
@@ -24,7 +27,7 @@ import { createPinMarkers, updatePinAnimations, Pin3DObject } from '../three/pin
 import type { BuildingRecord } from '../three/buildingSelection';
 import { makeSceneryPhoto } from '../../../scenery/photoCard';
 import { PhotoPreview, type SceneryPhoto } from '../../../scenery/PhotoPreview';
-import { viewUrl, type Viewpoint, type Vec3 } from '../../../scenery/viewpoint';
+import { VIEWS,viewUrl, type Viewpoint, type Vec3 } from '../../../scenery/viewpoint';
 
 
 
@@ -33,6 +36,7 @@ export interface Search3DBridge {
   target: HidingPlace;
   fishId?:string;
   locale?:Locale;
+  onHuntStatus?: (status:HuntStatus)=>void;
   onPosition: (p: Position, visible: boolean, heading?:number) => void;
   onCaptureReady: (capture: (() => string) | null) => void;
   autoFly?: boolean;
@@ -88,6 +92,10 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const [avatar,setAvatar]=useState<AvatarId>(loadAvatar);
   const avatarRef=useRef(avatar);avatarRef.current=avatar;
   const [vehicle,setVehicle]=useState<VehicleId>('none');
+  const vehicleRef=useRef(vehicle);vehicleRef.current=vehicle;
+  const flyingRef=useRef(false);
+  const [torch,setTorch]=useState(false);const torchRef=useRef(torch);torchRef.current=torch;
+  const [photoAchievements,setPhotoAchievements]=useState(loadPhotoAchievements);
   const [photoNotice,setPhotoNotice]=useState('');
   const photoOpenRef=useRef(false);photoOpenRef.current=!!photo||photoBusy;
   const photoGeneration=useRef(0);
@@ -103,7 +111,9 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       const blob=await makeSceneryPhoto(snapshot.image,en);
       if(generation!==photoGeneration.current)return;
       const link=viewUrl(snapshot.view,location.href);
-      setPhoto({blob,url:URL.createObjectURL(blob),link});
+      const ids=matchPhotoMissions(snapshot.view,photoPoseRef.current,vehicleRef.current,flyingRef.current);
+      const result=recordPhotoAchievements(ids,link);setPhotoAchievements(result.records);if(!result.saved&&ids.length)setPhotoNotice(en?'Photo challenge complete, but progress could not be saved.':'撮影のお題達成！ この端末に記録を保存できませんでした。');
+      setPhoto({blob,url:URL.createObjectURL(blob),link,achievements:ids.map(id=>{const m=PHOTO_MISSIONS.find(m=>m.id===id)!;return en?m.en:m.ja;})});
     }catch{if(generation===photoGeneration.current)setPhotoNotice(en?'Wait for the scenery to load and try again.':'景色の読み込みを待って、もう一度撮影してください。');}
     finally{if(generation===photoGeneration.current)setPhotoBusy(false);}
   };
@@ -125,7 +135,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   const flightRef = useRef<ReturnType<typeof setupPortFlight> | null>(null);
   const [areaStatus, setAreaStatus] = useState('');
   const locationRef = useRef<'port' | 'station'>('port');
-  const [flying, setFlying] = useState(false);
+  const [flying, setFlying] = useState(false);flyingRef.current=flying;
   useEffect(()=>{flightRef.current?.setAvatar(avatar);try{localStorage.setItem(AVATAR_KEY,avatar);}catch{}},[avatar]);
   useEffect(()=>{flightRef.current?.setPhotoPose(photoSetup?(flying?photoPose:'none'):null);},[photoSetup,photoPose,flying]);
   const controlsRef = useRef<OrbitControls | null>(null);
@@ -244,7 +254,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       together.disabled=true;
       try {const {setupSharedExploration}=await import('../../../multiplayer/sharedExploration');
         if(sharedDisposed)return;
-        shared=setupSharedExploration(container,scene,()=>flight.getNetworkPose());together.remove();
+        shared=setupSharedExploration(container,scene,()=>({...flight.getNetworkPose(),hunt:searchRef.current?.fishId}));together.remove();
       }catch{together.disabled=false;together.textContent='接続画面を再読込';}
     };
     if(location.hash.startsWith('#/join/'))together.click();
@@ -301,7 +311,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         onWebGLError('街のデータを読み込めませんでした。2Dで続けられます。');
       });
 
-    const fishWorld=searchRef.current?createWorldFish(scene,searchRef.current.fishId,searchRef.current.target,searchRef.current.locale??'ja'):undefined;
+    const fishWorld=createWorldFish(scene,searchRef.current?.fishId,searchRef.current?.target??FISH_SITES[0],searchRef.current?.locale??locale??'ja');
+    const huntTracker=new HuntTracker(huntKind(searchRef.current?.fishId??''));let lastHuntTime=performance.now();let fishAim=0;
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     searchRef.current?.onCaptureReady(() => {
       if (contextIsLost || !dataReady || loadingArea) throw new Error('Scenery is still loading');
@@ -539,7 +550,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           if(visible&&Math.hypot(p.x-target.x,p.z-target.z)<=25){
             const direction=target.clone().sub(camera.position),length=direction.length();
             raycaster.set(camera.position,direction.normalize());
-            const hits=raycaster.intersectObjects(scene.children.filter(o=>o!==fishWorld?.root&&!o.userData.virtualWaterBed&&!o.userData.regionalLandscape&&!(underwater&&o.userData.waterTerrain)),true);
+            const hits=raycaster.intersectObjects(scene.children.filter(o=>o!==fishWorld?.root&&o.name!=='HumanoidCharacter'&&!o.userData.virtualWaterBed&&!o.userData.regionalLandscape&&!(underwater&&o.userData.waterTerrain)),true);
             visible=!hits.some(h=>h.distance<length-4&&h.object instanceof THREE.Mesh&&h.object.material instanceof THREE.MeshStandardMaterial&&!h.object.userData.worldFish);
           }
         }
@@ -547,8 +558,10 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         camera.getWorldDirection(searchDirection);
         searchHeading=cameraHeading(searchDirection.x,searchDirection.z,searchHeading);
         searchRef.current.onPosition({ x:p.x, z:p.z,...(flight.isActive()?{y:p.y}:{}) }, visible,searchHeading);
+        const direction=target?.clone().sub(camera.position);fishAim=direction?direction.normalize().dot(camera.getWorldDirection(searchDirection)):0;
+        const status=huntTracker.update((currentTime-lastHuntTime)/1000,{distance:target?p.distanceTo(target):Infinity,visible,night:(scene.userData.atmosphere?.night??0)>.55,light:torchRef.current,aim:fishAim,active:flight.isActive()});lastHuntTime=currentTime;searchRef.current.onHuntStatus?.(status);
       }
-      fishWorld?.update(currentTime*.001,flight.isActive()?flight.getPosition():camera.position,!!searchRef.current?.discovered,reducedMotion);
+      fishWorld?.update(currentTime*.001,flight.isActive()?flight.getPosition():camera.position,!!searchRef.current?.discovered,reducedMotion,{night:(scene.userData.atmosphere?.night??0)>.55,light:torchRef.current,aim:fishAim});
       sceneResultRef.current?.updateHarbor?.(currentTime*.001,camera.position,reducedMotion);
       if(renderBudget.sample(currentTime,dataReady&&!loadingArea&&currentTime-sessionStart>5000)){
         renderer.setPixelRatio(renderBudget.dpr);
@@ -704,6 +717,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         className="search-flight-button"
       aria-label={flying?(en?'Switch to overview':'街を見渡す'):(en?'Start flying':'飛んでみる')}
       ><HudIcon name={flying?'map':'fly'}/><span>{isLoading || (!flying && !!areaStatus) ? (en?'Loading':'準備中') : flying ? (en?'Overview':'見渡す') : (en?'Fly':'飛ぶ')}</span></button>
+      {search&&huntKind(search.fishId??'')==='light'&&<button className="search-flight-button" aria-pressed={torch} onClick={()=>setTorch(!torch)}>{en?'Survey light':'探査ライト'} {torch?'ON':'OFF'}</button>}
       <details className="world-travel" onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}}}><summary><HudIcon name="pin"/><span>{en?'Places & sky':'移動・景色'}</span></summary><div className="world-travel-sheet">
       <fieldset className="world-atmosphere"><legend>{en?'Time and season':'時間と季節'}</legend>
         <label>{en?'Time':'時間帯'}<select aria-label={en?'Time of day':'時間帯'} value={atmosphereChoice.time} onChange={e=>chooseAtmosphere({time:e.target.value as TimeChoice})}>{(['auto','morning','day','evening','night'] as const).map((v,i)=><option value={v} key={v}>{(en?['Auto (Japan time)','Morning','Day','Evening','Night']:['自動（日本時間）','朝','昼','夕方','夜'])[i]}</option>)}</select></label>
@@ -717,6 +731,15 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         <button type="button" disabled={isLoading||!!areaStatus} onClick={()=>{const flight=flightRef.current;if(!flight)return;const ok=flight.setVehicle(vehicle==='car'?'none':'car');setPhotoNotice(ok?'':en?'Land on a clear, flat surface first, or use the harbor car stop.':'広い場所に着地してから乗るか、港の車乗り場を選んでください。');}}>{vehicle==='car'?(en?'Leave car':'車から降りる'):(en?'Drive here (on land)':'ここで車に乗る（地上）')}</button>
         <button type="button" disabled={isLoading||!!areaStatus} onClick={e=>{if(flightRef.current?.startCarTrip()){setFlying(true);setPhotoNotice('');const menu=e.currentTarget.closest('details');if(menu)menu.open=false;}else setPhotoNotice(en?'The harbor car stop is not ready. Move near the harbor and wait for loading.':'港の車乗り場を確認できません。沼津港へ移動して読み込みを待ってください。');}}>{en?'Drive from harbor car stop':'港の車乗り場からドライブ'}</button>
         <p>{en?'Use the stick to drive. Leave the car before flying.':'スティックで走行。飛ぶときはいったん車から降ります。'}</p>
+      </fieldset>
+      <fieldset className="world-atmosphere"><legend>{en?'Boat trips':'船でめぐる'}</legend>
+        {(['harbor','river','tour'] as const).map((kind,i)=><button key={kind} disabled={isLoading||!!areaStatus} onClick={e=>{if(flightRef.current?.startBoatTrip(kind==='river'?'river':'harbor',kind==='tour')){setFlying(true);setPhotoNotice('');const menu=e.currentTarget.closest('details');if(menu)menu.open=false;}else setPhotoNotice(en?'No verified water route is ready. Move near the harbor and retry.':'航行できる水域を確認できません。港へ移動して、読み込み後に試してください。');}}>{(en?['Drive a harbor boat','Drive a river boat','Harbor sightseeing cruise']:['港からボートを操縦','狩野川からボートを操縦','港の遊覧船に乗る'])[i]}</button>)}
+        {vehicle==='boat'&&<button onClick={()=>flightRef.current?.setVehicle('none')}>{en?'Leave boat':'船から降りる'}</button>}
+        <p>{en?'Stick for manual sailing. Cruises pause for photos; resume after closing the camera.':'スティックで操縦。遊覧中も撮影できます。手動操作で遊覧を終了します。'}</p>
+      </fieldset>
+      <fieldset className="world-atmosphere"><legend>{en?'Photo challenges':'撮影のお題'} {Object.keys(photoAchievements).length}/{PHOTO_MISSIONS.length}</legend>
+        {PHOTO_MISSIONS.map(m=><div key={m.id}><span>{photoAchievements[m.id]?'✓ ':''}{en?m.en:m.ja}</span><button onClick={()=>{const view=VIEWS[m.preset].view,controls=controlsRef.current;if(!controls)return;flightRef.current?.setMode(false);setFlying(false);const camera=controls.object as THREE.PerspectiveCamera;camera.position.fromArray(view.camera);camera.fov=view.fov;camera.updateProjectionMatrix();controls.minDistance=5;controls.target.fromArray(view.target);controls.update();chooseAtmosphere({time:m.time});document.querySelector<HTMLDetailsElement>('.world-travel')!.open=false;}}>{en?'Go to this view':'この場所へ'}</button></div>)}
+        <p>{en?'Complete challenges by taking a photo of the landmark. Diver and boat challenges need a posed photo. Progress stays on this device.':'ランドマークへ向けて撮影。潜水士・船のお題はキャラを入れて撮ろう。達成記録はこの端末に保存します。'}</p>
       </fieldset>
       <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{en?'Landmark labels':'目印を表示'} {landmarks?'ON':'OFF'}</button>
       <div className="search-world-destinations">

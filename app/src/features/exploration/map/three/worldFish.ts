@@ -6,6 +6,7 @@ import { getFishDisplayName } from '../../../../lib/i18n';
 import type { FishRecord } from '../../../../types/schema';
 import type { Locale } from '../../../../config/appConfig';
 import type { HidingPlace } from '../../domain';
+import {huntKind,fishMotion} from '../../huntRules';
 import { FISH_SITES, targetGlow } from '../../fishWorld';
 
 /** Stylized shared meshes: no photos, 24 rigged skeletons, shadow maps or bloom passes. */
@@ -55,6 +56,7 @@ export function createWorldFish(scene:THREE.Scene,targetFishId:string|undefined,
   const eyes=new THREE.Group();for(const s of [-1,1]){const eye=new THREE.Mesh(eyeGeometry,eyeMaterial);eye.position.set(.65,.15,s*.27);eyes.add(eye);}group.add(eyes);
   const tail=new THREE.Mesh(tailGeometry,material);tail.position.x=-1.15;if(visual.shape==='shrimp')tail.scale.set(.5,.5,.35);tail.visible=!['crab','octopus','isopod'].includes(visual.shape);group.add(tail);
   group.scale.setScalar(3);group.traverse(o=>{o.userData.worldFish=true;});root.add(group);
+  if(huntKind(record.id)==='school')for(const side of [-1,1]){const companion=new THREE.Mesh(geometry,material);companion.scale.setScalar(.65);companion.position.set(-1.8,.3,side*.9);companion.userData.worldFish=true;group.add(companion);}
   const origin=record.id===targetFishId?{...site,...target,y:target.y??85}:site;
   return {record,index,group,material,tail,origin,label:undefined as THREE.Sprite|undefined};
  });
@@ -65,16 +67,16 @@ export function createWorldFish(scene:THREE.Scene,targetFishId:string|undefined,
  let disposed=false;
  return {
   root,targetPosition:current,
-  update(time:number,viewer:THREE.Vector3,discovered:boolean,reducedMotion=false){
+  update(time:number,viewer:THREE.Vector3,discovered:boolean,reducedMotion=false,options={night:true,light:false,aim:1}){
    if(disposed)return;
    for(const item of fish){
-    const t=reducedMotion?item.index:time*.24+item.index*1.7;
-    item.group.position.set(item.origin.x+Math.sin(t)*2,item.origin.y+Math.sin(t*1.8)*.3,item.origin.z+Math.cos(t)*1.5);
-    item.group.rotation.y=Math.atan2(Math.sin(t),Math.cos(t));
+    const motion=fishMotion(item.record.id,item.index,time,reducedMotion);
+    item.group.position.set(item.origin.x+motion.x,item.origin.y+motion.y,item.origin.z+motion.z);item.group.rotation.y=motion.yaw;
     item.tail.rotation.y=reducedMotion?0:Math.sin(time*3+item.index)*.25;
-    const distance=viewer.distanceTo(item.group.position);item.group.visible=distance<240;
+    const distance=viewer.distanceTo(item.group.position);item.group.visible=distance<240&&(huntKind(item.record.id)!=='night'||options.night||item.record.id===targetFishId&&discovered);
     const isTarget=item.record.id===targetFishId;
-    const strength=isTarget?targetGlow(distance)*(discovered?.3:1):0;
+    const lit=huntKind(item.record.id)!=='light'||options.light&&options.aim>.78;
+    const strength=isTarget&&item.group.visible&&lit?targetGlow(distance)*(discovered?.3:1):0;
     item.material.emissiveIntensity=.06+strength*.75;
     if(isTarget){current.copy(item.group.position);glow.position.copy(current);glow.visible=strength>0;glow.scale.setScalar(12+(reducedMotion?0:Math.sin(time*3))*.7);glowMaterial.opacity=strength*.55;glow.userData.strength=strength;}
     if(distance<25&&!item.label){const map=labelTexture(getFishDisplayName(item.record,locale));textures.push(map);item.label=new THREE.Sprite(new THREE.SpriteMaterial({map,depthWrite:false,fog:true}));item.label.scale.set(3.6,.6,1);item.label.position.y=2;item.label.userData.worldFish=true;item.group.add(item.label);}

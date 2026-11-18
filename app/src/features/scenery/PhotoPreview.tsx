@@ -1,6 +1,6 @@
 import {createPortal} from 'react-dom';
 import {useEffect,useRef,useState} from 'react';
-export interface SceneryPhoto {blob:Blob; url:string; link:string}
+export interface SceneryPhoto {achievements?:string[];blob:Blob; url:string; link:string}
 export function PhotoPreview({photo,en,onClose}:{photo:SceneryPhoto;en:boolean;onClose:()=>void}) {
   const [notice,setNotice]=useState('');
   const close=useRef<HTMLButtonElement>(null);
@@ -26,6 +26,7 @@ export function PhotoPreview({photo,en,onClose}:{photo:SceneryPhoto;en:boolean;o
     }
   }}>
     <div className="scenery-photo-sheet"><header><h2>{en?'A view to take home':'この景色を持ち帰ろう'}</h2><button ref={close} onClick={onClose}>{en?'Back to the city':'街に戻る'}</button></header>
+      {!!photo.achievements?.length&&<p role="status">{en?'Photo challenge complete: ':'撮影のお題達成：'}{photo.achievements.join(' / ')}</p>}
       <img className="scenery-photo-preview" src={photo.url} alt={en?'Framed virtual Numazu scenery':'枠付きのバーチャル沼津の景色'}/>
       <div className="search-actions"><a className="primary-action-btn" download="shinkai-numazu.png" href={photo.url}>{en?'Save image':'画像を保存'}</a><button onClick={share}>{en?'Share':'共有する'}</button><button onClick={copy}>{en?'Copy view link':'景色のリンクをコピー'}</button></div>
       <p>{en?'This link opens the viewpoint, time of day and season. Scenery may change when the town is updated.':'リンクを開くと同じ撮影位置・向き・時間帯・季節で街を見られます。街の更新や画面の縦横比で見え方は変わります。'}</p>
