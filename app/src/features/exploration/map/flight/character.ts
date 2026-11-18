@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {type AvatarId,type PhotoPose,type VehicleId} from './avatarOptions';
 import {createSubmarine} from './submarine';
 import {createCar} from './car';
+import {createBoat} from './boat';
 
 export class HumanoidCharacter {
   public group: THREE.Group;
@@ -23,6 +24,7 @@ export class HumanoidCharacter {
   private lure:THREE.Group;
   private submarine=createSubmarine();
   private car=createCar();
+  private boat=createBoat();
   private vehicle:VehicleId='none';
   private walkPhase=0;
   private currentYaw: number = 0;
@@ -109,7 +111,7 @@ export class HumanoidCharacter {
     const stalk=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.35,6),accentMat);stalk.rotation.x=-.6;stalk.position.set(0,.37,-.12);
     const glow=new THREE.Mesh(new THREE.SphereGeometry(.065,8,6),new THREE.MeshBasicMaterial({color:0xffeb9c}));glow.position.set(0,.52,-.22);
     this.lure.add(stalk,glow);this.head.add(this.lure);
-    this.modelRoot.add(this.submarine.root,this.car.root);
+    this.modelRoot.add(this.submarine.root,this.car.root,this.boat.root);
 
     // バイザー（顔の前方：-Z 方向をローカル正面とする）
     // A flat inset sits in front of the hood surface, avoiding intersecting meshes.
@@ -207,7 +209,7 @@ export class HumanoidCharacter {
     this.headShell.scale.set(id==='jellyfish'?1.25:1.15,id==='jellyfish'?.9:.98,1.03);
     this.group.userData.avatar=id;
   }
-  public setVehicle(id:VehicleId):void{this.vehicle=id;this.submarine.root.visible=id==='submarine';this.car.root.visible=id==='car';this.group.userData.vehicle=id;}
+  public setVehicle(id:VehicleId):void{this.vehicle=id;this.submarine.root.visible=id==='submarine';this.car.root.visible=id==='car';this.boat.root.visible=id==='boat';this.group.userData.vehicle=id;}
   public applyPhotoPose(pose:PhotoPose,yaw:number):void{
     this.resetOrientation(yaw);
     this.leftArm.rotation.set(0,0,.08);this.rightArm.rotation.set(0,0,-.08);
@@ -316,7 +318,7 @@ export class HumanoidCharacter {
     if(this.vehicle!=='none'){
       this.leftArm.rotation.set(-1,0,.15);this.rightArm.rotation.set(-1,0,-.15);
       this.leftLeg.rotation.set(-1.1,0,0);this.rightLeg.rotation.set(-1.1,0,0);
-      this.modelRoot.rotation.x*=.2;if(this.vehicle==='submarine')this.submarine.update(time,speed);else this.car.update(dt,speed);
+      this.modelRoot.rotation.x*=.2;if(this.vehicle==='submarine')this.submarine.update(time,speed);else if(this.vehicle==='car')this.car.update(dt,speed);
     }
     // 5. 状態に応じたライトと自発光の最適化（白飛び防止と水中視認性の両立）
     if (state === 'water') {

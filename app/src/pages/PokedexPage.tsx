@@ -92,6 +92,7 @@ export const PokedexPage: React.FC<PokedexPageProps> = ({
 
   return (
     <div className="page-container pokedex-page">
+      <a className="primary-action-btn" href="#/aquarium">{locale==='ja'?'集めた魚が泳ぐ水族館へ':'Visit your swimming aquarium'}</a>
       {/* ヘッダー＆コンプ率バー */}
       <section className="pokedex-summary-card">
         <div className="pokedex-summary-header">

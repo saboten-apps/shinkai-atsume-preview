@@ -1,3 +1,4 @@
+import {huntKind,HUNT_HINTS,type HuntStatus} from './huntRules';
 import {PerformancePanel} from './map/components/PerformancePanel';
 import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { Locale } from '../../config/appConfig';
@@ -43,6 +44,8 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
   const entryRef = useRef<Position>(position);
   const [heading,setHeading]=useState(0);
   const [visible,setVisible] = useState(false);
+  const [hunt,setHunt]=useState<HuntStatus>({kind:huntKind(fish?.id??''),progress:0,ready:false});
+  const onHuntStatus=useCallback((value:HuntStatus)=>setHunt(value),[]);
   const [notice,setNotice] = useState('');
   const [stats,setStats] = useState<PerformanceStats|null>(null);
   const [sound,setSound] = useState(false);
@@ -75,7 +78,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
       window.scrollTo(0, 0);
     };
   }, [immersive]);
-  const bridge:Search3DBridge = {start:entryRef.current,target:place,fishId:fish?.id,locale:props.locale,onPosition,onCaptureReady,onReady:onSceneReady,autoFly:autoFly.current,discovered:!!found};
+  const bridge:Search3DBridge = {start:entryRef.current,target:place,fishId:fish?.id,locale:props.locale,onPosition,onHuntStatus,onCaptureReady,onReady:onSceneReady,autoFly:autoFly.current,discovered:!!found};
   useEffect(()=>()=>{if(card)URL.revokeObjectURL(card.url);},[card]);
   useEffect(()=>{
     if(!sound || found)return;
@@ -91,14 +94,14 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     };tick();return()=>clearTimeout(timer);
   },[sound,found]);
   useEffect(()=>()=>{void audioRef.current?.close();},[]);
-  const switchMode=(next:SearchMode)=>{setOptionsOpen(false);if(next===mode)return;entryRef.current=position;autoFly.current=false;setSceneReady(false);setMode(next);setNotice('');setVisible(next==='2d');setSlow(false);slowCount.current=0;};
+  const switchMode=(next:SearchMode)=>{setOptionsOpen(false);if(next===mode)return;entryRef.current=position;autoFly.current=false;setSceneReady(false);setMode(next);setHunt({kind:huntKind(fish?.id??''),progress:0,ready:false});setNotice('');setVisible(next==='2d');setSlow(false);slowCount.current=0;};
   const resume=(next:SearchMode)=>{
     entryRef.current=position;autoFly.current=next==='3d';setMode(next);setSceneReady(false);
     setOptionsOpen(false);setNotice('');setSlow(false);slowCount.current=0;setShowingCard(false);
   };
   const openCard=()=>{setSound(false);setOptionsOpen(false);setShowingCard(true);};
   const discover=()=>{
-    if(found||!fish || !hint.near || (mode==='3d'&&!visible))return;
+    if(found||!fish || (mode==='2d'?!hint.near:!visible||!hunt.ready))return;
     const record:Discovery={date,fishId:fish.id,placeId:place.id,version,mode,foundAt:new Date().toISOString()};
     try{if(mode==='3d')sceneRef.current=captureRef.current?.();}catch{sceneRef.current=undefined;}
     setFound(record);setShowingCard(true);setSound(false);
@@ -132,12 +135,12 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
       </div>
       {found?<div className="search-detector is-found"><span className="detector-arrow" aria-hidden="true">✓</span><div><strong>{en?'Fish discovered!':'今日の魚、発見！'}</strong><small>{en?'Keep exploring, or take a photo.':'このまま街歩きや撮影を楽しもう'}</small></div></div>:<div className={`search-detector ${hint.near?'is-near':''}`}>
         <span className="detector-arrow" aria-hidden="true"><span style={{transform:`rotate(${hint.bearing-(mode==='3d'?heading:0)}deg)`}}>↑</span></span>
-        <div><strong>{(en?DIRECTIONS_EN:DIRECTIONS)[hint.direction]} <span className="detector-distance">{Math.round(hint.distance)}<small>m</small></span></strong><small>{hint.near?(en?'Fish nearby!':'すぐ近くに反応！'):place.medium&&place.medium!=='air'?`${en?'Underwater':'水の中にいるよ'} · ${en?'Depth':'水深'} ${(41.5-(place.y??41.5)).toFixed(1)}m`:(en?'Follow the signal':'反応を頼りに近づこう')}</small></div>
+        <div><strong>{(en?DIRECTIONS_EN:DIRECTIONS)[hint.direction]} <span className="detector-distance">{Math.round(hint.distance)}<small>m</small></span></strong><small>{hint.near?(mode==='3d'?HUNT_HINTS[hunt.kind][en?1:0]:(en?'Fish nearby!':'すぐ近くに反応！')):place.medium&&place.medium!=='air'?`${en?'Underwater':'水の中にいるよ'} · ${en?'Depth':'水深'} ${(41.5-(place.y??41.5)).toFixed(1)}m`:(en?'Follow the signal':'反応を頼りに近づこう')}</small></div>
       </div>}
       <HudMenu open={optionsOpen} onClose={()=>setOptionsOpen(false)} en={en}>
         <div className="hud-view-switch" role="group" aria-label={en?'View mode':'表示モード'}><button aria-pressed={mode==='3d'} onClick={()=>switchMode('3d')}>3D <small>{en?'Explore the city':'街を探索'}</small></button><button aria-pressed={mode==='2d'} onClick={()=>switchMode('2d')}>2D <small>{en?'Lightweight map':'軽い地図'}</small></button></div>
         {found&&<button onClick={()=>{setOptionsOpen(false);openCard();}}>{en?'View discovery card':'発見カードを見る'}</button>}
-        <h3>{en?'Controls':'操作のしかた'}</h3>
+        <h3>{en?'How to find this fish':'この魚の探し方'}</h3><p>{HUNT_HINTS[hunt.kind][en?1:0]}</p><p>{en?'These are game challenges. You can also use the lightweight 2D map.':'ゲーム用の探索条件です。軽い2D地図でも探せます。'}</p><h3>{en?'Controls':'操作のしかた'}</h3>
         {mode==='3d'?<div className="hud-help-grid"><div><b>{en?'Move':'移動する'}</b><span>{en?'Left stick; WASD / arrows on PC':'左スティック／PCはWASD・矢印'}</span></div><div><b>{en?'Look around':'見回す'}</b><span>{en?'Drag the scenery':'景色をドラッグ'}</span></div><div><b>{en?'Rise / descend':'上がる・降りる'}</b><span>{en?'Hold the right buttons; E / Q on PC':'右のボタンを押している間／PCはE・Q'}</span></div><div><b>{en?'About a place':'場所の紹介を見る'}</b><span>{en?'Hold a building':'建物を長押し'}</span></div></div>:<p>{en?'Tap the map to move.':'地図をタップすると移動できます。'}</p>}
         <p className="hud-search-hint"><small>{en?'Today’s clue':'今日のヒント'}</small>{en?place.hintEn:place.hint}</p>
         <details className="hud-world-note"><summary>{en?'About this virtual city':'街の表現と操作の補足'}</summary><p className="search-help">{mode==='3d'?(en?'Building heights are emphasized 1.3× and bridges are approximate models aligned with the map. Fish placements and depths are fictional. Dive to find underwater fish; only today’s fish glows nearby. Map: drag with two fingers to move the center. Flight: use the left stick to move, drag to look around, or tap a destination to fly. Landing switches to walking; use Rise to fly again. Approach the glowing fish. Press and hold a building to inspect it.':'建物の高さは見やすさのため1.3倍に強調し、橋は位置を地図に合わせた簡易モデルです。魚はゲーム上の配置で、実際の生息地や水深とは異なります。海・川の魚は水面から潜って探せます。今日の魚だけ近づくほど光ります。地図：2本指で中心を移動。飛行：左スティックで移動、ドラッグで見回し、タップした場所へ自動飛行。着地すると歩行に切り替わり、「飛び立つ」で再び飛べます。光る魚に近づこう。建物を長押しすると情報を確認できます。'):(en?'Tap the map to move the orange search marker.':'地図をタップしてオレンジ色の探索マーカーを移動します。')}</p>
@@ -149,7 +152,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
       </HudMenu>
       <div className={`search-map ${sceneReady?'is-ready':''}`}>{mode==='3d'?<MapBoundary en={en} onFallback={()=>switchMode('2d')}><Suspense fallback={null}><Map3D pins={EMPTY_PINS} selectedPinId={null} onSelectPin={NO_SELECT} onUpdateStats={onStats} onWebGLError={onError} search={bridge}/></Suspense><span className="search-center" aria-hidden="true">＋</span></MapBoundary>:<Exploration2D en={en} position={position} onMove={setPosition} targetFishId={fish.id} target={place} discovered={!!found}/>}</div>
       <div className="search-actions search-discover">
-        {!found&&(!immersive||hint.near)&&<button className="primary-action-btn" disabled={!hint.near||(mode==='3d'&&!visible)} onClick={discover}>{hint.near?(en?'Discover the fish!':'魚を発見する！'):(en?'Follow the detector':'探知機を頼りに近づこう')}</button>}
+        {!found&&(!immersive||hint.near||hunt.progress>0)&&<button className="primary-action-btn" disabled={mode==='2d'?!hint.near:!visible||!hunt.ready} onClick={discover}>{mode==='3d'&&(hint.near||hunt.progress>0)&&!hunt.ready?`${en?'Observe':'観察中'} ${Math.round(hunt.progress*100)}%`:(hint.near||hunt.ready)?(en?'Discover the fish!':'魚を発見する！'):(en?'Follow the detector':'探知機を頼りに近づこう')}</button>}
         {immersive&&<>{slow&&<button className="search-low-fps" onClick={()=>switchMode('2d')}>{en?'Lighter 2D':'軽い2Dへ'}</button>}<small>PLATEAU / GSI</small></>}
       </div>
     </>}

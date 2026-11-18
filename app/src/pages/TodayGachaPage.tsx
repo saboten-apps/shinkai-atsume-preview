@@ -151,6 +151,7 @@ export const TodayGachaPage: React.FC<TodayGachaPageProps> = ({
           </section>
           {fishingIntro}
           <p className="scenery-entry"><a href="#/view">{locale==='ja'?'沼津の景色を眺める・写真を撮る':'Explore and photograph Numazu'} <span aria-hidden="true">→</span></a></p>
+          <a className="secondary-action-btn" href="#/aquarium">{locale==='ja'?'あつめた魚の水族館へ':'Visit your aquarium'}</a>
           <article className="fish-result-card" aria-live="polite">
             <div className="specimen-plate-topbar">
               <div className="specimen-plate-no">
