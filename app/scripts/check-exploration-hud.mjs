@@ -45,7 +45,7 @@ try {
  await page.getByLabel('移動先',{exact:true}).selectOption('port');
  assert(!(await page.locator('.world-travel').evaluate(el=>el.open)));
  await page.getByRole('button',{name:'飛んでみる',exact:true}).click();
- await page.getByRole('button',{name:'景色を撮る',exact:true}).click();
+ await page.getByRole('button',{name:'景色を撮る',exact:true}).click();await page.getByRole('button',{name:'この構図で撮る',exact:true}).click();
  await page.getByRole('dialog',{name:'撮影した景色',exact:true}).waitFor();
  await page.getByRole('button',{name:'街に戻る',exact:true}).click();
  await page.getByRole('button',{name:'案内・設定',exact:true}).click();

@@ -6,7 +6,7 @@ export interface PoseChannel {
 }
 const PERIOD=1000/3;
 function changed(a:LocalPose,b:LocalPose) {
-  return a.active!==b.active || a.state!==b.state || Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z)>.02
+  return a.avatar!==b.avatar||a.pose!==b.pose||a.vehicle!==b.vehicle||a.active!==b.active || a.state!==b.state || Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z)>.02
     || Math.abs(Math.atan2(Math.sin(a.yaw-b.yaw),Math.cos(a.yaw-b.yaw)))>.01
     || Math.hypot(a.vx-b.vx,a.vy-b.vy,a.vz-b.vz)>.05;
 }

@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import {type AvatarId,type PhotoPose,type VehicleId} from './avatarOptions';
+import {createSubmarine} from './submarine';
 
 export class HumanoidCharacter {
   public group: THREE.Group;
@@ -13,6 +15,13 @@ export class HumanoidCharacter {
   private chestLight: THREE.PointLight;
   private suitMat: THREE.MeshStandardMaterial;
 
+  private hoodMat:THREE.MeshStandardMaterial;
+  private headShell:THREE.Mesh;
+  private fins:THREE.Mesh[]=[];
+  private jellySkirt:THREE.Mesh;
+  private lure:THREE.Group;
+  private submarine=createSubmarine();
+  private vehicle:VehicleId='none';
   private walkPhase=0;
   private currentYaw: number = 0;
   private currentPitch: number = 0;
@@ -34,7 +43,8 @@ export class HumanoidCharacter {
       emissiveIntensity: 0,
     });
     const suitMat = this.suitMat;
-    const hoodMat = new THREE.MeshStandardMaterial({color:0xba7770, roughness:.9});
+    const hoodMat = this.hoodMat = new THREE.MeshStandardMaterial({color:0xba7770, roughness:.9});
+    hoodMat.userData.atmosphereExempt=true;this.suitMat.userData.atmosphereExempt=true;
 
     const accentMat = new THREE.MeshStandardMaterial({
       color: 0xf4d7a7, // 潜水服のあたたかい縁
@@ -80,6 +90,7 @@ export class HumanoidCharacter {
       new THREE.SphereGeometry(0.34, 16, 12),
       hoodMat
     );
+    this.headShell=headSphere;
     headSphere.scale.set(1.15, .98, 1.03);
     this.head.add(headSphere);
     // メンダコらしい耳ひれ。正面・背面のどちらからも輪郭が見える。
@@ -87,8 +98,16 @@ export class HumanoidCharacter {
     for (const side of [-1,1]) {
       const fin=new THREE.Mesh(finGeometry,hoodMat);
       fin.scale.set(.58,1.05,.34);fin.position.set(side*.36,.19,0);
-      fin.rotation.z=-side*.72;this.head.add(fin);
+      fin.rotation.z=-side*.72;this.head.add(fin);this.fins.push(fin);
     }
+
+    this.jellySkirt=new THREE.Mesh(new THREE.CylinderGeometry(.33,.45,.16,12),hoodMat);
+    this.jellySkirt.name='jelly-skirt';this.jellySkirt.position.y=-.15;this.jellySkirt.visible=false;this.head.add(this.jellySkirt);
+    this.lure=new THREE.Group();this.lure.name='angler-lure';this.lure.visible=false;
+    const stalk=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.35,6),accentMat);stalk.rotation.x=-.6;stalk.position.set(0,.37,-.12);
+    const glow=new THREE.Mesh(new THREE.SphereGeometry(.065,8,6),new THREE.MeshBasicMaterial({color:0xffeb9c}));glow.position.set(0,.52,-.22);
+    this.lure.add(stalk,glow);this.head.add(this.lure);
+    this.modelRoot.add(this.submarine.root);
 
     // バイザー（顔の前方：-Z 方向をローカル正面とする）
     // A flat inset sits in front of the hood surface, avoiding intersecting meshes.
@@ -139,7 +158,7 @@ export class HumanoidCharacter {
     const armGeom = new THREE.CapsuleGeometry(0.10, 0.25, 6, 12);
 
     // 左腕
-    this.leftArm = new THREE.Group();
+    this.leftArm = new THREE.Group();this.leftArm.name='left-arm';
     this.leftArm.position.set(0.34, 0.98, 0);
     const leftArmMesh = new THREE.Mesh(armGeom, suitMat);
     leftArmMesh.position.y = -0.20;
@@ -147,7 +166,7 @@ export class HumanoidCharacter {
     this.modelRoot.add(this.leftArm);
 
     // 右腕
-    this.rightArm = new THREE.Group();
+    this.rightArm = new THREE.Group();this.rightArm.name='right-arm';
     this.rightArm.position.set(-0.34, 0.98, 0);
     const rightArmMesh = new THREE.Mesh(armGeom, suitMat);
     rightArmMesh.position.y = -0.20;
@@ -179,6 +198,24 @@ export class HumanoidCharacter {
     this.group.visible = false;
   }
 
+  public setAvatar(id:AvatarId):void{
+    const palette={mendako:[0xba7770,0xe6ddcb],jellyfish:[0x8cb8cc,0xdce5ea],angler:[0x778866,0xe4d4ad]}[id];
+    this.hoodMat.color.setHex(palette[0]);this.suitMat.color.setHex(palette[1]);
+    this.fins.forEach(f=>f.visible=id==='mendako');this.jellySkirt.visible=id==='jellyfish';this.lure.visible=id==='angler';
+    this.headShell.scale.set(id==='jellyfish'?1.25:1.15,id==='jellyfish'?.9:.98,1.03);
+    this.group.userData.avatar=id;
+  }
+  public setVehicle(id:VehicleId):void{this.vehicle=id;this.submarine.root.visible=id==='submarine';this.group.userData.vehicle=id;}
+  public applyPhotoPose(pose:PhotoPose,yaw:number):void{
+    this.resetOrientation(yaw);
+    this.leftArm.rotation.set(0,0,.08);this.rightArm.rotation.set(0,0,-.08);
+    this.leftLeg.rotation.set(0,0,0);this.rightLeg.rotation.set(0,0,0);
+    if(pose==='wave')this.leftArm.rotation.set(-.15,0,2.5);
+    if(pose==='cheer'){this.leftArm.rotation.z=2.65;this.rightArm.rotation.z=-2.65;}
+    if(pose==='salute')this.rightArm.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0),new THREE.Vector3(.14,.32,-.3).normalize());
+    if(this.vehicle==='submarine'){this.leftLeg.rotation.x=-1.1;this.rightLeg.rotation.x=-1.1;}
+    this.group.userData.photoPose=pose;
+  }
   public getYaw():number { return this.currentYaw; }
   public dispose():void {
     const geometries=new Set<THREE.BufferGeometry>(), materials=new Set<THREE.Material>();
@@ -274,6 +311,11 @@ export class HumanoidCharacter {
       this.modelRoot.position.y=Math.abs(Math.sin(this.walkPhase))*.025*speedRatio;
     }
 
+    if(this.vehicle==='submarine'){
+      this.leftArm.rotation.set(-1,0,.15);this.rightArm.rotation.set(-1,0,-.15);
+      this.leftLeg.rotation.set(-1.1,0,0);this.rightLeg.rotation.set(-1.1,0,0);
+      this.modelRoot.rotation.x*=.2;this.submarine.update(time,speed);
+    }
     // 5. 状態に応じたライトと自発光の最適化（白飛び防止と水中視認性の両立）
     if (state === 'water') {
       this.backpackLight.intensity = 0;

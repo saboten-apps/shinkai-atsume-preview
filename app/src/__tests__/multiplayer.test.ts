@@ -105,3 +105,14 @@ describe('invitations and session reuse',()=>{
   expect(connectionError({status:429})).toContain('接続回数の上限');expect(connectionError({status:503})).toContain('休止中');expect(connectionError(new Error('network'))).toContain('可能性');
  });
 });
+
+it('accepts known appearance and vehicle data, and rejects arbitrary or incompatible remote models',()=>{
+ expect(validPose({...pose,avatar:'jellyfish',pose:'wave',vehicle:'none'})).toBe(true);
+ expect(validPose({...pose,state:'water',avatar:'angler',pose:'salute',vehicle:'submarine'})).toBe(true);
+ for(const fields of [{avatar:'custom-url'},{pose:'invalid'},{vehicle:'car'},{vehicle:'submarine',state:'air'}])expect(validPose({...pose,...fields})).toBe(false);
+});
+it('publishes stationary appearance, photo pose and vehicle changes without increasing the send rate',async()=>{
+ const m=mockChannel(),p=new PosePublisher(m.channel,id,session);p.setStatus('SUBSCRIBED');const still={...local,vx:0,speed:0};
+ await run(p,still,1,0,500);await run(p,{...still,avatar:'angler',pose:'wave'},1,500,1000);await run(p,{...still,state:'water',vehicle:'submarine'},1,1000,1500);
+ expect(m.messages).toHaveLength(3);expect(m.messages[1]).toMatchObject({payload:{avatar:'angler',pose:'wave'}});expect(m.messages[2]).toMatchObject({payload:{vehicle:'submarine'}});expect(m.posts()).toBe(0);
+});

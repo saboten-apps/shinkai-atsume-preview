@@ -1,3 +1,4 @@
+import {createPortal} from 'react-dom';
 import {useEffect,useRef,useState} from 'react';
 export interface SceneryPhoto {blob:Blob; url:string; link:string}
 export function PhotoPreview({photo,en,onClose}:{photo:SceneryPhoto;en:boolean;onClose:()=>void}) {
@@ -15,7 +16,7 @@ export function PhotoPreview({photo,en,onClose}:{photo:SceneryPhoto;en:boolean;o
       else await copy();
     }catch(e){if(!(e instanceof DOMException&&e.name==='AbortError'))setNotice(en?'Save the image and copy the link below.':'画像保存とリンクのコピーをご利用ください。');}
   };
-  return <div ref={root} className="scenery-photo-overlay" role="dialog" aria-modal="true" aria-label={en?'Your scenery photo':'撮影した景色'} onKeyDown={e=>{
+  return createPortal(<div ref={root} className="scenery-photo-overlay" role="dialog" aria-modal="true" aria-label={en?'Your scenery photo':'撮影した景色'} onKeyDown={e=>{
     if(e.key==='Escape'){e.stopPropagation();onClose();}
     if(e.key==='Tab'){
       const elements=Array.from(root.current?.querySelectorAll<HTMLElement>('button,a,textarea')??[]);
@@ -28,8 +29,9 @@ export function PhotoPreview({photo,en,onClose}:{photo:SceneryPhoto;en:boolean;o
       <img className="scenery-photo-preview" src={photo.url} alt={en?'Framed virtual Numazu scenery':'枠付きのバーチャル沼津の景色'}/>
       <div className="search-actions"><a className="primary-action-btn" download="shinkai-numazu.png" href={photo.url}>{en?'Save image':'画像を保存'}</a><button onClick={share}>{en?'Share':'共有する'}</button><button onClick={copy}>{en?'Copy view link':'景色のリンクをコピー'}</button></div>
       <p>{en?'This link opens the viewpoint, time of day and season. Scenery may change when the town is updated.':'リンクを開くと同じ撮影位置・向き・時間帯・季節で街を見られます。街の更新や画面の縦横比で見え方は変わります。'}</p>
+      <p>{en?'Characters and poses are kept in the saved image, not in the viewpoint link.':'キャラとポーズは保存画像に残ります。景色のリンクには含まれません。'}</p>
       <textarea readOnly aria-label={en?'Scenery link':'景色のリンク'} value={photo.link} onFocus={e=>e.currentTarget.select()}/>
       <p role="status">{notice}</p>
     </div>
-  </div>;
+  </div>,document.body);
 }
