@@ -15,7 +15,33 @@ export class FreeFlightController {
   public active: boolean = false;
   public state: FreeFlightState = 'air';
   public vehicle:VehicleId='none';
-  public setVehicle(id:VehicleId):boolean {if(id==='submarine'&&(!this.active||!this.isSubmerged()))return false;this.vehicle=id;this.velocity.set(0,0,0);return true;}
+  public setVehicle(id:VehicleId,colliders:Octree[]=[]):boolean {
+    if(id!=='none'&&!this.active)return false;
+    if(id==='submarine'&&!this.isSubmerged())return false;
+    if(id==='car'&&(this.state!=='ground'||!this.isGroundedOnSurface||this.isSubmerged()||!this.carFitsAt(this.position,colliders)))return false;
+    this.vehicle=id;this.velocity.set(0,0,0);return true;
+  }
+  private carFitsAt(point:THREE.Vector3,colliders:Octree[]):boolean {
+    const probe=this.capsule;probe.radius=1.2;probe.start.copy(point);probe.start.y+=1.2;probe.end.copy(probe.start);
+    return !colliders.some(tree=>{const hit=tree.capsuleIntersect(probe);return hit&&hit.depth>.015;});
+  }
+  /** Find a flat dry footprint at harbor ground height, rejecting roofs and walls. */
+  public findCarParking(colliders:Octree[],x:number,z:number):THREE.Vector3|null {
+    if(this.waterQuery(x,z))return null;
+    let center:THREE.Vector3|null=null;
+    for(const [dx,dz]of [[0,0],[1.2,0],[-1.2,0],[0,1.2],[0,-1.2]]){
+      if(this.waterQuery(x+dx,z+dz))return null;
+      this.groundRay.origin.set(x+dx,SEA+10,z+dz);let nearest=Infinity,point:THREE.Vector3|null=null;
+      for(const tree of colliders){const hit=tree.rayIntersect(this.groundRay);if(hit&&hit.distance<nearest){nearest=hit.distance;point=hit.position.clone();if(hit.triangle.getNormal(this.groundNormal).y<.9)return null;}}
+      if(!point||point.y<SEA||point.y>SEA+8)return null;
+      if(!center)center=point;else if(Math.abs(point.y-center.y)>.15)return null;
+    }
+    center!.y+=.001;return this.carFitsAt(center!,colliders)?center:null;
+  }
+  public parkCarAt(colliders:Octree[],x:number,z:number):boolean {
+    if(!this.active)return false;const point=this.findCarParking(colliders,x,z);if(!point)return false;
+    this.teleport(point.x,point.y,point.z);this.state='ground';this.isGroundedOnSurface=true;return this.setVehicle('car',colliders);
+  }
 
   public position: THREE.Vector3;
   public velocity: THREE.Vector3;
@@ -74,6 +100,7 @@ export class FreeFlightController {
   }
 
   public resetPosition(): void {
+    this.vehicle='none';
     this.position.copy(START_POSITION_FREE);
     this.velocity.set(0, 0, 0);
     this.yaw = THREE.MathUtils.degToRad(INITIAL_FREE_LOOK.yawDeg);
@@ -110,7 +137,7 @@ export class FreeFlightController {
   }
 
   public setVertical(v: number): void {
-    this.verticalInput = THREE.MathUtils.clamp(v, -1, 1);
+    this.verticalInput = this.vehicle==='car'?0:THREE.MathUtils.clamp(v, -1, 1);
     if(Math.abs(this.verticalInput)<.02)this.velocity.y=0;
   }
 
@@ -159,15 +186,16 @@ export class FreeFlightController {
     // 1. 実効入力の決定（検証フックによる保持入力を優先統合）
     const effectiveStickX = this.hasScriptStick ? this.scriptStick.x : this.stickInput.x;
     const effectiveStickY = this.hasScriptStick ? this.scriptStick.y : this.stickInput.y;
-    const effectiveVert = this.hasScriptVertical ? this.scriptVertical : this.verticalInput;
+    const effectiveVert = this.vehicle==='car'?0:this.hasScriptVertical ? this.scriptVertical : this.verticalInput;
 
     const wasGrounded = this.isGroundedOnSurface;
     const inWater = this.isSubmerged();
-    if(!inWater)this.vehicle='none';
+    if(!inWater&&this.vehicle==='submarine')this.vehicle='none';
+    if(inWater&&this.vehicle==='car')this.vehicle='none';
     const takingOff = effectiveVert > .1;
     if(takingOff || inWater)this.walkingOffEdge=false;
     const walking = !inWater && !takingOff && (wasGrounded || this.walkingOffEdge);
-    const maxSpeed = walking ? FREE_FLIGHT_CONFIG.maxSpeedGround : inWater ? (this.vehicle==='submarine'?15:FREE_FLIGHT_CONFIG.maxSpeedWater) : FREE_FLIGHT_CONFIG.maxSpeedAir;
+    const maxSpeed = walking ? (this.vehicle==='car'?12:FREE_FLIGHT_CONFIG.maxSpeedGround) : inWater ? (this.vehicle==='submarine'?15:FREE_FLIGHT_CONFIG.maxSpeedWater) : FREE_FLIGHT_CONFIG.maxSpeedAir;
 
     // 2. カメラ方向ベクトルの算出
     // 水平前進ベクトル (yaw 基準, +Zが南、-Zが北、+Xが東、-Xが西)
@@ -225,7 +253,7 @@ export class FreeFlightController {
 
     // 4. 加速・減速（慣性とホバー停止）
     const hasInput = inputMag > 0.05 || destination !== null || falling;
-    const accelRate = hasInput ? FREE_FLIGHT_CONFIG.accelFactor : FREE_FLIGHT_CONFIG.decelFactor;
+    const accelRate = this.vehicle==='car'?(hasInput?4:9):hasInput ? FREE_FLIGHT_CONFIG.accelFactor : FREE_FLIGHT_CONFIG.decelFactor;
     const lerpAlpha = 1.0 - Math.pow(0.01, accelRate * dt * 0.15);
 
     this.velocity.lerp(targetVel, THREE.MathUtils.clamp(lerpAlpha, 0, 1));
@@ -258,7 +286,8 @@ export class FreeFlightController {
     if(this.isGroundedOnSurface){
       this.walkingOffEdge=false;
       const horizontal=Math.hypot(this.velocity.x,this.velocity.z);
-      if(horizontal>FREE_FLIGHT_CONFIG.maxSpeedGround){const scale=FREE_FLIGHT_CONFIG.maxSpeedGround/horizontal;this.velocity.x*=scale;this.velocity.z*=scale;}
+      const groundLimit=this.vehicle==='car'?12:FREE_FLIGHT_CONFIG.maxSpeedGround;
+      if(horizontal>groundLimit){const scale=groundLimit/horizontal;this.velocity.x*=scale;this.velocity.z*=scale;}
       this.velocity.y=0;
     } else if(wasGrounded&&!takingOff&&!this.isSubmerged())this.walkingOffEdge=true;
 
@@ -280,18 +309,18 @@ export class FreeFlightController {
     }
 
     // 9. 人型キャラクターモデルの同期と姿勢制御
-    if(this.state!=='water')this.vehicle='none';
+    if((this.vehicle==='submarine'&&this.state!=='water')||(this.vehicle==='car'&&this.state!=='ground'))this.vehicle='none';
     character.setVehicle(this.vehicle);
     character.setPosition(this.position);
     
     // キャラクターの向き：移動速度が一定以上あれば移動方向、それ以外はカメラの水平向き
-    let charTargetYaw = this.yaw;
+    let charTargetYaw = this.vehicle==='car'?character.getYaw():this.yaw;
     const curSpeed = this.velocity.length();
     const horizSpeed = Math.hypot(this.velocity.x, this.velocity.z);
     if (horizSpeed > 0.4) {
-      charTargetYaw = Math.atan2(this.velocity.x, -this.velocity.z);
+      charTargetYaw = Math.atan2(this.vehicle==='car'?-this.velocity.x:this.velocity.x, -this.velocity.z);
     }
-    character.updatePose(charTargetYaw, curSpeed, this.state==='ground'?FREE_FLIGHT_CONFIG.maxSpeedGround:maxSpeed, this.state, dt, time);
+    character.updatePose(charTargetYaw, curSpeed, this.state==='ground'&&this.vehicle!=='car'?FREE_FLIGHT_CONFIG.maxSpeedGround:maxSpeed, this.state, dt, time);
 
     // 10. 三人称追従カメラの更新（Roll=0度固定、水面出入りも同一カメラでシームレス）
     this.updateCamera(camera, colliders);
@@ -349,8 +378,9 @@ export class FreeFlightController {
   }
   private resolveCollisions(colliders: Octree[]): void {
     const capsule = this.capsule;
-    capsule.start.copy(this.position);capsule.start.y+=.5;
-    capsule.end.copy(this.position);capsule.end.y+=1.2;
+    capsule.radius=this.vehicle==='car'?1.2:.5;
+    capsule.start.copy(this.position);capsule.start.y+=capsule.radius;
+    capsule.end.copy(this.position);capsule.end.y+=Math.max(1.2,capsule.radius);
     let landed = false;
     for (const tree of colliders) {
       if(this.skipWaterTerrain(tree))continue;

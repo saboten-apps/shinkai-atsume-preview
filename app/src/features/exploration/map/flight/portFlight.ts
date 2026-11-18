@@ -64,7 +64,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
   let lookId: number | null = null, lastX = 0, lastY = 0;
   function setMode(active: boolean, start?: THREE.Vector3) {
     pressed.clear();cancelTravel();
-    if (active) savedPosition.copy(camera.position);
+    if (active&&!controller.active) savedPosition.copy(camera.position);
     controller.activate(active);controller.setVehicle('none');character.setVehicle('none');lastVehicle='none';onVehicleChange('none');photoPose=null;
     if (active && start) controller.position.copy(start);
     controls.enabled = !active; character.group.visible = active;
@@ -174,7 +174,15 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
     setMode,
     setAvatar(id:AvatarId){avatarId=id;character.setAvatar(id);},
     setPhotoPose(pose:PhotoPose|null){stopInputs();photoPose=pose;if(pose!==null)previewPose();else character.setVisible(controller.active);},
-    setVehicle(id:VehicleId){stopInputs();const accepted=controller.setVehicle(id);if(accepted){character.setVehicle(id);lastVehicle=id;onVehicleChange(id);}return accepted;},
+    setVehicle(id:VehicleId){stopInputs();const accepted=controller.setVehicle(id,trees);if(accepted){character.setVehicle(id);lastVehicle=id;onVehicleChange(id);}return accepted;},
+    startCarTrip(){
+      const previous=controller.position.clone();controller.position.set(-170,45,-140);refreshColliders();controller.position.copy(previous);
+      let parking:THREE.Vector3|null=null;
+      for(const x of [-170,-180,-160,-190,-150]){for(const z of [-140,-150,-130,-160,-120]){parking=controller.findCarParking(trees,x,z);if(parking)break;}if(parking)break;}
+      if(!parking)return false;
+      setMode(true,parking);if(!controller.parkCarAt(trees,parking.x,parking.z))return false;
+      character.setPosition(controller.position);character.resetOrientation(0);character.setVehicle('car');lastVehicle='car';onVehicleChange('car');return true;
+    },
     startSubmarineTrip(){if(!isWaterAt(-100,-140))return false;setMode(true,new THREE.Vector3(-100,SEA-2,-140));controller.state='water';controller.setVehicle('submarine');character.setPosition(controller.position);character.setVehicle('submarine');lastVehicle='submarine';onVehicleChange('submarine');return true;},
     addGeometry(group: THREE.Group) {
       group.updateWorldMatrix(true, true);
@@ -223,7 +231,7 @@ export function setupPortFlight(container: HTMLElement, scene: THREE.Scene, came
           controller.velocity.set(0, 0, 0);
         }
       }
-       const data=controller.getHookData(); riseLabel.textContent=data.state==='ground'?'飛び立つ':'上がる';drop.disabled=data.state==='ground'; depth.textContent = (controller.vehicle==='submarine'?'潜水艇 · ':'')+(data.state==='ground'?'徒歩':data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`); setUnderwater(data.state === 'water'); },
+       const data=controller.getHookData(); riseLabel.textContent=controller.vehicle==='car'?'乗車中':data.state==='ground'?'飛び立つ':'上がる';rise.disabled=controller.vehicle==='car';drop.disabled=data.state==='ground'; depth.textContent = (controller.vehicle==='submarine'?'潜水艇 · ':controller.vehicle==='car'?`ミニカー · ${(data.speed*3.6).toFixed(0)}km/h · `:'')+(data.state==='ground'?'徒歩':data.state === 'water' ? `水深 ${data.depth.toFixed(1)}m` : `高度 ${data.altitude.toFixed(1)}m`); setUnderwater(data.state === 'water'); },
     getNetworkPose() { return {avatar:avatarId,vehicle:controller.vehicle,pose:photoPose??'natural',x:controller.position.x,y:controller.position.y,z:controller.position.z,vx:controller.velocity.x,vy:controller.velocity.y,vz:controller.velocity.z,yaw:Math.atan2(Math.sin(character.getYaw()),Math.cos(character.getYaw())),speed:controller.velocity.length(),state:controller.state,active:controller.active}; },
     getPosition() { return controller.position; },
     getStatus() { return controller.getHookData(); },
