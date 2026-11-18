@@ -18,12 +18,19 @@ export class FreeFlightController {
   public vehicle:VehicleId='none';
   public autopilotSpeed:number|undefined;
   public setVehicle(id:VehicleId,colliders:Octree[]=[]):boolean {
-    if(id!=='none'&&!this.active)return false;
-    if(id==='submarine'&&!this.isSubmerged())return false;
-    if(id==='boat'&&(!boatFitsWater(this.waterQuery,this.position.x,this.position.z)||Math.abs(this.position.y-SEA)>2))return false;
-    if(id==='car'&&(this.state!=='ground'||!this.isGroundedOnSurface||this.isSubmerged()||!this.carFitsAt(this.position,colliders)))return false;
-    if(id==='boat')this.position.y=SEA+.04;
+    if(id!=='none'&&!this.availableVehicles(colliders).includes(id))return false;
+    if(id==='boat'){this.position.y=SEA+.04;this.state='air';}
+    if(id==='submarine'&&this.position.y>=SEA){this.position.y=SEA-.5;this.state='water';}
     this.vehicle=id;this.velocity.set(0,0,0);return true;
+  }
+  public availableVehicles(colliders:Octree[]=[]):VehicleId[]{
+    if(!this.active)return [];
+    const result:VehicleId[]=[];
+    if(this.waterQuery(this.position.x,this.position.z)){
+      if(Math.abs(this.position.y-SEA)<=2&&boatFitsWater(this.waterQuery,this.position.x,this.position.z))result.push('boat');
+      if(this.position.y<=SEA+2)result.push('submarine');
+    }else if(this.state==='ground'&&this.isGroundedOnSurface&&this.carFitsAt(this.position,colliders))result.push('car');
+    return result;
   }
   private carFitsAt(point:THREE.Vector3,colliders:Octree[]):boolean {
     const probe=this.capsule;probe.radius=1.2;probe.start.copy(point);probe.start.y+=1.2;probe.end.copy(probe.start);

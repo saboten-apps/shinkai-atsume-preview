@@ -29,7 +29,7 @@ export function PhotoPreview({photo,en,onClose}:{photo:SceneryPhoto;en:boolean;o
       {!!photo.achievements?.length&&<p role="status">{en?'Photo challenge complete: ':'撮影のお題達成：'}{photo.achievements.join(' / ')}</p>}
       <img className="scenery-photo-preview" src={photo.url} alt={en?'Framed virtual Numazu scenery':'枠付きのバーチャル沼津の景色'}/>
       <div className="search-actions"><a className="primary-action-btn" download="shinkai-numazu.png" href={photo.url}>{en?'Save image':'画像を保存'}</a><button onClick={share}>{en?'Share':'共有する'}</button><button onClick={copy}>{en?'Copy view link':'景色のリンクをコピー'}</button></div>
-      <p>{en?'This link opens the viewpoint, time of day and season. Scenery may change when the town is updated.':'リンクを開くと同じ撮影位置・向き・時間帯・季節で街を見られます。街の更新や画面の縦横比で見え方は変わります。'}</p>
+      <p>{en?'This link opens the viewpoint. The game clock and seasons keep moving.':'リンクを開くと同じ撮影位置・向きで街を見られます。時間と季節はゲーム内で進み続けます。'}</p>
       <p>{en?'Characters and poses are kept in the saved image, not in the viewpoint link.':'キャラとポーズは保存画像に残ります。景色のリンクには含まれません。'}</p>
       <textarea readOnly aria-label={en?'Scenery link':'景色のリンク'} value={photo.link} onFocus={e=>e.currentTarget.select()}/>
       <p role="status">{notice}</p>

@@ -1,4 +1,5 @@
 const paths = {
+  vehicle: 'M3 14l2-7h14l2 7v5H3ZM3 14h18M6 19v2M18 19v2M7 16h.01M17 16h.01',
   back: 'M14 6l-6 6 6 6M8 12h12',
   menu: 'M4 6h16M4 12h16M4 18h16',
   close: 'M6 6l12 12M18 6L6 18',

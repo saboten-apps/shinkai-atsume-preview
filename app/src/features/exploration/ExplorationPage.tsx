@@ -1,3 +1,5 @@
+import {loadAvatar} from './map/flight/avatarOptions';
+import {AvatarPicker} from './AvatarPicker';
 import {huntKind,HUNT_HINTS,type HuntStatus} from './huntRules';
 import {PerformancePanel} from './map/components/PerformancePanel';
 import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
@@ -35,6 +37,8 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
   const en = props.locale === 'en';
   const [mode,setMode] = useState<SearchMode>(props.initialMode??'3d');
   const autoFly=useRef((props.initialMode??'3d')==='3d');
+  const [entryAvatar,setEntryAvatar]=useState(loadAvatar);
+  const [entered3D,setEntered3D]=useState(false);
   const [sceneReady,setSceneReady]=useState(false);
   const onSceneReady=useCallback(()=>{setSceneReady(true);requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>('.search-menu-button')?.focus({preventScroll:true}));},[]);
   const [optionsOpen,setOptionsOpen] = useState(false);
@@ -65,7 +69,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     if(slowCount.current>=5)setSlow(true);
   },[]);
   const onError = useCallback((reason:string)=>{setNotice(reason);setMode('2d');setVisible(true);},[]);
-  const immersive = !!fish && !showingCard && mode === '3d';
+  const immersive = !!fish && !showingCard && mode === '3d' && entered3D;
   useEffect(() => {
     if (!immersive) return;
     document.body.classList.add('exploration-immersive');
@@ -94,9 +98,9 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     };tick();return()=>clearTimeout(timer);
   },[sound,found]);
   useEffect(()=>()=>{void audioRef.current?.close();},[]);
-  const switchMode=(next:SearchMode)=>{setOptionsOpen(false);if(next===mode)return;entryRef.current=position;autoFly.current=false;setSceneReady(false);setMode(next);setHunt({kind:huntKind(fish?.id??''),progress:0,ready:false});setNotice('');setVisible(next==='2d');setSlow(false);slowCount.current=0;};
+  const switchMode=(next:SearchMode)=>{setOptionsOpen(false);if(next===mode)return;if(next==='3d')setEntered3D(false);entryRef.current=position;autoFly.current=false;setSceneReady(false);setMode(next);setHunt({kind:huntKind(fish?.id??''),progress:0,ready:false});setNotice('');setVisible(next==='2d');setSlow(false);slowCount.current=0;};
   const resume=(next:SearchMode)=>{
-    entryRef.current=position;autoFly.current=next==='3d';setMode(next);setSceneReady(false);
+    if(next==='3d')setEntered3D(false);entryRef.current=position;autoFly.current=next==='3d';setMode(next);setSceneReady(false);
     setOptionsOpen(false);setNotice('');setSlow(false);slowCount.current=0;setShowingCard(false);
   };
   const openCard=()=>{setSound(false);setOptionsOpen(false);setShowingCard(true);};
@@ -122,6 +126,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     }catch(error){if(!(error instanceof DOMException&&error.name==='AbortError'))setNotice(en?'Use the text below and save the image.':'下の共有文と画像保存をご利用ください。');}
   };
   if(!fish)return <section className="page-container"><h2>{en?'Draw today’s fish first':'まず今日のガチャを引こう'}</h2><button className="primary-action-btn" onClick={props.onBack}>{en?'Back to Today':'今日へ戻る'}</button></section>;
+  if(mode==='3d'&&!showingCard&&!entered3D)return <section className="exploration-entry"><p>{en?'VIRTUAL NUMAZU':'バーチャル沼津'}</p><h2>{en?'Head into the city':'沼津の街へ出かけよう'}</h2><p>{en?'Choose your diver before entering 3D.':'3Dに入る前に、キャラクターを選べます。'}</p><AvatarPicker en={en} value={entryAvatar} onChange={setEntryAvatar}/><div className="search-actions"><button className="primary-action-btn" onClick={()=>setEntered3D(true)}>{en?'Enter the 3D city':'このキャラクターで街へ'}</button><button onClick={()=>switchMode('2d')}>{en?'Explore in 2D':'2Dで探す'}</button><button onClick={props.onBack}>{en?'Back':'戻る'}</button></div></section>;
   return <section className={`exploration-page ${immersive?'is-immersive':''}`}>
     <header className="search-heading"><div><p>{date} · {en?'VIRTUAL NUMAZU':'バーチャル沼津'}</p><h2>{en?'Find today’s fish':'今日の魚を探そう'}</h2></div><button onClick={props.onBack}>{en?'Back':'今日へ戻る'}</button></header>
     {!showingCard&&<>
@@ -150,7 +155,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
       {mode==='3d'&&<PerformancePanel stats={stats} en={en} context={`exploration:${date}:${position.x},${position.z}`}/>}
         <MapDownload en={en}/><p className="search-options-credit">{en?'Source: MLIT PLATEAU, Numazu buildings, roads, vegetation and street furniture 2023, terrain and water 2021; GSI Maps aerial photographs, elevation and vector-map tiles. Modified for virtual exploration; not survey-accurate.':'出典：国土交通省 PLATEAU 沼津市（建物・道路・植生・都市設備2023年度／地形・水面2021年度）、地理院タイル（国土地理院・空中写真・標高・地図）を加工。バーチャル探索用の表現で、正確な測量図ではありません。'} <a href="https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2023" target="_blank" rel="noreferrer">PLATEAU</a> · <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">GSI</a></p>
       </HudMenu>
-      <div className={`search-map ${sceneReady?'is-ready':''}`}>{mode==='3d'?<MapBoundary en={en} onFallback={()=>switchMode('2d')}><Suspense fallback={null}><Map3D pins={EMPTY_PINS} selectedPinId={null} onSelectPin={NO_SELECT} onUpdateStats={onStats} onWebGLError={onError} search={bridge}/></Suspense><span className="search-center" aria-hidden="true">＋</span></MapBoundary>:<Exploration2D en={en} position={position} onMove={setPosition} targetFishId={fish.id} target={place} discovered={!!found}/>}</div>
+      <div className={`search-map ${sceneReady?'is-ready':''}`}>{mode==='3d'?<MapBoundary en={en} onFallback={()=>switchMode('2d')}><Suspense fallback={null}><Map3D avatarId={entryAvatar} pins={EMPTY_PINS} selectedPinId={null} onSelectPin={NO_SELECT} onUpdateStats={onStats} onWebGLError={onError} search={bridge}/></Suspense><span className="search-center" aria-hidden="true">＋</span></MapBoundary>:<Exploration2D en={en} position={position} onMove={setPosition} targetFishId={fish.id} target={place} discovered={!!found}/>}</div>
       <div className="search-actions search-discover">
         {!found&&(!immersive||hint.near||hunt.progress>0)&&<button className="primary-action-btn" disabled={mode==='2d'?!hint.near:!visible||!hunt.ready} onClick={discover}>{mode==='3d'&&(hint.near||hunt.progress>0)&&!hunt.ready?`${en?'Observe':'観察中'} ${Math.round(hunt.progress*100)}%`:(hint.near||hunt.ready)?(en?'Discover the fish!':'魚を発見する！'):(en?'Follow the detector':'探知機を頼りに近づこう')}</button>}
         {immersive&&<>{slow&&<button className="search-low-fps" onClick={()=>switchMode('2d')}>{en?'Lighter 2D':'軽い2Dへ'}</button>}<small>PLATEAU / GSI</small></>}
