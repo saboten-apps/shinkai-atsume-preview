@@ -70,6 +70,8 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
   },[]);
   const onError = useCallback((reason:string)=>{setNotice(reason);setMode('2d');setVisible(true);},[]);
   const immersive = !!fish && !showingCard && mode === '3d' && entered3D;
+  useEffect(()=>{if(!fish||showingCard||mode!=='3d'||entered3D)return;document.body.classList.add('exploration-preentry');window.scrollTo(0,0);return()=>document.body.classList.remove('exploration-preentry');},[fish,showingCard,mode,entered3D]);
+
   useEffect(() => {
     if (!immersive) return;
     document.body.classList.add('exploration-immersive');
@@ -126,7 +128,7 @@ export default function ExplorationPage(props: { locale: Locale; date: string; f
     }catch(error){if(!(error instanceof DOMException&&error.name==='AbortError'))setNotice(en?'Use the text below and save the image.':'下の共有文と画像保存をご利用ください。');}
   };
   if(!fish)return <section className="page-container"><h2>{en?'Draw today’s fish first':'まず今日のガチャを引こう'}</h2><button className="primary-action-btn" onClick={props.onBack}>{en?'Back to Today':'今日へ戻る'}</button></section>;
-  if(mode==='3d'&&!showingCard&&!entered3D)return <section className="exploration-entry"><p>{en?'VIRTUAL NUMAZU':'バーチャル沼津'}</p><h2>{en?'Head into the city':'沼津の街へ出かけよう'}</h2><p>{en?'Choose your diver before entering 3D.':'3Dに入る前に、キャラクターを選べます。'}</p><AvatarPicker en={en} value={entryAvatar} onChange={setEntryAvatar}/><div className="search-actions"><button className="primary-action-btn" onClick={()=>setEntered3D(true)}>{en?'Enter the 3D city':'このキャラクターで街へ'}</button><button onClick={()=>switchMode('2d')}>{en?'Explore in 2D':'2Dで探す'}</button><button onClick={props.onBack}>{en?'Back':'戻る'}</button></div></section>;
+  if(mode==='3d'&&!showingCard&&!entered3D)return <section className="exploration-entry"><p>{en?'VIRTUAL NUMAZU':'バーチャル沼津'}</p><h2>{en?'Head into the city':'沼津の街へ出かけよう'}</h2><p>{en?'Choose your diver before entering 3D.':'3Dに入る前に、キャラクターを選べます。'}</p><AvatarPicker en={en} value={entryAvatar} onChange={setEntryAvatar}/><div className="search-actions entry-actions"><button className="entry-start-button" onClick={()=>setEntered3D(true)}>{en?'Enter Numazu in 3D':'沼津の街へ出発する'}<span aria-hidden="true"> →</span></button><button onClick={()=>switchMode('2d')}>{en?'Explore in 2D':'2Dで探す'}</button><button onClick={props.onBack}>{en?'Back':'戻る'}</button></div></section>;
   return <section className={`exploration-page ${immersive?'is-immersive':''}`}>
     <header className="search-heading"><div><p>{date} · {en?'VIRTUAL NUMAZU':'バーチャル沼津'}</p><h2>{en?'Find today’s fish':'今日の魚を探そう'}</h2></div><button onClick={props.onBack}>{en?'Back':'今日へ戻る'}</button></header>
     {!showingCard&&<>

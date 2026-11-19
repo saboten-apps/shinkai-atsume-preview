@@ -1,3 +1,5 @@
+import {WorldStatus} from './WorldStatus';
+import {describeArea,worldClockLabel} from '../worldStatus';
 import {HuntTracker,huntKind,type HuntStatus} from '../../huntRules';
 import {FISH_SITES} from '../../fishWorld';
 import {PHOTO_MISSIONS,loadPhotoAchievements,matchPhotoMissions,recordPhotoAchievements} from '../../../scenery/photoMissions';
@@ -120,6 +122,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   searchRef.current = search;
   const mountRef = useRef<HTMLDivElement>(null);
   const navigationRef=useRef<HTMLDivElement>(null);
+  const worldStatusRef=useRef<HTMLDivElement>(null);
   const [landmarks,setLandmarks]=useState(true);
   const atmosphereChoiceRef=useRef(DEFAULT_ATMOSPHERE);
   const atmosphereEngineRef=useRef<ReturnType<typeof createWorldAtmosphere>|null>(null);
@@ -437,7 +440,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
     const sharedFocus = new THREE.Vector3();
     const previousCamera = camera.position.clone(), previousRotation = camera.quaternion.clone();
     let lastCameraMotion = sessionStart;
-    let lastNavigationTime = -Infinity, lastBoardingTime=-Infinity;
+    let lastNavigationTime = -Infinity, lastBoardingTime=-Infinity, lastWorldStatus=-Infinity;
     let renderTarget: 30|60 = 60;
     const resumeRendering = () => {
       const now = performance.now();
@@ -464,6 +467,8 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
       prevFrameTime = currentTime;
 
       atmosphere.update(atmosphereChoiceRef.current,currentTime);
+      if(currentTime-lastWorldStatus>=1000){lastWorldStatus=currentTime;const root=worldStatusRef.current;if(root){const p=flight.isActive()?flight.getPosition():controls.target,clock=worldClockLabel(new Date(),en);const entries:Record<string,string>={'area':describeArea(p.x,p.z,en),'season':clock.season,'period':clock.period,'time':clock.time};for(const [key,value] of Object.entries(entries)){const node=root.querySelector(`[data-current-${key}]`);if(node&&node.textContent!==value)node.textContent=value;}}}
+
       if(currentTime-lastBoardingTime>250){lastBoardingTime=currentTime;const next=flight.getAvailableVehicles().join(',');if(next!==boardingRef.current){boardingRef.current=next;setBoarding(next);}}
 
       // 水面アニメーション（海揺らぎ・川スクロール）
@@ -700,6 +705,21 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
   return (
     <div className={`search-world ${flying?'is-flying':''}`} onPointerDown={e=>{for(const menu of e.currentTarget.querySelectorAll<HTMLDetailsElement>('.world-travel,.world-ride'))if(menu.open&&!menu.contains(e.target as Node))menu.open=false;}}>
       <div className="search-world-toolbar">
+      <details className="world-ride" onToggle={e=>{if(e.currentTarget.open){flightRef.current?.stopMotion();const next=flightRef.current?.getAvailableVehicles().join(',')??'';boardingRef.current=next;setBoarding(next);}}} onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}}}>
+        <summary><HudIcon name="vehicle"/><span>{vehicle!=='none'?(en?'Leave vehicle':'降りる'):(en?'Ride':'乗り物')}</span></summary>
+        <div className="world-ride-sheet" aria-label={en?'Vehicles at your location':'今いる場所の乗り物'}>
+          <strong>{en?'At this location':'今いる場所で乗る'}</strong>
+          {vehicle!=='none'?<button onClick={e=>{flightRef.current?.setVehicle('none');e.currentTarget.closest('details')!.open=false;}}>{en?'Leave vehicle':'乗り物から降りる'}</button>:<>
+            {(['boat','submarine','car'] as const).filter(id=>boarding.split(',').includes(id)).map(id=><button key={id} disabled={isLoading} onClick={e=>{const ok=flightRef.current?.setVehicle(id);if(ok){setPhotoNotice('');e.currentTarget.closest('details')!.open=false;}else setPhotoNotice(en?'Move closer to a suitable surface and try again.':'水面の近く、または平らな地上で試してください。');}}>{id==='boat'?(en?'Board boat':'船に乗る'):id==='submarine'?(en?'Board submarine':'潜水艇に乗る'):(en?'Drive car':'車に乗る')}</button>)}
+            {!boarding&&<p>{en?'Approach the water surface for a boat or submarine. Land on flat ground for a car.':'水面の近くで船・潜水艇、平らな地上で車に乗れます。'}</p>}
+          </>}
+        </div>
+      </details>
+      <details className="world-travel" onToggle={e=>{if(e.currentTarget.open)flightRef.current?.stopMotion();}} onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}}}>
+        <summary><HudIcon name="map"/><span>{en?'Tools':'操作'}</span></summary>
+        <div className="world-travel-sheet">
+          <div className="world-sheet-heading"><strong>{en?'Explore controls':'探索の操作'}</strong><button aria-label={en?'Close controls':'操作を閉じる'} onClick={e=>{e.currentTarget.closest('details')!.open=false;}}>×</button></div>
+          <div className="world-operation-grid">
       <button
         type="button"
         disabled={isLoading || (!flying && !!areaStatus)}
@@ -712,25 +732,13 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
           const target=controlsRef.current!.target;
           flight.setMode(active, searchRef.current ? new THREE.Vector3(target.x,90,target.z) : initialViewRef.current ? new THREE.Vector3(target.x,Math.max(50,Math.min(400,target.y+12)),target.z) : locationRef.current === 'station' ? new THREE.Vector3(210, 80, -2395) : undefined);
           setFlying(active);
+          const menu=mountRef.current?.parentElement?.querySelector<HTMLDetailsElement>('.world-travel');if(menu)menu.open=false;
         }}
         className="search-flight-button"
       aria-label={flying?(en?'Switch to overview':'街を見渡す'):(en?'Start flying':'飛んでみる')}
       ><HudIcon name={flying?'map':'fly'}/><span>{isLoading || (!flying && !!areaStatus) ? (en?'Loading':'準備中') : flying ? (en?'Overview':'見渡す') : (en?'Fly':'飛ぶ')}</span></button>
       {search&&huntKind(search.fishId??'')==='light'&&<button className="search-flight-button" aria-pressed={torch} onClick={()=>setTorch(!torch)}>{en?'Light':'ライト'} {torch?'ON':'OFF'}</button>}
-      <details className="world-ride" onToggle={e=>{if(e.currentTarget.open){flightRef.current?.stopMotion();const next=flightRef.current?.getAvailableVehicles().join(',')??'';boardingRef.current=next;setBoarding(next);}}} onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}}}>
-        <summary><HudIcon name="vehicle"/><span>{vehicle!=='none'?(en?'Leave vehicle':'降りる'):(en?'Ride':'乗り物')}</span></summary>
-        <div className="world-ride-sheet" aria-label={en?'Vehicles at your location':'今いる場所の乗り物'}>
-          <strong>{en?'At this location':'今いる場所で乗る'}</strong>
-          {vehicle!=='none'?<button onClick={e=>{flightRef.current?.setVehicle('none');e.currentTarget.closest('details')!.open=false;}}>{en?'Leave vehicle':'乗り物から降りる'}</button>:<>
-            {(['boat','submarine','car'] as const).filter(id=>boarding.split(',').includes(id)).map(id=><button key={id} disabled={isLoading} onClick={e=>{const ok=flightRef.current?.setVehicle(id);if(ok){setPhotoNotice('');e.currentTarget.closest('details')!.open=false;}else setPhotoNotice(en?'Move closer to a suitable surface and try again.':'水面の近く、または平らな地上で試してください。');}}>{id==='boat'?(en?'Board boat':'船に乗る'):id==='submarine'?(en?'Board submarine':'潜水艇に乗る'):(en?'Drive car':'車に乗る')}</button>)}
-            {!boarding&&<p>{en?'Approach the water surface for a boat or submarine. Land on flat ground for a car.':'水面の近くで船・潜水艇、平らな地上で車に乗れます。'}</p>}
-          </>}
-        </div>
-      </details>
-      <details className="world-travel" onToggle={e=>{if(e.currentTarget.open)flightRef.current?.stopMotion();}} onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}}}>
-        <summary><HudIcon name="map"/><span>{en?'Guide':'街の案内'}</span></summary>
-        <div className="world-travel-sheet">
-          <div className="world-sheet-heading"><strong>{en?'Town guide':'街の案内'}</strong><button aria-label={en?'Close town guide':'街の案内を閉じる'} onClick={e=>{e.currentTarget.closest('details')!.open=false;}}>×</button></div>
+          </div>
           <p className="world-clock-note">{en?'Game clock: one day in 10 minutes, all four seasons in 1 hour.':'ゲーム内の1日は10分。四季は1時間で一周します。'}</p>
           <button type="button" aria-pressed={landmarks} onClick={()=>setLandmarks(!landmarks)}>{en?'Landmark labels':'街の目印'} {landmarks?'ON':'OFF'}</button>
           <details className="photo-mission-list"><summary>{en?'Photo challenges':'撮影のお題'} {Object.keys(photoAchievements).length}/{PHOTO_MISSIONS.length}</summary>
@@ -739,6 +747,7 @@ export const Map3DView: React.FC<Map3DViewProps> = ({
         </div>
       </details>
       </div>
+      <WorldStatus rootRef={worldStatusRef} en={en}/>
       <div ref={mountRef} className="search-world-canvas"/>
       <NavigationHud rootRef={navigationRef} en={en}/>
       <button className="scenery-photo-trigger" aria-label={en?'Take photo':'景色を撮る'} disabled={isLoading||!!areaStatus||photoBusy} onClick={()=>setPhotoSetup(true)}><HudIcon name="camera"/><span>{photoBusy?(en?'Saving':'保存中'):(en?'Photo':'撮影')}</span></button>
