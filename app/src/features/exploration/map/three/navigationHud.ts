@@ -9,7 +9,7 @@ export function createNavigationHud(root:HTMLElement,camera:THREE.Camera,en:bool
   const text=(en?COMPASS_EN:COMPASS_JA)[Math.round(value/45)%8];heading.textContent=text;compass.setAttribute('aria-label',`${en?'Facing':'向いている方角'}：${text}`);
   slots.forEach(el=>{el.hidden=true;});if(!showLandmarks)return;
   const rootBox=root.getBoundingClientRect(),{width,height}=rootBox;if(!width||!height)return;
-  const obstacles=[compass,...(root.closest('.exploration-page')??root.parentElement)?.querySelectorAll<HTMLElement>('.flight-instructions:not([hidden]),.search-world-status,.map-loading-indicator,.search-toolbar,.search-detector,.search-world-toolbar')??[]].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height).map(r=>({left:r.left-rootBox.left,right:r.right-rootBox.left,top:r.top-rootBox.top,bottom:r.bottom-rootBox.top}));
+  const obstacles=[compass,...(root.closest('.exploration-page')??root.parentElement)?.querySelectorAll<HTMLElement>('.flight-instructions:not([hidden]),.search-world-status,.map-loading-indicator,.search-toolbar,.search-detector,.search-world-toolbar,.world-current-status')??[]].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height).map(r=>({left:r.left-rootBox.left,right:r.right-rootBox.left,top:r.top-rootBox.top,bottom:r.bottom-rootBox.top}));
   const candidates=CITY_LANDMARKS.map(site=>({site,distance:Math.hypot(site.x-viewer.x,site.z-viewer.z)})).filter(({site,distance})=>distance>35&&distance<('far'in site?60000:1100)).sort((a,b)=>a.distance-b.distance);
   const boxes:Array<{x:number;y:number}>=[];let index=0;
   for(const {site,distance} of candidates){
